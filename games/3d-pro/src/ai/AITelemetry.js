@@ -36,6 +36,10 @@ export class AITelemetry {
     this.nearMissCount = 0;
     this.totalPouncesDodged = 0;
 
+    // Drosophila Fly-Brain Telemetry
+    this.flyActive = false;
+    this.flyTelemetry = null;
+
     // Profiling
     this.aiTickTimeMs = 0;
     this.totalTicks = 0;
@@ -88,11 +92,21 @@ export class AITelemetry {
     this.totalPouncesDodged++;
   }
 
+  recordFlyBrain(telemetry, active) {
+    this.flyActive = active;
+    this.flyTelemetry = telemetry;
+  }
+
   /**
    * Generates a concise diagnostic summary formatted for HUD / Debug displays.
    */
   getFormattedSummary() {
     const yTargetDist = Math.hypot(this.yetiTarget.x, this.yetiTarget.d);
+    const flyInfo = this.flyActive && this.flyTelemetry
+      ? `[AI DROSOPHILA SNN] Motor: ${this.flyTelemetry.engine} (${this.flyTelemetry.connected ? 'WS ONLINE' : 'LOCAL'})\n` +
+        `  Spikes: S:${this.flyTelemetry.sensorySpikes} | C:${this.flyTelemetry.centralSpikes} | M_L:${this.flyTelemetry.motorSpikesLeft} | M_R:${this.flyTelemetry.motorSpikesRight} | GF:${this.flyTelemetry.giantFiberSpikes}`
+      : '[AI DROSOPHILA] Inactivo (Pulsa "B" para invocar rival)';
+
     return [
       `[AI YETI] BT: ${this.lastBTNode} (${this.yetiBehavior})`,
       `  Radar: [${this.whiskerHits.map(h => h ? '█' : '░').join('')}] Avoidance: (${this.yetiAvoidance.x.toFixed(1)}, ${this.yetiAvoidance.d.toFixed(1)})`,
@@ -100,7 +114,8 @@ export class AITelemetry {
       `[AI SKIER] Modo: ${this.skierMode} | Steer: ${(this.skierPlannedAngle * (180 / Math.PI)).toFixed(0)}° | Utility: ${this.skierUtilityScore.toFixed(0)}`,
       `  Alerta Peligro: ${this.skierImminentHazard ? '⚠️ INMINENTE' : 'DESPEJADO'}`,
       `[DDA FLOW] Estado: ${this.ddaStateName} (${(this.flowIndex > 0 ? '+' : '') + this.flowIndex.toFixed(2)}) | Skill: ${(this.playerSkill * 100).toFixed(0)}% | Mod Yeti: ${this.yetiSpeedMod.toFixed(2)}x`,
-      `  Esquivas límite: ${this.nearMissCount} | Saltos esquivados: ${this.totalPouncesDodged}`
+      `  Esquivas límite: ${this.nearMissCount} | Saltos esquivados: ${this.totalPouncesDodged}`,
+      flyInfo
     ].join('\n');
   }
 }

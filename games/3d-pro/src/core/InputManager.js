@@ -68,6 +68,7 @@ export class InputManager {
       case 'Escape':this.onCommand('pause');break;
       case 'F2':case 'Backquote':this.onCommand('debug');break;
       case 'KeyT':case 'Tab':this.onCommand('autopilot');break;
+      case 'KeyB':this.onCommand('toggleFlyRival');break;
     }
   }
   keyUp(e){if(!this.keys[e.code])return;this.keys[e.code]=false;const a=MAP[e.code];if(a!==undefined&&this.counts[a])this.counts[a]--;}

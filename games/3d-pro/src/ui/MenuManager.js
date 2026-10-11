@@ -61,7 +61,9 @@ export class MenuManager {
       refill: handlers.refill,
       aiMenu: handlers.toggleAi,
       aiBtn: handlers.toggleAi,
-      toggleAiPilot: handlers.toggleAi
+      toggleAiPilot: handlers.toggleAi,
+      flyRivalMenu: handlers.toggleFlyRival,
+      toggleFlyRivalDebug: handlers.toggleFlyRival
     };
 
     for (const id in this.clicks) {
@@ -137,6 +139,16 @@ export class MenuManager {
     const text = mode === 'AUTOPILOT' ? 'Piloto IA: AUTO' : mode === 'CO_PILOT' ? 'Piloto IA: CO-PILOT' : 'Piloto IA: OFF';
     if (this.elements.aiMenu) this.elements.aiMenu.textContent = text;
     if (this.elements.aiBtn) this.elements.aiBtn.textContent = mode === 'AUTOPILOT' ? '🤖 IA: AUTO' : mode === 'CO_PILOT' ? '🛡️ IA: CO-PILOT' : '🤖 IA: OFF';
+  }
+
+  updateFlyRival(active, engine = 'LOCAL_LIF') {
+    const btn = document.getElementById('flyRivalMenu');
+    if (btn) {
+      btn.textContent = active
+        ? `🪰 Rival Mosca: ACTIVO (${engine}) [Tecla B]`
+        : '🪰 Rival Drosophila: INACTIVO (Tecla B)';
+      btn.style.background = active ? 'rgba(0,255,170,0.25)' : 'rgba(0,255,170,0.08)';
+    }
   }
 
   results(distance, record, isNew, score = 0, gates = 0, stunts = 0) {

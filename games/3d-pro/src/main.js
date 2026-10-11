@@ -26,6 +26,8 @@ import { AITelemetry } from './ai/AITelemetry.js';
 import { DDAEngine } from './ai/DDAEngine.js';
 import { SkierAgentAI, SkierAIMode } from './ai/SkierAgentAI.js';
 import { AIDebugRenderer } from './ai/AIDebugRenderer.js';
+import { FlyBrainCompetitorAI } from './ai/FlyBrainCompetitorAI.js';
+import { FlyCompetitor } from './entities/FlyCompetitor.js';
 
 class SnowEscapeGame {
   constructor() {
@@ -60,6 +62,8 @@ class SnowEscapeGame {
     // Entities
     this.player = new Player(this.factory, this.engine.scene);
     this.yeti = new Yeti(this.factory, this.engine.scene);
+    this.flyCompetitor = new FlyCompetitor(this.engine.scene);
+    this.flyBrainAI = new FlyBrainCompetitorAI();
 
     // UI & Control Handlers
     this.menu = new MenuManager(this.storage, {
@@ -78,7 +82,8 @@ class SnowEscapeGame {
         if (this.state === 'playing') this.player.energy = 1;
       },
       quality: q => this.engine.setQuality(q),
-      toggleAi: () => this.toggleAi()
+      toggleAi: () => this.toggleAi(),
+      toggleFlyRival: () => this.toggleFlyRival()
     });
 
     this.input = new InputManager({
@@ -117,7 +122,20 @@ class SnowEscapeGame {
       case 'pause': this.togglePause(); break;
       case 'debug': this.toggleDebug(); break;
       case 'autopilot': this.toggleAi(); break;
+      case 'toggleFlyRival': this.toggleFlyRival(); break;
     }
+  }
+
+  toggleFlyRival() {
+    const nextState = !this.flyCompetitor.active;
+    this.flyCompetitor.setActive(nextState);
+    if (nextState) this.flyCompetitor.reset(2.5);
+    const engineMode = this.flyBrainAI.telemetry.engine;
+    this.menu.updateFlyRival(nextState, engineMode);
+    const msg = nextState
+      ? `🪰 RIVAL DROSOPHILA IA: ACTIVADO (${engineMode})`
+      : '🪰 RIVAL DROSOPHILA IA: DESACTIVADO';
+    this.hud.announce(msg, 2.5);
   }
 
   toggleAi() {
@@ -148,6 +166,7 @@ class SnowEscapeGame {
     this.effects.reset();
     this.player.reset(this.runMode);
     this.yeti.reset(this.menu.spawnAt);
+    if (this.flyCompetitor.active) this.flyCompetitor.reset(2.5);
     this.telemetry.reset();
     this.dda.reset();
     this.hud.clear();
@@ -295,10 +314,17 @@ class SnowEscapeGame {
     this.yeti.step(dt, this.player, this.collisions, this.world, this.dda, this.telemetry);
     this.handleYetiEvent();
 
-    // 5. DDA Flow Engine Step
+    // 5. Fly Competitor (Drosophila SNN) Step
+    if (this.flyCompetitor.active) {
+      this.flyBrainAI.update(dt, this.flyCompetitor, this.yeti, this.world);
+      this.flyCompetitor.step(dt, this.flyBrainAI, this.collisions, this.world);
+    }
+    this.telemetry.recordFlyBrain(this.flyBrainAI.telemetry, this.flyCompetitor.active);
+
+    // 6. DDA Flow Engine Step
     this.dda.step(dt, this.player, this.yeti, this.telemetry);
 
-    // 6. Effects Step
+    // 7. Effects Step
     this.effects.step(dt, this.player, this.state === 'playing');
 
     // Periodic Autosave
@@ -315,6 +341,7 @@ class SnowEscapeGame {
     this.terrain.update(this.player);
     this.obstacles.update(this.player);
     this.player.draw();
+    if (this.flyCompetitor.active) this.flyCompetitor.draw();
     this.yeti.draw(this.player, this.engine.camera);
     this.effects.draw(this.player);
 
@@ -357,7 +384,8 @@ class SnowEscapeGame {
     this.obstacles.dispose();
     this.terrain.dispose();
     this.aiRenderer.dispose();
-    this.engine.scene.remove(this.player.model.root, this.yeti.model.root);
+    this.flyBrainAI.dispose();
+    this.engine.scene.remove(this.player.model.root, this.yeti.model.root, this.flyCompetitor.model.root);
     this.factory.dispose();
     this.engine.dispose();
   }
