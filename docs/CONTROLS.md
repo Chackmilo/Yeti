@@ -11,7 +11,7 @@ Esta guía detalla la configuración de entradas, normalización y mecánicas de
 | **Girar Izquierda / Derecha** | `←` / `→` | `A` / `D` | Giro lateral con estela de esquí y ángulo de descenso dinámico. |
 | **Freno en Cuña (Snowplow)** | `↑` | `W` | Deceleración progresiva y fricción lateral controlada para pasos estrechos y ajuste de trazada en puertas de slalom. |
 | **Posición de Descenso (Tuck)** | `↓` | `S` | Reduce la resistencia aerodinámica e incrementa la velocidad cuesta abajo en línea recta. |
-| **⚡ Turbo Boost** | **`Espacio`** | `Shift` (izq./der.) / `F` | Aceleración extrema a 35 m/s. <br>• **En Clásico:** Ilimitado con inercia a alta velocidad (`turnAuthority = 0.76`).<br>• **En Moderno:** Consume estamina (6 s de uso, 8 s recarga). |
+| **⚡ Turbo Boost** | **`Espacio`** | `Shift` (izq./der.) / `F` | Aceleración extrema a 35 m/s. <br>• **En Clásico:** Ilimitado. En ambos modos, mientras el turbo está activo, la autoridad de giro baja al 76% (`turnAuthority = 0.76`).<br>• **En Moderno:** Consume estamina (6 s de uso, 8 s recarga). |
 | **⏸️ Pausa / Reanudar** | **`Escape`** | — | Pausa exclusiva: congela la simulación y despliega el menú sin interferir con el turbo. |
 | **🤖 Alternar Piloto IA** | `T` | `Tab` | *(Edición PRO)* Conmuta entre `HUMANO (OFF)`, `AUTOPILOT` y `CO_PILOT`. |
 | **Reiniciar Pista** | `R` | — | Reinicia la bajada con una nueva semilla procedural. |
@@ -26,13 +26,13 @@ Soporte nativo con detección automática en caliente (Xbox Series/One, PlayStat
 
 | Control del Mando | Acción | Detalle Técnico |
 | :--- | :--- | :--- |
-| **Stick Izquierdo / Cruceta (D-Pad)** | Dirección y Giro | Entrada analógica con zona muerta calibrada (`deadzone: 0.15`). |
+| **Stick Izquierdo / Cruceta (D-Pad)** | Dirección y Giro | Eje convertido a digital: ±0.28 en horizontal (giro) y ±0.35 en vertical (arriba = freno, abajo = descenso). |
 | **Gatillo Izquierdo (LT / L2) o Botón B** | Freno en Cuña | Modulación analógica de desaceleración y spray de nieve. |
 | **Gatillo Derecho (RT / R2) o Botón A** | Turbo Boost | Impulso de velocidad máxima inmediata. |
 | **Botón X / Cuadrado** | **Alternar Piloto IA** | Ciclo dinámico: `OFF` $\to$ `AUTOPILOT` $\to$ `CO_PILOT`. |
 | **Start / Options** | Pausa / Continuar | Alterna overlay modal de pausa. |
-| **Back / Select / Share** | Reinicio Rápido | Regenera la montaña sin recargar la página. |
-| **Stick Derecho (R3 Click)** | Diagnóstico 3D | Alterna telemetría XAI y gizmos. |
+| **Botón Y / Triángulo** | Reinicio Rápido | Regenera la montaña sin recargar la página. |
+| **Back / Select / Share** | Diagnóstico 3D | Alterna telemetría XAI y gizmos (equivale a `F2`). |
 
 ---
 
@@ -54,7 +54,7 @@ La suite ofrece dos filosofías de juego bien diferenciadas para ajustarse al es
 | Característica | 👾 Modo Clásico | ⚡ Modo Moderno |
 | :--- | :--- | :--- |
 | **Duración del Turbo** | **Ilimitado (Infinito)** | **Limitado por Estamina (6 s continuos)** |
-| **Inercia y Maniobrabilidad** | Velocidad máxima de 35 m/s con **autoridad de giro reducida al 76%** (`turnAuthority = 0.76`). Exige soltar turbo o frenar para no derrapar hacia los pinos. | **Alta maniobrabilidad ágil**. El giro no sufre penalización severa, pero el turbo es un recurso escaso y táctico. |
+| **Inercia y Maniobrabilidad** | Velocidad máxima de 35 m/s con **autoridad de giro reducida al 76%** (`turnAuthority = 0.76`). Exige soltar turbo o frenar para no derrapar hacia los pinos. | **Giro completo sin turbo**; con turbo activo también baja al 76%, pero el turbo es un recurso escaso y táctico. |
 | **Recarga de Energía** | No aplica (el turbo siempre está disponible). | Recarga pasiva completa en **8 segundos**, o instantánea mediante slalom. |
 | **Recompensa de Puerta Slalom** | **Impulso de velocidad inmediata (+3.0 m/s)** y bonificación exponencial de puntos (`150 * combo`). | Recarga instantánea del **+25% de la barra de energía** y puntos por combo (`100 * combo`). |
 | **Indicador en HUD** | `Turbo ∞` con barra cian estática. | Medidor de estamina porcentual (`0% - 100%`) con aviso cromático ámbar/rojo al bajar del 23%. |
@@ -84,3 +84,6 @@ En modo Clásico, el turbo es infinito, pero viajar a 35 m/s (126 km/h) reduce l
 
 ### 3. Rampas y Acrobacias Aéreas 360°
 Al embestir una rampa alpina con impulso, la nutria salta en una parábola de 2.8 m de elevación, ejecutando un giro de 360° en el aire y volando por encima de árboles y rocas. La recompensa de **+250 PTS** se otorga **exclusivamente al completar un aterrizaje limpio sobre la nieve**, acompañada de partículas spray, vibración auditiva y aceleración extra.
+
+### 4. Alerta Visual de Proximidad (Edición PRO)
+Cuando el Yeti está a menos de **65 m**, los bordes de la pantalla laten en rojo con una intensidad proporcional a la cercanía. Es el mismo umbral que el latido sonoro, para que jugar sin audio no sea una desventaja. El pulso es lento (menos de 1 Hz), se desactiva con `prefers-reduced-motion` y la capa no bloquea los controles táctiles.

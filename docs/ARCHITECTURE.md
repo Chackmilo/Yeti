@@ -3,7 +3,7 @@
 [![Three.js](https://img.shields.io/badge/Three.js-r170-black?logo=three.js)](https://threejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite)](https://vitejs.dev/)
 [![Node](https://img.shields.io/badge/Node.js-20%2B%20%7C%2022%2B-339933?logo=node.js)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/Tests-22%2F22%20Passing-brightgreen)](../games/3d-pro/tests)
+[![Tests](https://img.shields.io/badge/Tests-33%2F33%20Passing-brightgreen)](../games/3d-pro/tests)
 [![AI Engine](https://img.shields.io/badge/AI%20Engine-Behavior%20Trees%20%2B%20MPC%20%2B%20DDA-cyan)](../games/3d-pro/src/ai)
 [![Gamepad](https://img.shields.io/badge/Gamepad-Xbox%20%2F%20PlayStation-blue)](CONTROLS.md)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](../LICENSE)
@@ -122,7 +122,7 @@ El sistema de terreno infinito en [`WorldGenerator.js`](../games/3d-pro/src/worl
    - Mantiene las llamadas de dibujo (**Draw Calls**) entre **14 y 22 llamadas por fotograma**.
 
 3. **Calidad Gráfica Adaptativa con Histéresis:**
-   - Monitorea FPS de forma continua con objetivo de 60 FPS. Si caen por debajo de 47 FPS durante más de 5 segundos sostenidos, reduce el *Device Pixel Ratio* y desactiva sombras directas dinámicas, evitando oscilaciones visuales erráticas.
+   - Monitorea FPS de forma continua con objetivo de 60 FPS. Si caen por debajo de 47 FPS durante más de 5 segundos sostenidos, reduce el *Device Pixel Ratio* en 0.2 (mínimo 0.85); si además caen por debajo de 38 FPS, desactiva las sombras dinámicas y pasa a calidad ligera, evitando oscilaciones visuales erráticas.
 
 4. **Almacenamiento Seguro sin Fallos:**
    - Encapsulado en [`StorageManager.js`](../games/3d-pro/src/core/StorageManager.js). Si `localStorage` está bloqueado por directivas de privacidad del navegador o corrupto, conmuta a memoria sin lanzar excepciones no controladas.
@@ -136,10 +136,12 @@ games/3d-pro/
 ├── index.html                   # Shell HTML accesible y semántico
 ├── vite.config.js               # Empaquetado y code-splitting
 ├── package.json                 # Manifiesto y scripts npm (v4.5.0-ai)
-├── tests/                       # Suite de 22 tests unitarios (Node.js nativo)
+├── tests/                       # Suite de 33 tests unitarios (Node.js nativo)
 │   ├── ai.test.js               # Tests de Behavior Trees, Lead Pursuit y DDA (13 tests)
 │   ├── coherence.test.js        # Tests de coherencia de configuración, safeHalf 4.2 y corredor (3 tests)
-│   └── physics.test.js          # Tests de CCD, corredor seguro 10km, instanciación y Storage (6 tests)
+│   ├── physics.test.js          # Tests de CCD, corredor seguro 10km, instanciación y Storage (6 tests)
+│   ├── ui.test.js               # Tests de alerta de proximidad, HUD y menú accesible (8 tests)
+│   └── entities.test.js         # Tests de la nutria (lente, bufanda) y puntos de slalom (3 tests)
 └── src/
     ├── main.js                  # Orquestador del juego y state machine
     ├── config.js                # Fuente única de verdad: constantes físicas, corridor y validación

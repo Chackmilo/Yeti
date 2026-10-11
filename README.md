@@ -1,7 +1,7 @@
 # 🦦 Snow Escape — Suite Completa de Videojuegos Alpinos
 
 [![CI Pipeline](https://img.shields.io/badge/CI-GitHub%20Actions-brightgreen?logo=github-actions)](.github/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/Tests-22%2F22%20Passing-brightgreen?logo=node.js)](games/3d-pro/tests)
+[![Tests](https://img.shields.io/badge/Tests-33%2F33%20Passing-brightgreen?logo=node.js)](games/3d-pro/tests)
 [![Three.js](https://img.shields.io/badge/Three.js-r170-black?logo=three.js)](https://threejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite)](https://vitejs.dev/)
 [![Docker](https://img.shields.io/badge/Docker-26.5%20MB%20Alpine-blue?logo=docker)](Dockerfile)
@@ -13,7 +13,7 @@ Suite de videojuegos arcade de esquí infinito inspirada en la mística clásica
 1. **🏔️ Portal Hub Alpinos ([`index.html`](index.html)):** Centro de bienvenida con selector de juegos, comparador de motores, nieve dinámica en Canvas y lectura de récords locales.
 2. **👾 Snow Escape 2D Retro ([`games/2d-retro/index.html`](games/2d-retro/index.html)):** Arcade clásico 2D en Canvas con slalom, rampas de salto 360°, IA predictiva, radar visual de amenaza, colisiones AABB y modos Clásico/Moderno.
 3. **🎿 Snow Escape 3D Standalone ([`games/3d-standalone/index.html`](games/3d-standalone/index.html)):** Experiencia 3D completa en un único archivo autosuficiente (~51 KB), Three.js por CDN, audio 3D HRTF, física *Swept Circle* y tarjeta de resultados.
-4. **⚡ Snow Escape 3D PRO & AI Engine ([`games/3d-pro`](games/3d-pro/)):** Suite modular de alto rendimiento con **Arquitectura de IA Avanzada (Behavior Trees + Piloto Automático Autónomo MPC + Motor DDA de Estado de Flujo + Telemetría XAI + Gizmos 3D)**, Vite 6, Three.js r170, Continuous Collision Detection (CCD) a 60 Hz, Gamepad API y suite de 22 tests automatizados.
+4. **⚡ Snow Escape 3D PRO & AI Engine ([`games/3d-pro`](games/3d-pro/)):** Suite modular de alto rendimiento con **Arquitectura de IA Avanzada (Behavior Trees + Piloto Automático Autónomo MPC + Motor DDA de Estado de Flujo + Telemetría XAI + Gizmos 3D)**, Vite 6, Three.js r170, Continuous Collision Detection (CCD) a 60 Hz, Gamepad API y suite de 33 tests automatizados.
 
 ---
 
@@ -41,10 +41,12 @@ Yeti/
 │       ├── package.json             # Manifiesto del paquete modular y scripts de prueba
 │       ├── vite.config.js           # Configuración de empaquetado y code-splitting
 │       ├── index.html               # Shell HTML de la edición PRO
-│       ├── tests/                   # Suite de 22 tests unitarios nativos verificados
+│       ├── tests/                   # Suite de 33 tests unitarios nativos verificados
 │       │   ├── ai.test.js           # Pruebas de Behavior Trees, Lead Pursuit, MPC y DDA (13 tests)
 │       │   ├── coherence.test.js    # Pruebas de coherencia de constantes, safeHalf 4.2 y corredor (3 tests)
-│       │   └── physics.test.js      # Pruebas de CCD, safe corridor (10 km), instanciación y Storage (6 tests)
+│       │   ├── physics.test.js      # Pruebas de CCD, safe corridor (10 km), instanciación y Storage (6 tests)
+│       │   ├── ui.test.js           # Pruebas de alerta de proximidad, HUD y menú accesible (8 tests)
+│       │   └── entities.test.js     # Pruebas de nutria (lente, bufanda) y puntos de slalom (3 tests)
 │       ├── src/                     # Código fuente desacoplado en 22 módulos ES
 │       └── dist/                    # Bundle de producción optimizado
 ├── index.html                       # 🏔️ Portal Web Hub Unificado
@@ -77,7 +79,7 @@ Yeti/
 | **Audio Espacial** | Síntesis Web Audio estéreo | Síntesis 3D HRTF posicional | Síntesis 3D HRTF + PannerNode |
 | **Física de Colisiones** | AABB continua | Swept Circle en cilindros | **Continuous Collision Detection (CCD)** |
 | **Resumen de Partida** | Tarjeta de puntos y récord | Tarjeta Scorecard Grid | **Scorecard Grid completo + Badges** |
-| **Pruebas Automatizadas** | Pruebas integradas | Validaciones runtime | **✅ Suite de 22 tests nativos (Node.js)** |
+| **Pruebas Automatizadas** | Pruebas integradas | Validaciones runtime | **✅ Suite de 33 tests nativos (Node.js)** |
 
 ---
 
@@ -89,7 +91,7 @@ Al utilizar **npm workspaces**, puedes ejecutar todos los comandos directamente 
 # 1. Instalar dependencias del monorepo
 npm install
 
-# 2. Ejecutar la suite completa de 22 tests unitarios certificados
+# 2. Ejecutar la suite completa de 33 tests unitarios certificados
 npm test
 
 # 3. Iniciar entorno de desarrollo interactivo de la edición PRO (Vite HMR)

@@ -3,7 +3,7 @@
 [![Three.js](https://img.shields.io/badge/Three.js-r170-black?logo=three.js)](https://threejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite)](https://vitejs.dev/)
 [![Node](https://img.shields.io/badge/Node.js-20%2B%20%7C%2024%2B-339933?logo=node.js)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/Tests-22%2F22%20Passing-brightgreen)](tests)
+[![Tests](https://img.shields.io/badge/Tests-33%2F33%20Passing-brightgreen)](tests)
 [![AI Engine](https://img.shields.io/badge/AI%20Engine-Behavior%20Trees%20%2B%20MPC%20%2B%20DDA-cyan)](src/ai)
 [![Gamepad](https://img.shields.io/badge/Gamepad-Xbox%20%2F%20PlayStation-blue)](https://w3c.github.io/gamepad/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -50,6 +50,7 @@ Versión modular y de grado de producción del videojuego alpino de esquí proce
 ### 4. Audio 3D HRTF y Tensión Dinámica
 - **Audio Posicional Convolutivo ([`AudioManager.js`](src/core/AudioManager.js)):** `PannerNode` configurado en modo `HRTF` sincronizado en tiempo real con las coordenadas 3D del Yeti y de la cámara.
 - **Latido Cardíaco Sub-Bass:** Osciladores de 54 Hz y 76 Hz que generan un latido acelerado de 72 a 187 BPM cuando el Yeti acorta distancia a menos de 65 metros.
+- **Alerta Visual de Proximidad (Accesibilidad):** capa `#yetiAlert` con viñeta roja que late a menos de 1 Hz desde 65 m (`CONFIG.alertRange`, el mismo umbral que el latido) e intensidad proporcional a la cercanía. Respeta `prefers-reduced-motion` y no bloquea los controles táctiles.
 - **Pisadas Sincronizadas y Viento Dinámico:** Pasos pesados acoplados a la cinemática de carrera del Yeti y filtrado resonante reactivo al turbo.
 
 ---
@@ -65,7 +66,7 @@ npm install
 # 2. Iniciar servidor de desarrollo con recarga rápida (HMR)
 npm run dev
 
-# 3. Ejecutar suite completa de 19 pruebas automatizadas
+# 3. Ejecutar suite completa de 33 pruebas automatizadas
 npm test
 
 # 4. Compilar bundle de producción optimizado
@@ -89,7 +90,8 @@ El directorio `dist/` contiene la compilación estática lista para producción 
 | **Gatillo Derecho (RT / R2) / Botón A (Cruz)** | Aceleración Turbo alpino. |
 | **Botón X / Cuadrado** | **Alternar Piloto Automático IA (`OFF` $\to$ `AUTOPILOT` $\to$ `CO_PILOT`).** |
 | **Start / Options** | Pausa y reanudación instantánea. |
-| **Back / Select / Share** | Reinicio rápido de la bajada. |
+| **Botón Y / Triángulo** | Reinicio rápido de la bajada. |
+| **Back / Select / Share** | Panel de diagnóstico 3D y telemetría XAI (equivale a `F2`). |
 
 ### Teclado
 | Acción | Teclas Primarias | Teclas Alternativas |
@@ -101,7 +103,7 @@ El directorio `dist/` contiene la compilación estática lista para producción 
 | **🤖 Alternar Piloto IA (Auto / Co-Pilot)** | `T` | `Tab` |
 | **Pausar / Reanudar** | `Escape` | — |
 | **Reiniciar Bajada** | `R` | — |
-| **Iniciar desde Menú** | `Enter` | `Espacio` |
+| **Iniciar desde Menú** | `Enter` | Botón A / Cruz del mando |
 | **Panel de Diagnóstico 3D y Telemetría XAI** | `F2` | `` ` `` (acento grave) |
 
 ### Dispositivos Móviles y Táctiles
@@ -120,8 +122,11 @@ snow-escape/
 ├── package.json                 # Metadatos, scripts y dependencias (Three.js + Vite)
 ├── vite.config.js               # Configuración de empaquetado y code-splitting
 ├── tests/
+│   ├── ai.test.js               # Pruebas de Behavior Trees, Lead Pursuit, MPC y DDA
+│   ├── coherence.test.js        # Invariantes de configuración y navegabilidad del corredor
 │   ├── physics.test.js          # Pruebas unitarias de CCD, corredor seguro y memoria
-│   └── ai.test.js               # Pruebas de Behavior Trees, Lead Pursuit, MPC y DDA
+│   ├── ui.test.js               # Alerta de proximidad, HUD y menú accesible
+│   └── entities.test.js         # Nutria (lente, bufanda) y puntos de slalom
 └── src/
     ├── config.js                # Constantes de juego, paletas de color y parámetros físicos
     ├── main.js                  # Orquestador del ciclo de vida y eventos de juego
@@ -183,7 +188,7 @@ snow-escape/
 
 ## 🧪 Pruebas Unitarias Automatizadas (`npm test`)
 
-La suite automatizada valida **22/22 especificaciones críticas** con el runner nativo de Node.js en tres suites:
+La suite automatizada valida **33/33 especificaciones críticas** con el runner nativo de Node.js en cinco suites:
 
 ### 1. Inteligencia Artificial ([`tests/ai.test.js`](tests/ai.test.js) — 13 tests)
 - ✅ **Behavior Tree Selector:** Evaluación secuencial hasta éxito o estado running.
@@ -212,6 +217,21 @@ La suite automatizada valida **22/22 especificaciones críticas** con el runner 
 - ✅ **Determinismo y reutilización de memoria:** Reciclaje de matrices sin fugas ni recolector de basura agresivo.
 - ✅ **Detección rápida en Broad Phase:** Segmentación espacial por bloques.
 - ✅ **Aislamiento de StorageManager:** Funcionamiento tolerante a fallos sin dependencias de `localStorage`.
+
+### 4. Interfaz y Accesibilidad ([`tests/ui.test.js`](tests/ui.test.js) — 8 tests)
+- ✅ **Alerta apagada fuera de partida:** menú, pausa, fin de partida, Yeti dormido o burlado.
+- ✅ **Umbral compartido de 65 m:** mismo radio que el latido de audio (`CONFIG.alertRange`); `gap` inválido no enciende la alerta.
+- ✅ **Intensidad proporcional:** crece al acercarse y satura en 1.
+- ✅ **Cableado del HUD:** la alerta vive en la capa `#yetiAlert` y no toca `#viewport`.
+- ✅ **Seguridad visual:** pulso lento (< 3 destellos/s), sin animación con `prefers-reduced-motion` y sin bloquear toques.
+- ✅ **Radiogroups accesibles:** `aria-checked` sincronizado con la selección.
+- ✅ **Yeti burlado legible:** sin unidad "m" huérfana.
+- ✅ **Resultados en español:** récord etiquetado `CLÁSICO` / `MODERNO`.
+
+### 5. Entidades ([`tests/entities.test.js`](tests/entities.test.js) — 3 tests)
+- ✅ **Lente de la nutria:** material `#bdefff` aplicado a las gafas.
+- ✅ **Bufanda al viento:** aletea más rápido con turbo y sin saltos de fase.
+- ✅ **Puntos de slalom:** `lastGatePoints` refleja `150 × combo` (Clásico) y `100 × combo` (Moderno).
 
 ---
 

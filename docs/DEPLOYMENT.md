@@ -6,7 +6,7 @@ Esta guía detalla las diferentes opciones para desplegar la suite en producció
 
 ## 🐳 Opción 1: Despliegue con Docker & Docker Compose (Recomendada para VPS)
 
-La suite cuenta con un empaquetado multi-etapa (*multi-stage build*) con **Node.js 22 Alpine** (compilación y suite de 22 tests unitarios certificados) y **Nginx Alpine** (runtime de solo ~26.5 MB).
+La suite cuenta con un empaquetado multi-etapa (*multi-stage build*) con **Node.js 22 Alpine** (compilación y suite de 33 tests unitarios certificados) y **Nginx Alpine** (runtime de solo ~26.5 MB).
 
 ### Paso 1: Clonar el repositorio en tu VPS
 ```bash
