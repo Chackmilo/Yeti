@@ -24,3 +24,6 @@ Thumbs.db
 # Internal tool caches
 .playwright-mcp/
 .gemini/
+
+# Originales de arte y video (fuente de assets/, fuera de git)
+art/

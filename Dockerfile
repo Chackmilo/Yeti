@@ -28,7 +28,6 @@ RUN rm -rf /usr/share/nginx/html/*
 # Copiar portal web principal y assets multimedia
 COPY index.html /usr/share/nginx/html/index.html
 COPY assets /usr/share/nginx/html/assets
-COPY Otter_pouring_coffee_by_lake_20261011143032.mp4 /usr/share/nginx/html/Otter_pouring_coffee_by_lake_20261011143032.mp4
 
 # Copiar ediciones autónomas y compiladas
 COPY games/2d-retro /usr/share/nginx/html/games/2d-retro
