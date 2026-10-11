@@ -392,7 +392,7 @@ try {
   document.getElementById('loadingText').textContent = 'No se pudo iniciar el juego. Comprueba WebGL y la aceleración gráfica. Consulta la consola para ver el detalle.';
 }
 
-if (import.meta.hot) {
+if (typeof import.meta !== 'undefined' && import.meta?.hot) {
   import.meta.hot.dispose(() => {
     game?.dispose();
     delete window.SnowEscape;

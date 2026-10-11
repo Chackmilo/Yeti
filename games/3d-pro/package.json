@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
+    "build": "vite build && esbuild src/main.js --bundle --minify --format=iife --log-override:empty-import-meta=silent --outfile=dist/assets/app.iife.js && node scripts/postbuild.js",
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --test tests/*.test.js"
   },
