@@ -20,6 +20,7 @@ export const CONFIG = Object.freeze({
   escapeTime: 3,
   warningTime: 1.8,
   nextYetiDistance: 600,
+  alertRange: 65,           // radio de alerta del Yeti: latido de audio + viñeta visual
 
   shadowSize: 1024,
   trackCount: 720,

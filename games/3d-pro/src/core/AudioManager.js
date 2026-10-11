@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { CONFIG as C } from '../config.js';
 
 export class AudioManager {
   constructor(storage) {
@@ -131,8 +132,8 @@ export class AudioManager {
     // Procedural chase tension heartbeat (pulso de tensión acelerado según cercanía)
     if (active && yeti && (yeti.status === 'chase' || yeti.status === 'warning') && (!player || player.protect <= 0)) {
       const gap = Math.max(0, (player?.d || 0) - yeti.d);
-      if (gap < 65) {
-        const tension = Math.max(0, Math.min(1, (65 - gap) / 58));
+      if (gap < C.alertRange) {
+        const tension = Math.max(0, Math.min(1, (C.alertRange - gap) / 58));
         const tempo = 0.82 - tension * 0.52; // De ~73 BPM hasta ~187 BPM al estar muy cerca
         this.heartbeatTimer += dt;
         if (this.heartbeatTimer >= tempo) {

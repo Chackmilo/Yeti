@@ -2,6 +2,18 @@
  * @file HUD.js
  * @description Heads-Up Display manager for real-time telemetry, scoring, AI badges, and XAI diagnostics.
  */
+import { CONFIG as C } from '../config.js';
+
+/**
+ * Intensidad (0..1) de la alerta visual de proximidad del Yeti.
+ * Solo en partida, con el Yeti activo y a menos de C.alertRange metros (mismo umbral que el latido).
+ */
+export function yetiAlertLevel(state, status, gap, range = C.alertRange) {
+  const live = state === 'playing' || state === 'caught';
+  const hunting = status === 'warning' || status === 'chase' || status === 'caught';
+  if (!live || !hunting || !(gap < range)) return 0;
+  return Math.min(1, 0.35 + 0.65 * (1 - Math.max(0, gap) / range));
+}
 
 export class HUD {
   constructor() {
@@ -18,6 +30,8 @@ export class HUD {
     this.ddaBadge = document.getElementById('ddaBadge');
     this.aiBadges = document.getElementById('aiBadges');
     this.aiBtn = document.getElementById('aiBtn');
+    this.alert = document.getElementById('yetiAlert');
+    this.alertLevel = -1;
     this.time = 0;
     this.bannerTime = 0;
     this.format = new Intl.NumberFormat('es-ES');
@@ -63,15 +77,11 @@ export class HUD {
     const active = yeti.status === 'chase' || yeti.status === 'warning' || yeti.status === 'caught';
     this.yetiLabel.textContent = active ? 'EL YETI ESTÁ A' : yeti.status === 'gone' ? '¡YETI BURLADO!' : 'EL YETI APARECE EN';
     this.yetiDistance.textContent = yeti.status === 'gone' ? '—' : String(Math.max(0, active ? Math.round(player.d - yeti.d) : Math.ceil(yeti.next - player.d)));
-    const gap = Math.max(0, player.d - yeti.d);
-    const viewport = document.getElementById('viewport');
-    if (viewport) {
-      if (active && gap < 60) {
-        const a = Math.min(0.65, 0.2 + (60 - gap) / 70);
-        viewport.style.boxShadow = `inset 0 0 55px rgba(239, 68, 68, ${a.toFixed(2)})`;
-      } else {
-        viewport.style.boxShadow = 'none';
-      }
+    const level = Math.round(yetiAlertLevel(state, yeti.status, player.d - yeti.d) * 100) / 100;
+    if (this.alert && level !== this.alertLevel) {
+      this.alertLevel = level;
+      this.alert.style.opacity = String(level);
+      this.alert.classList.toggle('on', level > 0);
     }
 
     this.energyText.textContent = player.mode === 'classic' ? '∞' : Math.round(player.energy * 100) + '%';
