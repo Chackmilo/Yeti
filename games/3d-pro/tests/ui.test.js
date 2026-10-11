@@ -124,4 +124,5 @@ test('Menú: avatar desde assets/ de la suite y sin prólogo empaquetado en 3D P
   assert.equal(SUITE_ASSETS, '../../../assets/');
   assert.equal(elements.get('menuAvatar').src, '../../../assets/otter_3d_coffee.jpg');
   assert.equal(elements.has('prologueModal'), false);
+  assert.match(readFileSync(new URL('../index.html', import.meta.url), 'utf8'), /id="menuAvatar"/);
 });

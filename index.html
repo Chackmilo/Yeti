@@ -843,6 +843,16 @@
     .character-card:hover .character-zoom-hint {
       opacity: 1;
     }
+    .character-zoom-hint {
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .character-card:focus-within .character-zoom-hint {
+      opacity: 1;
+    }
+    @media (hover: none) {
+      .character-zoom-hint { opacity: 1; }
+    }
 
     .character-card-body {
       padding: 22px;
@@ -966,7 +976,7 @@
 <body>
 
   <!-- CINEMATIC START VIDEO MODAL (CAFÉ EN EL LAGO) -->
-  <div id="intro-modal" class="intro-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+  <div id="intro-modal" class="intro-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="intro-title">
     <div class="intro-modal-content">
       <div class="intro-modal-header">
         <div class="intro-modal-title-group">
@@ -983,7 +993,7 @@
       </div>
 
       <div class="intro-video-wrapper">
-        <video id="intro-video" playsinline controls loop preload="auto" poster="./assets/otter_3d_coffee.jpg">
+        <video id="intro-video" playsinline controls loop preload="none" poster="./assets/otter_3d_coffee.jpg">
           <source src="./assets/intro_lake.mp4" type="video/mp4">
           Tu navegador no soporta la reproducción de video HTML5.
         </video>
@@ -1242,7 +1252,7 @@
         <article class="character-card" data-full="./assets/otter_3d_coffee.jpg" data-caption="Nutria Alpina 3D PBR — Suéter de lana acanalada mostaza, taza de café caliente y pelaje de alta definición. Protagonista de la Edición 3D PRO.">
           <div class="character-card-img-wrap">
             <img src="./assets/otter_3d_coffee.jpg" alt="Nutria 3D con suéter y café" class="character-card-img" loading="lazy">
-            <span class="character-zoom-hint">🔍 Ampliar Arte</span>
+            <button type="button" class="character-zoom-hint">🔍 Ampliar arte</button>
           </div>
           <div class="character-card-body">
             <span class="character-card-tag">Three.js PBR · Edición Pro & 3D</span>
@@ -1257,7 +1267,7 @@
         <article class="character-card" data-full="./assets/otter_2d_pixel.jpg" data-caption="Nutria Retro 2D Pixel-Art — Homenaje nostálgico al esquí arcade de los 90 y SkiFree. Protagonista de Otter Escape 2D.">
           <div class="character-card-img-wrap">
             <img src="./assets/otter_2d_pixel.jpg" alt="Nutria en Pixel Art en la nieve" class="character-card-img" loading="lazy">
-            <span class="character-zoom-hint">🔍 Ampliar Arte</span>
+            <button type="button" class="character-zoom-hint">🔍 Ampliar arte</button>
           </div>
           <div class="character-card-body">
             <span class="character-card-tag">Pixel Art 16-Bit · Canvas 2D</span>
@@ -1272,7 +1282,7 @@
         <article class="character-card" data-full="./assets/otter_cartoon_wanderer.jpg" data-caption="Nutria Exploradora Ilustrada — Concept art alpino con mochila de expedición, termo de café y saludo entusiasta de bienvenida.">
           <div class="character-card-img-wrap">
             <img src="./assets/otter_cartoon_wanderer.jpg" alt="Nutria con mochila y taza de café saludando" class="character-card-img" loading="lazy">
-            <span class="character-zoom-hint">🔍 Ampliar Arte</span>
+            <button type="button" class="character-zoom-hint">🔍 Ampliar arte</button>
           </div>
           <div class="character-card-body">
             <span class="character-card-tag">Concept Art · Ilustración Alpina</span>
@@ -1435,7 +1445,7 @@
       height = canvas.height = window.innerHeight;
     });
 
-    // 4. Cinematic Intro Video Modal Controls
+    // 4. Modales accesibles: fondo inerte, foco dentro y retorno del foco al cerrar
     const introModal = document.getElementById('intro-modal');
     const introVideo = document.getElementById('intro-video');
     const btnCloseIntro = document.getElementById('btn-close-intro');
@@ -1445,105 +1455,96 @@
     const soundIcon = document.getElementById('sound-icon');
     const soundLabel = document.getElementById('sound-label');
     const cbAutoIntro = document.getElementById('cb-auto-intro');
-
-    function closeIntro() {
-      if (!introModal) return;
-      introModal.classList.add('hidden');
-      if (introVideo) introVideo.pause();
-    }
-
-    function openIntro() {
-      if (!introModal) return;
-      introModal.classList.remove('hidden');
-      if (introVideo) {
-        introVideo.currentTime = 0;
-        introVideo.play().catch(() => {});
-      }
-    }
-
-    if (btnCloseIntro) btnCloseIntro.addEventListener('click', closeIntro);
-    if (btnEnterHub) btnEnterHub.addEventListener('click', closeIntro);
-    if (btnHeroIntro) btnHeroIntro.addEventListener('click', openIntro);
-
-    if (btnToggleSound && introVideo) {
-      btnToggleSound.addEventListener('click', () => {
-        introVideo.muted = !introVideo.muted;
-        if (introVideo.muted) {
-          soundIcon.textContent = '🔇';
-          soundLabel.textContent = 'Activar Sonido';
-        } else {
-          soundIcon.textContent = '🔊';
-          soundLabel.textContent = 'Silenciar';
-        }
-      });
-    }
-
-    // Auto-play on startup logic
-    try {
-      const autoDisabled = localStorage.getItem('otter_intro_disabled') === 'true';
-      if (cbAutoIntro) cbAutoIntro.checked = !autoDisabled;
-
-      if (autoDisabled) {
-        introModal.classList.add('hidden');
-      } else {
-        introVideo.muted = true;
-        const playPromise = introVideo.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(() => {
-            // Browser prevented unmuted or initial autoplay; video remains loaded
-          });
-        }
-      }
-
-      if (cbAutoIntro) {
-        cbAutoIntro.addEventListener('change', () => {
-          localStorage.setItem('otter_intro_disabled', cbAutoIntro.checked ? 'false' : 'true');
-        });
-      }
-    } catch (e) {}
-
-    // Close intro modal if clicking backdrop outside dialog card
-    if (introModal) {
-      introModal.addEventListener('click', (e) => {
-        if (e.target === introModal) closeIntro();
-      });
-    }
-
-    // 5. Artwork Lightbox Modal Controls
     const lightboxModal = document.getElementById('lightbox-modal');
     const lightboxImg = document.getElementById('lightbox-img');
     const lightboxCaption = document.getElementById('lightbox-caption');
     const btnCloseLightbox = document.getElementById('btn-close-lightbox');
+    const background = [document.querySelector('main.portal-container'), document.getElementById('snow-bg')];
+    let returnFocus = null;
 
+    function showModal(modal, focusTarget) {
+      returnFocus = document.activeElement;
+      modal.classList.remove('hidden');
+      background.forEach(el => { if (el) el.inert = true; });
+      // Un elemento con visibility:hidden no admite foco, y su transición (también la heredada por los botones con
+      // "transition: all") lo mantiene así el primer cuadro: se completan solo esas transiciones antes de enfocar
+      modal.getAnimations?.({ subtree: true }).forEach(a => { if (a.transitionProperty === 'visibility') a.finish(); });
+      focusTarget.focus();
+    }
+
+    function hideModal(modal) {
+      if (modal.classList.contains('hidden')) return;
+      modal.classList.add('hidden');
+      background.forEach(el => { if (el) el.inert = false; });
+      if (returnFocus && document.contains(returnFocus)) returnFocus.focus();
+      returnFocus = null;
+    }
+
+    function syncSoundLabel() {
+      soundIcon.textContent = introVideo.muted ? '🔇' : '🔊';
+      soundLabel.textContent = introVideo.muted ? 'Activar Sonido' : 'Silenciar';
+    }
+
+    function openIntro(muted) {
+      if (typeof muted === 'boolean') introVideo.muted = muted;
+      syncSoundLabel();
+      showModal(introModal, btnEnterHub);
+      introVideo.currentTime = 0;
+      introVideo.play().catch(() => {});
+    }
+
+    function closeIntro() {
+      introVideo.pause();
+      hideModal(introModal);
+    }
+
+    btnCloseIntro.addEventListener('click', closeIntro);
+    btnEnterHub.addEventListener('click', closeIntro);
+    btnHeroIntro.addEventListener('click', () => openIntro());
+    btnToggleSound.addEventListener('click', () => {
+      introVideo.muted = !introVideo.muted;
+      syncSoundLabel();
+    });
+    introModal.addEventListener('click', (e) => {
+      if (e.target === introModal) closeIntro();
+    });
+
+    // Autoarranque silencioso solo si el usuario no lo desactivó ni pide menos movimiento o ahorro de datos
+    let autoDisabled = false;
+    try { autoDisabled = localStorage.getItem('otter_intro_disabled') === 'true'; } catch (e) {}
+    cbAutoIntro.checked = !autoDisabled;
+    cbAutoIntro.addEventListener('change', () => {
+      try { localStorage.setItem('otter_intro_disabled', cbAutoIntro.checked ? 'false' : 'true'); } catch (e) {}
+    });
+    const quietStart = matchMedia('(prefers-reduced-motion: reduce)').matches || navigator.connection?.saveData === true;
+    if (location.hash === '#prologo') openIntro(true);
+    else if (!autoDisabled && !quietStart) openIntro(true);
+
+    // 5. Lightbox de arte
     function closeLightbox() {
-      if (lightboxModal) lightboxModal.classList.add('hidden');
+      hideModal(lightboxModal);
     }
 
-    if (btnCloseLightbox) btnCloseLightbox.addEventListener('click', closeLightbox);
-    if (lightboxModal) {
-      lightboxModal.addEventListener('click', (e) => {
-        if (e.target === lightboxModal) closeLightbox();
-      });
-    }
+    btnCloseLightbox.addEventListener('click', closeLightbox);
+    lightboxModal.addEventListener('click', (e) => {
+      if (e.target === lightboxModal) closeLightbox();
+    });
 
     document.querySelectorAll('.character-card').forEach(card => {
       card.addEventListener('click', () => {
-        const full = card.getAttribute('data-full');
-        const cap = card.getAttribute('data-caption');
-        if (full && lightboxImg) {
-          lightboxImg.src = full;
-          lightboxCaption.textContent = cap || '';
-          lightboxModal.classList.remove('hidden');
-        }
+        const img = card.querySelector('img');
+        lightboxImg.src = card.getAttribute('data-full');
+        lightboxImg.alt = img ? img.alt : '';
+        lightboxCaption.textContent = card.getAttribute('data-caption') || '';
+        showModal(lightboxModal, btnCloseLightbox);
       });
     });
 
-    // 6. Global Escape key handling
+    // 6. Escape cierra el modal abierto
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeLightbox();
-        closeIntro();
-      }
+      if (e.key !== 'Escape') return;
+      if (!lightboxModal.classList.contains('hidden')) closeLightbox();
+      else if (!introModal.classList.contains('hidden')) closeIntro();
     });
   </script>
 </body>

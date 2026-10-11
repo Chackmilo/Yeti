@@ -15,10 +15,12 @@ const EDITIONS = ['games/2d-retro/index.html', 'games/3d-standalone/index.html',
 const REF = /\b(?:src|href|poster|data-full)="([^"]*)"/g;
 const EXTERNAL = /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i;
 const GENERATED = /(?:^|\/)games\/3d-pro\/dist\//;
-// Oráculo: archivos versionados o versionables (incluye nuevos sin añadir; excluye lo ignorado, como art/ y dist/)
-const SHIPPABLE = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard'], { cwd: ROOT, encoding: 'utf8' })
-  .split('\n').filter(Boolean);
-const isShippable = rel => SHIPPABLE.includes(rel) || SHIPPABLE.some(f => f.startsWith(rel.endsWith('/') ? rel : rel + '/'));
+// Oráculo: archivos versionados o versionables (incluye nuevos sin añadir; excluye lo ignorado, como art/ y dist/).
+// Perezoso (git solo corre dentro de los tests) y con -z (sin comillas octales en nombres no ASCII).
+let shippable;
+const shippableFiles = () => (shippable ??= execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: ROOT, encoding: 'utf8' })
+  .split('\0').filter(Boolean));
+const isShippable = rel => shippableFiles().includes(rel) || shippableFiles().some(f => f.startsWith(rel.endsWith('/') ? rel : rel + '/'));
 
 test('Suite: las páginas solo enlazan archivos locales relativos que se despliegan', () => {
   const problems = [];
@@ -26,7 +28,7 @@ test('Suite: las páginas solo enlazan archivos locales relativos que se desplie
     let refs = 0;
     for (const [, raw] of read(page).matchAll(REF)) {
       refs++;
-      const ref = raw.split(/[?#]/)[0];
+      const ref = decodeURIComponent(raw.split(/[?#]/)[0]);
       if (!ref || EXTERNAL.test(raw) || GENERATED.test(ref)) continue;
       const viteSource = page === 'games/3d-pro/index.html' && ref.startsWith('/src/');
       if (ref.startsWith('/') && !viteSource) {
@@ -35,7 +37,7 @@ test('Suite: las páginas solo enlazan archivos locales relativos que se desplie
       }
       const target = viteSource ? resolve(ROOT, 'games/3d-pro', '.' + ref) : resolve(ROOT, dirname(page), ref);
       const rel = relative(ROOT, target).split(sep).join('/');
-      if (!isShippable(rel)) problems.push(`${page}: no existe o no se despliega ${raw}`);
+      if (!existsSync(target) || !isShippable(rel)) problems.push(`${page}: no existe o no se despliega ${raw}`);
     }
     assert.ok(refs > 0, `${page}: no se encontró ninguna referencia (¿cambió el formato de los atributos?)`);
   }
@@ -74,4 +76,17 @@ test('Suite: cada medio existe una sola vez y los originales quedan fuera del de
   assert.equal(existsSync(resolve(ROOT, 'games/3d-pro/public')), false, 'games/3d-pro/public duplica assets/');
   assert.deepEqual(readdirSync(ROOT).filter(f => /\.(?:mp4|webm|jpe?g)$/i.test(f)), [],
     'originales sueltos en la raíz: muévelos a art/');
+  assert.ok(isShippable('assets/otter_3d_coffee.jpg'), 'falta el avatar compartido de 3D PRO en assets/');
+});
+
+test('Portal: prólogo ligero y accesible, galería operable con teclado', () => {
+  const html = read('index.html');
+  assert.match(html, /<div id="intro-modal" class="intro-modal-backdrop hidden"/, 'sin JS el modal no debe tapar el portal');
+  assert.match(html, /<video id="intro-video"[^>]*preload="none"/);
+  assert.match(html, /matchMedia\('\(prefers-reduced-motion: reduce\)'\)/);
+  assert.match(html, /location\.hash === '#prologo'/);
+  assert.match(html, /\.inert = true/);
+  const cards = (html.match(/<article class="character-card"/g) || []).length;
+  const buttons = (html.match(/<button type="button" class="character-zoom-hint">/g) || []).length;
+  assert.ok(cards > 0 && buttons === cards, 'cada tarjeta necesita un botón "Ampliar" alcanzable con teclado');
 });
