@@ -98,8 +98,10 @@ class DrosophilaBrainModel:
         self.W_cm[:, 4:6] = 5.0
         self.W_cm[:, 6:8] = 4.0
 
-        # Direct fast reflex pathway (LPLC2 looming directly to Giant Fiber for microsecond latency)
+        # Direct fast reflex pathway (LPTC -> DNa steering and Looming -> Giant Fiber)
         self.W_reflex = np.zeros((16, 8), dtype=np.float32)
+        self.W_reflex[:6, 0:2] = 16.0    # Left sensors -> DNa01 Left steering reflex
+        self.W_reflex[6:12, 2:4] = 16.0  # Right sensors -> DNa02 Right steering reflex
         self.W_reflex[12:16, 6:8] = 25.0  # Direct Looming -> Giant Fiber jump trigger
 
         # Firing statistics and smoothing
