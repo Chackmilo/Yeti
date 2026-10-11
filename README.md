@@ -1,19 +1,20 @@
 # 🦦 Otter Escape: Yeti Chase — Suite Completa de Videojuegos Alpinos
 
 [![CI Pipeline](https://img.shields.io/badge/CI-GitHub%20Actions-brightgreen?logo=github-actions)](.github/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/Tests-33%2F33%20Passing-brightgreen?logo=node.js)](games/3d-pro/tests)
+[![Tests](https://img.shields.io/badge/Tests-37%2F37%20Passing-brightgreen?logo=node.js)](games/3d-pro/tests)
 [![Three.js](https://img.shields.io/badge/Three.js-r170-black?logo=three.js)](https://threejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite)](https://vitejs.dev/)
 [![Docker](https://img.shields.io/badge/Docker-26.5%20MB%20Alpine-blue?logo=docker)](Dockerfile)
 [![Gamepad](https://img.shields.io/badge/Gamepad-Xbox%20%2F%20PlayStation-blue)](docs/CONTROLS.md)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Suite de videojuegos arcade de esquí infinito inspirada en la mística clásica de *SkiFree*, protagonizada por una intrépida **Nutria Esquiadora** equipada con casco dorado, bufanda ondeante al viento, esquís dobles y cola dinámica que se balancea en cada curva, perseguida por el legendario **Yeti de las cumbres**. La suite está modernizada con físicas avanzadas a 60 Hz (objetivo de diseño), audio espacial 3D HRTF y mecánicas acrobáticas. Diseñada con una arquitectura modular de software desacoplada, la suite integra tres ediciones independientes organizadas en un monorepo profesional y servidas a través de un **Portal Web Unificado**:
+Suite de videojuegos arcade de esquí infinito inspirada en la mística clásica de *SkiFree*, protagonizada por una intrépida **Nutria Esquiadora** equipada con casco dorado, bufanda ondeante al viento, esquís dobles y cola dinámica que se balancea en cada curva, perseguida por el legendario **Yeti de las cumbres**. La suite está modernizada con físicas avanzadas a 60 Hz (objetivo de diseño), audio espacial 3D HRTF y mecánicas acrobáticas. Diseñada con una arquitectura modular de software desacoplada, la suite integra ediciones independientes organizadas en un monorepo profesional y servidas a través de un **Portal Web Unificado**:
 
 1. **🏔️ Portal Hub Alpinos ([`index.html`](index.html)):** Centro de bienvenida con selector de juegos, comparador de motores, nieve dinámica en Canvas y lectura de récords locales.
 2. **👾 Otter Escape 2D Retro ([`games/2d-retro/index.html`](games/2d-retro/index.html)):** Arcade clásico 2D en Canvas con slalom, rampas de salto 360°, IA predictiva, radar visual de amenaza, colisiones AABB y modos Clásico/Moderno.
 3. **🎿 Otter Escape 3D Standalone ([`games/3d-standalone/index.html`](games/3d-standalone/index.html)):** Experiencia 3D completa en un único archivo autosuficiente (~51 KB), Three.js por CDN, audio 3D HRTF, física *Swept Circle* y tarjeta de resultados.
-4. **⚡ Otter Escape PRO & AI Engine ([`games/3d-pro`](games/3d-pro/)):** Suite modular de alto rendimiento con **Arquitectura de IA Avanzada (Behavior Trees + Piloto Automático Autónomo MPC + Motor DDA de Estado de Flujo + Telemetría XAI + Gizmos 3D)**, Vite 6, Three.js r170, Continuous Collision Detection (CCD) a 60 Hz, Gamepad API y suite de 33 tests automatizados.
+4. **⚡ Otter Escape PRO & AI Engine ([`games/3d-pro`](games/3d-pro/)):** Suite modular de alto rendimiento con **Arquitectura de IA Avanzada (Behavior Trees + Piloto Automático Autónomo MPC + Motor DDA de Estado de Flujo + Telemetría XAI + Gizmos 3D)**, Vite 6, Three.js r170, Continuous Collision Detection (CCD) a 60 Hz, Gamepad API y suite de 37 tests automatizados.
+5. **🪰 Drosophila Fly-Brain AI ([`experiments/fly-brain`](experiments/fly-brain/)):** Simulación neurobiológica de la mosca de la fruta (*FlyWire* SNN LIF) que compite en tiempo real como rival en pista (tecla **`B`**). Funciona con servidor WebSocket en Python o con motor local embebido en JavaScript a 60 FPS.
 
 ---
 
@@ -47,9 +48,11 @@ Yeti/
 │       │   ├── physics.test.js      # Pruebas de CCD, safe corridor (10 km), instanciación y Storage (6 tests)
 │       │   ├── ui.test.js           # Pruebas de alerta de proximidad, HUD y menú accesible (8 tests)
 │       │   └── entities.test.js     # Pruebas de nutria (lente, bufanda) y puntos de slalom (3 tests)
-│       ├── src/                     # Código fuente desacoplado en 22 módulos ES
+│       ├── src/                     # Código fuente desacoplado en 23 módulos ES
 │       ├── scripts/                 # Postbuild: inyección CSS inline y bundle IIFE universal
 │       └── dist/                    # Bundle de producción optimizado (ESM + IIFE fallback)
+├── experiments/                     # Laboratorio de computación y neurobiología
+│   └── fly-brain/                   # Simulación SNN Drosophila LIF + puente WebSocket Python
 ├── index.html                       # 🏔️ Portal Web Hub Unificado
 ├── jugar.bat                        # 🎮 Lanzador interactivo 1-clic para Windows (Hub / Local Vite / Standalone)
 ├── package.json                     # Orquestador Monorepo (workspaces y scripts universales)
@@ -142,16 +145,30 @@ Para más detalles sobre despliegue con Nginx nativo o plataformas como Cloudfla
 | **⚡ Turbo Boost** | **`Espacio`** o `Shift` / `F` | Botón `A` (Xbox) / `✕` (PS) | `⚡ TURBO` (simultáneo con giro) |
 | **⏸️ Pausa / Reanudar** | **`Escape`** | Botón Start | Botón HUD pausa |
 | **🤖 Piloto Automático IA (3D PRO)** | Tecla `T` o `Tab` | Botón `X` (Xbox) / `□` (PS) | Botón HUD IA |
+| **🪰 Rival Mosca (Drosophila SNN)** | Tecla **`B`** | — | Botón Menú / Debug |
 | **Diagnóstico 3D & Telemetría XAI** | `F2` o `` ` `` | Stick Derecho (`R3`) | Botón HUD Debug |
 
 Para consultar la configuración exhaustiva de controles, dinámicas de inercia y diferencias entre Modo Clásico y Modo Moderno, consulta [**`docs/CONTROLS.md`**](docs/CONTROLS.md).
 
 ---
 
+## 🪰 Experimento Neurobiológico Drosophila SNN (Rama: `experiment/fly-brain-ai`)
+
+Esta rama incorpora una simulación neurobiológica de la red neuronal de la mosca de la fruta (*Drosophila melanogaster*) que actúa como esquiador rival autónomo con dinámica **Leaky Integrate-and-Fire (LIF)**.
+
+* **Doble Motor:** Opera de forma local a 60 Hz en JavaScript o conectado mediante WebSocket a un servidor puente en Python (`ws://127.0.0.1:8765`).
+* **Activación Inmediata:** Presiona **`B`** en la edición 3D PRO para invocar al competidor en cualquier momento.
+* **Telemetría en Vivo:** Presiona **`F2`** para ver el conteo de picos neuronales sensoriales, motores y de escape (*Giant Fiber*).
+* **Guía Completa de Uso e Integración:** Consulta [**`experiments/fly-brain/README.md`**](experiments/fly-brain/README.md) para detalles matemáticos, esquemas JSON y ejemplos de código.
+
+---
+
 ## 📚 Documentación Técnica Detallada
 
 * 🧠 [**Arquitectura de IA y Físicas CCD**](docs/ARCHITECTURE.md)
+* 🪰 [**Experimento Drosophila Fly-Brain AI**](experiments/fly-brain/README.md)
 * 🎮 [**Especificación de Controles y Gamepad API**](docs/CONTROLS.md)
 * 🚀 [**Guía de Despliegue en Producción**](docs/DEPLOYMENT.md)
 * 📋 [**Certificado Técnico y Benchmark de Calidad**](docs/VALIDATION.md)
+
 

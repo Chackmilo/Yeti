@@ -14,6 +14,7 @@ Esta guía detalla la configuración de entradas, normalización y mecánicas de
 | **⚡ Turbo Boost** | **`Espacio`** | `Shift` (izq./der.) / `F` | Aceleración extrema a 35 m/s. <br>• **En Clásico:** Ilimitado. En ambos modos, mientras el turbo está activo, la autoridad de giro baja al 76% (`turnAuthority = 0.76`).<br>• **En Moderno:** Consume estamina (6 s de uso, 8 s recarga). |
 | **⏸️ Pausa / Reanudar** | **`Escape`** | — | Pausa exclusiva: congela la simulación y despliega el menú sin interferir con el turbo. |
 | **🤖 Alternar Piloto IA** | `T` | `Tab` | *(Edición PRO)* Conmuta entre `HUMANO (OFF)`, `AUTOPILOT` y `CO_PILOT`. |
+| **🪰 Rival Mosca (Drosophila SNN)** | **`B`** | — | *(Edición PRO)* Invoca o retira en vivo al competidor biológico impulsado por red neuronal *Leaky Integrate-and-Fire*. |
 | **Reiniciar Pista** | `R` | — | Reinicia la bajada con una nueva semilla procedural. |
 | **Iniciar desde Menú** | `Enter` | — | Arranca el descenso desde el menú principal. |
 | **Herramientas de Diagnóstico** | `F2` | `` ` `` (backtick) | Alterna gizmos 3D (rayos sensoriales, retícula de intercepción y llamadas de dibujo). Oculto de la interfaz pública para mayor inmersión. |

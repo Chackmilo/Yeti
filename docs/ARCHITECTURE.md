@@ -3,7 +3,7 @@
 [![Three.js](https://img.shields.io/badge/Three.js-r170-black?logo=three.js)](https://threejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite)](https://vitejs.dev/)
 [![Node](https://img.shields.io/badge/Node.js-20%2B%20%7C%2022%2B-339933?logo=node.js)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/Tests-33%2F33%20Passing-brightgreen)](../games/3d-pro/tests)
+[![Tests](https://img.shields.io/badge/Tests-37%2F37%20Passing-brightgreen)](../games/3d-pro/tests)
 [![AI Engine](https://img.shields.io/badge/AI%20Engine-Behavior%20Trees%20%2B%20MPC%20%2B%20DDA-cyan)](../games/3d-pro/src/ai)
 [![Gamepad](https://img.shields.io/badge/Gamepad-Xbox%20%2F%20PlayStation-blue)](CONTROLS.md)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](../LICENSE)
@@ -97,6 +97,19 @@ Motor jerárquico *zero-allocation* optimizado para ejecución a 60 Hz con sopor
 - Activable mediante <kbd>F2</kbd> o acento grave (<kbd>`</kbd>).
 - Renderiza en 3D los conos de visión del Yeti, bigotes sensoriales (verde = despejado, rojo = obstáculo), retícula de intercepción en la nieve y trayectoria planificada del esquiador.
 
+### F. Agente Rival Neurobiológico Drosophila LIF (`games/3d-pro/src/ai/FlyBrainCompetitorAI.js` & `experiments/fly-brain/`)
+- **Simulación Neurobiológica Realista:** Basada en el conectoma de la mosca de la fruta (*FlyWire* / *Eon Systems fly-brain*). Modela grupos neuronales específicos con dinámica *Leaky Integrate-and-Fire* (LIF):
+  - **LPTC:** Detección de flujo óptico lateral y aproximación de obstáculos a izquierda y derecha.
+  - **LPLC2 / Looming:** Despolarización masiva ante peligro frontal crítico inminente.
+  - **Central Complex:** Orientación y rumbo hacia las puertas de slalom.
+  - **DNa01 / DNa02:** Neuronas motoras de dirección contralateral (`M_R - M_L`).
+  - **Giant Fiber (GF):** Disparo de escape de emergencia (salto acrobático 360° o turbo).
+- **Arquitectura de Doble Motor (Dual-Engine):**
+  - **Servidor Python (PyTorch / WebSocket):** Micro-servicio en `ws://127.0.0.1:8765` para simulación biológica avanzada en Python.
+  - **Emulador Local SNN en JavaScript:** Motor LIF embebido a 60 Hz ejecutándose de forma nativa en el navegador con búferes tipados (`Float32Array`) sin dependencias externas.
+- **Entidad Física 3D ([`FlyCompetitor.js`](../games/3d-pro/src/entities/FlyCompetitor.js)):** Modelo 3D con cuerpo de quitina, ojos facetados esmeralda, antenas, esquís y un **halo sináptico bioluminiscente** que modula su intensidad en tiempo real según la tasa de disparo de la red neuronal.
+- **Activación en Partida:** Conmutable en cualquier instante con la tecla <kbd>B</kbd> o desde el menú de inicio (`🪰 Rival Drosophila`). Telemetría de picos integrada en el panel <kbd>F2</kbd>.
+
 ---
 
 ## 🌲 4. Generación Procedural & Corredor Seguro Verificado
@@ -153,8 +166,9 @@ games/3d-pro/
 ├── package.json                 # Manifiesto y scripts npm (v4.5.0-ai)
 ├── scripts/
 │   └── postbuild.js             # Inyección CSS inline y cargador universal
-├── tests/                       # Suite de 33 tests unitarios (Node.js nativo)
+├── tests/                       # Suite de 37 tests unitarios (Node.js nativo)
 │   ├── ai.test.js               # Tests de Behavior Trees, Lead Pursuit y DDA (13 tests)
+│   ├── flybrain.test.js         # Tests de dinamica neuronal LIF Drosophila (4 tests)
 │   ├── coherence.test.js        # Tests de coherencia de configuración, safeHalf 4.2 y corredor (3 tests)
 │   ├── physics.test.js          # Tests de CCD, corredor seguro 10km, instanciación y Storage (6 tests)
 │   ├── ui.test.js               # Tests de alerta de proximidad, HUD y menú accesible (8 tests)
@@ -167,6 +181,7 @@ games/3d-pro/
     │   ├── BehaviorTree.js      # Framework jerárquico BT
     │   ├── YetiAI.js            # Tácticas del Yeti y bigotes
     │   ├── SkierAgentAI.js      # Autopilot MPC y Co-Pilot
+    │   ├── FlyBrainCompetitorAI.js # Controlador Rival SNN Drosophila (Dual-Engine)
     │   ├── DDAEngine.js         # Ajuste dinámico de dificultad
     │   ├── AITelemetry.js       # Registro de métricas XAI
     │   └── AIDebugRenderer.js   # Gizmos 3D de depuración
@@ -178,6 +193,7 @@ games/3d-pro/
     ├── entities/                # Actores 3D
     │   ├── Player.js            # Cinemática del esquiador, turbo y saltos
     │   ├── Yeti.js              # Rig jerárquico 3D y cinemática del Yeti
+    │   ├── FlyCompetitor.js     # Rival insectoide con halo sináptico 3D
     │   └── ProceduralModels.js  # Fábrica geométrica procedural
     ├── physics/                 # Motor físico
     │   └── CollisionSystem.js   # Continuous Collision Detection (Swept CCD)
