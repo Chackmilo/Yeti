@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { CONFIG as C } from '../src/config.js';
 import { HUD, yetiAlertLevel } from '../src/ui/HUD.js';
-import { MenuManager, selectRadio } from '../src/ui/MenuManager.js';
+import { MenuManager, selectRadio, SUITE_ASSETS } from '../src/ui/MenuManager.js';
 
 // DOM mínimo para instanciar HUD/MenuManager en Node (sin navegador)
 function fakeElement() {
@@ -115,4 +115,13 @@ test('Resultados: el récord se etiqueta en español (CLÁSICO / MODERNO)', () =
   menu.mode = 'modern';
   menu.results(500, 600, false);
   assert.match(elements.get('results').innerHTML, /Récord Personal \(MODERNO\)/);
+});
+
+test('Menú: avatar desde assets/ de la suite y sin prólogo empaquetado en 3D PRO', () => {
+  const elements = fakeDom();
+  globalThis.document.querySelectorAll = () => [];
+  new MenuManager({ record: () => 0 }, {});
+  assert.equal(SUITE_ASSETS, '../../../assets/');
+  assert.equal(elements.get('menuAvatar').src, '../../../assets/otter_3d_coffee.jpg');
+  assert.equal(elements.has('prologueModal'), false);
 });

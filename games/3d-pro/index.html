@@ -14,7 +14,7 @@
 <section id="menu" class="overlay"><div class="card">
 <div class="eyebrow">PROCEDURAL ALPINE ADVENTURE · NUTRIA ALPINO</div><h1>OTTER<br><span>ESCAPE PRO.</span></h1>
 <div style="display:flex;align-items:center;gap:14px;margin:12px 0 14px;padding:10px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(140,233,255,0.25);border-radius:16px;">
-  <img src="/assets/otter_3d_coffee.jpg" onerror="this.src='../../assets/otter_3d_coffee.jpg'" alt="Nutria Alpina 3D" style="width:54px;height:54px;border-radius:12px;object-fit:cover;border:2px solid #5fe6ff;box-shadow:0 4px 12px rgba(0,0,0,0.4);flex-shrink:0;">
+  <img id="menuAvatar" alt="Nutria Alpina 3D" width="54" height="54" style="width:54px;height:54px;border-radius:12px;object-fit:cover;border:2px solid #5fe6ff;box-shadow:0 4px 12px rgba(0,0,0,0.4);flex-shrink:0;">
   <div style="text-align:left;">
     <div style="font-size:12px;font-weight:800;letter-spacing:1px;color:#5fe6ff;text-transform:uppercase;">Nutria Alpina PBR</div>
     <div style="font-size:11px;color:#d0e6f5;line-height:1.4;">Suéter mostaza & café caliente antes de deslizarse a 120 km/h</div>
@@ -47,25 +47,10 @@
   <button id="audioMenu" aria-label="Sonido">Sonido: activado</button>
   <button id="aiMenu" aria-label="Piloto IA">Piloto IA: OFF</button>
 </div>
-<button id="btnPrologue3D" type="button" style="width:100%;margin-top:10px;background:rgba(2,132,199,0.22);border:1px solid rgba(95,230,255,0.45);color:#e0f2fe;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:12px;">☕ Ver Prólogo en el Lago (Cinemática)</button>
+<a id="btnPrologue3D" href="../../index.html#prologo" onclick="if(location.pathname.includes('/dist/'))this.href='../../../index.html#prologo'" style="margin-top:10px;background:rgba(2,132,199,0.22);border:1px solid rgba(95,230,255,0.45);color:#e0f2fe;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:12px;text-decoration:none;">☕ Ver prólogo en el lago (portal)</a>
 <a href="../../index.html" onclick="if(location.pathname.includes('/dist/'))this.href='../../../index.html'" style="display:block;text-align:center;color:#8ce9ff;text-decoration:none;font-size:12px;margin-top:12px;border:1px solid #ffffff24;padding:9px;border-radius:10px;background:#ffffff08">🏠 Volver al Portal de Juegos</a>
 <div class="controls">🎮 Mando: Stick para girar · Gatillos para Freno y Turbo · Botón X: Piloto IA · Start: Pausa<br>← → / A D: girar · ↑ / W: freno en cuña · ↓ / S: descenso · Espacio / Shift / F: turbo · T / Tab: Piloto IA<br>🚩 Cruza slalom para combo y turbo · 🏂 Salta en rampas para acrobacias 360° (+250 PTS)<br>Escape: pausa · R: reiniciar · F2 / `: herramientas de diagnóstico · Móvil: cuatro botones táctiles.</div>
 </div></section>
-<section id="prologueModal" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Cinemática de inicio" style="z-index:60;">
-  <div class="card" style="max-width:640px;text-align:center;">
-    <div class="eyebrow">PRÓLOGO ALPINO · CAFÉ EN EL LAGO</div>
-    <h2>El Café Matutino</h2>
-    <p class="muted">Momentos de calma frente a las aguas gélidas antes de deslizarse por la nieve virgen.</p>
-    <div style="width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#030b14;margin:14px 0;border:1px solid rgba(95,230,255,0.3);box-shadow:0 12px 30px rgba(0,0,0,0.6);">
-      <video id="prologueVideo3D" playsinline controls loop style="width:100%;height:100%;object-fit:cover;">
-        <source src="/assets/intro_lake.mp4" type="video/mp4">
-        <source src="../../assets/intro_lake.mp4" type="video/mp4">
-        <source src="../../Otter_pouring_coffee_by_lake_20261011143032.mp4" type="video/mp4">
-      </video>
-    </div>
-    <button class="primary" id="closePrologue3D" type="button">VOLVER AL MENÚ DE INICIO</button>
-  </div>
-</section>
 <section id="pause" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Juego pausado">
   <div class="card">
     <div class="eyebrow">RESPIRA EL AIRE ALPINO</div>

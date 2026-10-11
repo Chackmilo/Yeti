@@ -2,6 +2,9 @@
  * @file MenuManager.js
  * @description Manages UI views, difficulty modes, settings, audio toggles, and AI Autopilot controls.
  */
+/** Carpeta assets/ compartida de la suite: Vite la sirve en dev (publicDir); en dist se resuelve desde games/3d-pro/dist/. */
+export const SUITE_ASSETS = import.meta.env?.DEV ? '/' : '../../../assets/';
+
 /** Marca un botón de un radiogroup como seleccionado (clase visual + aria-checked). */
 export function selectRadio(buttons, selected) {
   for (const o of buttons) {
@@ -73,25 +76,8 @@ export class MenuManager {
       this.quality.onchange = () => handlers.quality(this.quality.value);
     }
 
-    const btnPrologue = document.getElementById('btnPrologue3D');
-    const closePrologue = document.getElementById('closePrologue3D');
-    const modalPrologue = document.getElementById('prologueModal');
-    const videoPrologue = document.getElementById('prologueVideo3D');
-    if (btnPrologue && modalPrologue) {
-      btnPrologue.onclick = () => {
-        modalPrologue.classList.remove('hidden');
-        if (videoPrologue) {
-          videoPrologue.currentTime = 0;
-          videoPrologue.play().catch(() => {});
-        }
-      };
-    }
-    if (closePrologue && modalPrologue) {
-      closePrologue.onclick = () => {
-        modalPrologue.classList.add('hidden');
-        if (videoPrologue) videoPrologue.pause();
-      };
-    }
+    const avatar = document.getElementById('menuAvatar');
+    if (avatar) avatar.src = SUITE_ASSETS + 'otter_3d_coffee.jpg';
 
     this.sync();
   }

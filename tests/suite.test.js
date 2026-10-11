@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { resolve, dirname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
@@ -15,23 +15,29 @@ const EDITIONS = ['games/2d-retro/index.html', 'games/3d-standalone/index.html',
 const REF = /\b(?:src|href|poster|data-full)="([^"]*)"/g;
 const EXTERNAL = /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i;
 const GENERATED = /(?:^|\/)games\/3d-pro\/dist\//;
+// Oráculo: archivos versionados o versionables (incluye nuevos sin añadir; excluye lo ignorado, como art/ y dist/)
+const SHIPPABLE = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard'], { cwd: ROOT, encoding: 'utf8' })
+  .split('\n').filter(Boolean);
+const isShippable = rel => SHIPPABLE.includes(rel) || SHIPPABLE.some(f => f.startsWith(rel.endsWith('/') ? rel : rel + '/'));
 
-test('Suite: las páginas solo enlazan archivos locales relativos que existen', { todo: 'Tarea 2' }, () => {
+test('Suite: las páginas solo enlazan archivos locales relativos que se despliegan', () => {
   const problems = [];
   for (const page of PAGES) {
+    let refs = 0;
     for (const [, raw] of read(page).matchAll(REF)) {
+      refs++;
       const ref = raw.split(/[?#]/)[0];
       if (!ref || EXTERNAL.test(raw) || GENERATED.test(ref)) continue;
-      if (page === 'games/3d-pro/index.html' && ref.startsWith('/src/')) {
-        if (!existsSync(resolve(ROOT, 'games/3d-pro', '.' + ref))) problems.push(`${page}: no existe ${raw}`);
-        continue;
-      }
-      if (ref.startsWith('/')) {
+      const viteSource = page === 'games/3d-pro/index.html' && ref.startsWith('/src/');
+      if (ref.startsWith('/') && !viteSource) {
         problems.push(`${page}: ruta absoluta ${raw} (rompe file:// y subrutas)`);
         continue;
       }
-      if (!existsSync(resolve(ROOT, dirname(page), ref))) problems.push(`${page}: no existe ${raw}`);
+      const target = viteSource ? resolve(ROOT, 'games/3d-pro', '.' + ref) : resolve(ROOT, dirname(page), ref);
+      const rel = relative(ROOT, target).split(sep).join('/');
+      if (!isShippable(rel)) problems.push(`${page}: no existe o no se despliega ${raw}`);
     }
+    assert.ok(refs > 0, `${page}: no se encontró ninguna referencia (¿cambió el formato de los atributos?)`);
   }
   assert.deepEqual(problems, []);
 });
@@ -64,7 +70,7 @@ test('Suite: la alerta de proximidad usa una capa visible en las tres ediciones'
   }
 });
 
-test('Suite: cada medio existe una sola vez y los originales quedan fuera del despliegue', { todo: 'Tarea 2' }, () => {
+test('Suite: cada medio existe una sola vez y los originales quedan fuera del despliegue', () => {
   assert.equal(existsSync(resolve(ROOT, 'games/3d-pro/public')), false, 'games/3d-pro/public duplica assets/');
   assert.deepEqual(readdirSync(ROOT).filter(f => /\.(?:mp4|webm|jpe?g)$/i.test(f)), [],
     'originales sueltos en la raíz: muévelos a art/');
