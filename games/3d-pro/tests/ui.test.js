@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { CONFIG as C } from '../src/config.js';
 import { HUD, yetiAlertLevel } from '../src/ui/HUD.js';
-import { selectRadio } from '../src/ui/MenuManager.js';
+import { MenuManager, selectRadio } from '../src/ui/MenuManager.js';
 
 // DOM mínimo para instanciar HUD/MenuManager en Node (sin navegador)
 function fakeElement() {
@@ -104,4 +104,15 @@ test('HUD: con el Yeti burlado se oculta la unidad "m" y vuelve con la cuenta at
   updateHud(hud, 'playing', { status: 'sleep', d: 0, next: 700 });
   assert.equal(elements.get('yetiLabel').textContent, 'EL YETI APARECE EN');
   assert.equal(elements.get('yetiUnit').hidden, false);
+});
+
+test('Resultados: el récord se etiqueta en español (CLÁSICO / MODERNO)', () => {
+  const elements = fakeDom();
+  globalThis.document.querySelectorAll = () => [];
+  const menu = new MenuManager({ record: () => 0 }, {});
+  menu.results(500, 600, false);
+  assert.match(elements.get('results').innerHTML, /Récord Personal \(CLÁSICO\)/);
+  menu.mode = 'modern';
+  menu.results(500, 600, false);
+  assert.match(elements.get('results').innerHTML, /Récord Personal \(MODERNO\)/);
 });

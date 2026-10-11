@@ -34,3 +34,14 @@ test('Nutria: la bufanda aletea más rápido con turbo y su fase es continua', (
   }
   assert.ok(fast.scarfPhase > calm.scarfPhase * 1.5);
 });
+
+test('Slalom: lastGatePoints refleja los puntos sumados en cada modo', () => {
+  for (const [mode, points] of [['classic', 150], ['modern', 100]]) {
+    const player = new Player(createModelFactory(), SCENE);
+    player.reset(mode);
+    const world = { blocks: [{ flags: [{ active: true, cleared: false, d: 0.1, x: 0 }], ramps: [] }] };
+    player.step(1 / 60, { held: () => false }, NO_HIT, world, null);
+    assert.equal(player.lastGatePoints, points);
+    assert.equal(player.score, points);
+  }
+});

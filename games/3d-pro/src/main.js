@@ -278,7 +278,7 @@ class SnowEscapeGame {
     }
     if (this.player.newGate) {
       this.audio.gateChime();
-      this.hud.announce('¡PUERTA SLALOM! +' + (100 * this.player.slalomCombo) + ' PTS · COMBO x' + this.player.slalomCombo, 1.2);
+      this.hud.announce('¡PUERTA SLALOM! +' + this.player.lastGatePoints + ' PTS · COMBO x' + this.player.slalomCombo, 1.2);
     }
     if (this.player.newJump) {
       this.audio.tone(440, 0.25, 'sine', 0.25, 0, 750);

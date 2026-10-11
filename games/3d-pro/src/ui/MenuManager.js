@@ -132,7 +132,7 @@ export class MenuManager {
           </div>
           <div style="grid-column:span 2;border-top:1px solid rgba(255,255,255,0.1);padding-top:10px;display:flex;justify-content:space-between;align-items:center;">
             <div>
-              <div style="color:#ffeaa1;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Récord Personal (${this.mode.toUpperCase()})</div>
+              <div style="color:#ffeaa1;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Récord Personal (${this.mode === 'classic' ? 'CLÁSICO' : 'MODERNO'})</div>
               <div style="font-size:20px;font-weight:900;color:#ffeaa1;font-variant-numeric:tabular-nums;">${this.format.format(record)} m</div>
             </div>
             ${isNew ? '<span style="background:#f59e0b;color:#000;font-weight:900;font-size:11px;padding:3px 8px;border-radius:6px;letter-spacing:1px;">¡NUEVO RÉCORD!</span>' : ''}

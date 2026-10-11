@@ -46,6 +46,7 @@ export class Player {
     this.slalomCombo = 0;
     this.score = 0;
     this.gatesCleared = 0;
+    this.lastGatePoints = 0;
     this.stuntsLanded = 0;
     this.newGate = false;
     this.newJump = false;
@@ -163,12 +164,13 @@ export class Player {
                 this.gatesCleared++;
                 this.slalomCombo++;
                 if (this.mode === 'classic') {
-                  this.score += 150 * this.slalomCombo;
+                  this.lastGatePoints = 150 * this.slalomCombo;
                   this.speed = Math.min(C.turboSpeed + 3, this.speed + 3.0);
                 } else {
-                  this.score += 100 * this.slalomCombo;
+                  this.lastGatePoints = 100 * this.slalomCombo;
                   this.energy = clamp(this.energy + 0.25, 0, 1);
                 }
+                this.score += this.lastGatePoints;
                 this.newGate = true;
                 if (dda) dda.recordEvent('gate_clear');
               } else {
