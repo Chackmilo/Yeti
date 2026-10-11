@@ -32,6 +32,7 @@ export class Player {
     this.oldX = 0;
     this.oldD = 0;
     this.clock = 0;
+    this.scarfPhase = 0;
     this.newCrash = false;
 
     // Acrobatics & Jumps
@@ -115,6 +116,9 @@ export class Player {
     this.brake = damp(this.brake, braking ? 1 : 0, 4, dt);
     this.turn = damp(this.turn, turn, 6, dt);
     this.turbo = input.held(ACTION.TURBO) && this.brake < 0.2 && !this.crash && (this.mode === 'classic' || this.energy > 0.02);
+
+    // Cosmetic only: continuous scarf flutter phase, faster under turbo
+    this.scarfPhase += dt * (this.turbo ? 20 : 12);
 
     const energyRegenMult = dda ? dda.energyRegenMod : 1.0;
     this.energy = this.mode === 'modern' ? clamp(this.energy + (this.turbo ? -1 / 6 : (1 / 8) * energyRegenMult) * dt, 0, 1) : 1;
@@ -222,7 +226,7 @@ export class Player {
       m.tail.rotation.y = Math.sin(this.clock * 8) * 0.12 + this.turn * 0.45;
     }
     if (m.scarf) {
-      m.scarf.rotation.x = Math.sin(this.clock * 12) * 0.1 * (this.turbo ? 1.8 : 1.0);
+      m.scarf.rotation.x = Math.sin(this.scarfPhase) * 0.1 * (this.turbo ? 1.8 : 1.0);
     }
 
     m.body.position.set(0, 0, 0);
