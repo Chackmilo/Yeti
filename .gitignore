@@ -24,3 +24,8 @@ Thumbs.db
 # Internal tool caches
 .playwright-mcp/
 .gemini/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
