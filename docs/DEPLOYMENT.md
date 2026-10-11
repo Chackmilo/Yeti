@@ -1,4 +1,4 @@
-# 🚀 Guía de Despliegue en Servidores y VPS — Snow Escape Suite
+# 🚀 Guía de Despliegue en Servidores y VPS — Otter Escape: Yeti Chase Suite
 
 Esta guía detalla las diferentes opciones para desplegar la suite en producción, desde contenedores Docker ultraligeros hasta plataformas PaaS y servidores estáticos tradicionales.
 

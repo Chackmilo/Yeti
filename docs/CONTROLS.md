@@ -1,4 +1,4 @@
-# 🎮 Guía Universal de Controles & Dinámica Jugable — Snow Escape Suite
+# 🎮 Guía Universal de Controles & Dinámica Jugable — Otter Escape: Yeti Chase Suite
 
 Esta guía detalla la configuración de entradas, normalización y mecánicas de control para las tres ediciones de la suite (**2D Retro Canvas**, **3D Standalone** y **3D PRO Modular**).
 

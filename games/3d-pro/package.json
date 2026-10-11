@@ -1,7 +1,7 @@
 {
-  "name": "snow-escape",
+  "name": "otter-escape",
   "version": "4.5.0-ai",
-  "description": "Procedural 3D Alpine Skiing Arcade with Behavior Tree Yeti AI, Autonomous Skier Autopilot, DDA Flow Engine, and Web Audio HRTF",
+  "description": "Otter Escape: Yeti Chase — Procedural 3D Alpine Skiing Arcade with Behavior Tree Yeti AI, Autonomous Skier Autopilot, DDA Flow Engine, and Web Audio HRTF",
   "private": true,
   "type": "module",
   "scripts": {

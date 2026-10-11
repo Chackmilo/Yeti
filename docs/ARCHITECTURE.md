@@ -1,4 +1,4 @@
-# ⛷️ Snow Escape 3D PRO — Especificación de Arquitectura de Software & AI Suite
+# ⛷️ Otter Escape PRO (Yeti Chase) — Especificación de Arquitectura de Software & AI Suite
 
 [![Three.js](https://img.shields.io/badge/Three.js-r170-black?logo=three.js)](https://threejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite)](https://vitejs.dev/)

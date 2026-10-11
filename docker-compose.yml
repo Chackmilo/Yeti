@@ -1,9 +1,9 @@
 services:
-  snow-escape:
+  otter-escape:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: snow-escape-suite
+    container_name: otter-escape-suite
     restart: unless-stopped
     ports:
       - "${PORT:-8088}:80"

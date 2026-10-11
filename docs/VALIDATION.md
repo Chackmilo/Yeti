@@ -1,5 +1,5 @@
-================================================================================
-SNOW ESCAPE 3D PRO — CERTIFICADO DE VALIDACIÓN TÉCNICA Y DE CALIDAD
+=================================================================================
+OTTER ESCAPE PRO (YETI CHASE) — CERTIFICADO DE VALIDACIÓN TÉCNICA Y DE CALIDAD
 ================================================================================
 Fecha de Certificación: 2026-10-11
 Entorno: Node.js 20+ / 22+ / 24+ | Vite 6 | Three.js r170 | Docker 29+ | WebGL 2.0 | Web Audio API
@@ -81,5 +81,5 @@ Resultado: 26 módulos transformados y empaquetados en ~1.6 segundos
 | **Lanzador Windows** | Ejecución mediante `jugar.bat` | Menú interactivo para lanzar Portal, servidor local Vite o versiones standalone en 1 clic. | APROBADO |
 
 ================================================================================
-FIN DEL CERTIFICADO — SISTEMA DE CALIDAD SNOW ESCAPE SUITE
+FIN DEL CERTIFICADO — SISTEMA DE CALIDAD OTTER ESCAPE SUITE
 ================================================================================

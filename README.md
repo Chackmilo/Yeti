@@ -1,4 +1,4 @@
-# 🦦 Snow Escape — Suite Completa de Videojuegos Alpinos
+# 🦦 Otter Escape: Yeti Chase — Suite Completa de Videojuegos Alpinos
 
 [![CI Pipeline](https://img.shields.io/badge/CI-GitHub%20Actions-brightgreen?logo=github-actions)](.github/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/Tests-33%2F33%20Passing-brightgreen?logo=node.js)](games/3d-pro/tests)
@@ -11,9 +11,9 @@
 Suite de videojuegos arcade de esquí infinito inspirada en la mística clásica de *SkiFree*, protagonizada por una intrépida **Nutria Esquiadora** equipada con casco dorado, bufanda ondeante al viento, esquís dobles y cola dinámica que se balancea en cada curva, perseguida por el legendario **Yeti de las cumbres**. La suite está modernizada con físicas avanzadas a 60 Hz (objetivo de diseño), audio espacial 3D HRTF y mecánicas acrobáticas. Diseñada con una arquitectura modular de software desacoplada, la suite integra tres ediciones independientes organizadas en un monorepo profesional y servidas a través de un **Portal Web Unificado**:
 
 1. **🏔️ Portal Hub Alpinos ([`index.html`](index.html)):** Centro de bienvenida con selector de juegos, comparador de motores, nieve dinámica en Canvas y lectura de récords locales.
-2. **👾 Snow Escape 2D Retro ([`games/2d-retro/index.html`](games/2d-retro/index.html)):** Arcade clásico 2D en Canvas con slalom, rampas de salto 360°, IA predictiva, radar visual de amenaza, colisiones AABB y modos Clásico/Moderno.
-3. **🎿 Snow Escape 3D Standalone ([`games/3d-standalone/index.html`](games/3d-standalone/index.html)):** Experiencia 3D completa en un único archivo autosuficiente (~51 KB), Three.js por CDN, audio 3D HRTF, física *Swept Circle* y tarjeta de resultados.
-4. **⚡ Snow Escape 3D PRO & AI Engine ([`games/3d-pro`](games/3d-pro/)):** Suite modular de alto rendimiento con **Arquitectura de IA Avanzada (Behavior Trees + Piloto Automático Autónomo MPC + Motor DDA de Estado de Flujo + Telemetría XAI + Gizmos 3D)**, Vite 6, Three.js r170, Continuous Collision Detection (CCD) a 60 Hz, Gamepad API y suite de 33 tests automatizados.
+2. **👾 Otter Escape 2D Retro ([`games/2d-retro/index.html`](games/2d-retro/index.html)):** Arcade clásico 2D en Canvas con slalom, rampas de salto 360°, IA predictiva, radar visual de amenaza, colisiones AABB y modos Clásico/Moderno.
+3. **🎿 Otter Escape 3D Standalone ([`games/3d-standalone/index.html`](games/3d-standalone/index.html)):** Experiencia 3D completa en un único archivo autosuficiente (~51 KB), Three.js por CDN, audio 3D HRTF, física *Swept Circle* y tarjeta de resultados.
+4. **⚡ Otter Escape PRO & AI Engine ([`games/3d-pro`](games/3d-pro/)):** Suite modular de alto rendimiento con **Arquitectura de IA Avanzada (Behavior Trees + Piloto Automático Autónomo MPC + Motor DDA de Estado de Flujo + Telemetría XAI + Gizmos 3D)**, Vite 6, Three.js r170, Continuous Collision Detection (CCD) a 60 Hz, Gamepad API y suite de 33 tests automatizados.
 
 ---
 
