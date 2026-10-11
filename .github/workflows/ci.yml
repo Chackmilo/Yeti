@@ -28,9 +28,9 @@ jobs:
       - name: Install Dependencies
         run: |
           cd games/3d-pro
-          npm ci
+          npm ci --workspaces=false
 
-      - name: Run Test Suite (19 Unit Tests)
+      - name: Run Test Suite (3D PRO + guardias de la suite)
         run: npm test
 
       - name: Build Production Bundle
