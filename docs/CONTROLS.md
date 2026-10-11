@@ -65,7 +65,7 @@ La suite ofrece dos filosofías de juego bien diferenciadas para ajustarse al es
 ## 🦦 Protagonista: La Nutria Esquiadora
 
 En las tres ediciones, el esquiador tradicional se transforma en una carismática **Nutria Esquiadora**:
-* **Casco y Gafas:** Casco dorado de competición (`#f5b936`) y gafas de ventisca aerodinámicas.
+* **Casco y Gafas:** Casco dorado de competición (`#f5b936`), montura oscura (`#243346`) y gafas de ventisca aerodinámicas con lente de brillo cian alpino (`#bdefff`).
 * **Bufanda al Viento:** Bufanda naranja/roja (`#ff684a`) cuyo extremo ondea rítmicamente con el viento y multiplica su aleteo al activar el turbo.
 * **Esquís Dobles:** Dos esquís color turquesa (`#16b8c4`) con fijaciones reforzadas y puntas curvadas. Se orientan en cuña `V` al frenar.
 * **Cola Dinámica Reactiva:** Una cola visible que no solo se mece al ritmo natural del descenso, sino que **se balancea activamente en sentido contrario y se inclina al tomar curvas pronunciadas**, aportando una sensación orgánica y viva.

@@ -52,14 +52,16 @@ Duración de ejecución: ~1.8 segundos
   ✔ Nutria: la bufanda aletea más rápido con turbo y su fase es continua (4.7ms)
   ✔ Slalom: lastGatePoints refleja los puntos sumados en cada modo (4.5ms)
 
-2. BENCHMARK DE COMPILACIÓN DE PRODUCCIÓN (Vite 6)
+2. BENCHMARK DE COMPILACIÓN DE PRODUCCIÓN (Vite 6 + esbuild IIFE + Postbuild)
 --------------------------------------------------------------------------------
 Comando: npm run build
-Resultado: 26 módulos transformados y empaquetados en ~1.7 segundos
-  - dist/index.html:                  6.63 kB (gzip: 2.79 kB)
+Resultado: 26 módulos transformados y empaquetados en ~1.6 segundos
+  - dist/index.html:                  6.63 kB (gzip: 2.79 kB, con CSS inline inyectado)
   - dist/assets/index.css:            6.32 kB (gzip: 2.16 kB)
-  - dist/assets/index.js (Juego+IA): 71.67 kB (gzip: 23.62 kB)
-  - dist/assets/three.js (Motor):   480.46 kB (gzip: 121.10 kB)
+  - dist/assets/index.js (Juego+IA): 71.67 kB (gzip: 23.62 kB, ES Module)
+  - dist/assets/three.js (Motor):   480.46 kB (gzip: 121.10 kB, ES Module)
+  - dist/assets/app.iife.js:        552.70 kB (Bundle autónomo IIFE para file:///)
+  - scripts/postbuild.js:           Inyección automática de estilos y selector de runtime dinámico
 
 3. CRITERIOS DE ACEPTACIÓN PROFESIONALES COMPROBADOS
 --------------------------------------------------------------------------------
@@ -73,7 +75,10 @@ Resultado: 26 módulos transformados y empaquetados en ~1.7 segundos
 | **Físicas CCD** | Desplazamientos a 35 m/s (126 km/h) | Detección continua por barrido de segmento; cero tunneling a través de troncos. | APROBADO |
 | **Persistencia** | Deshabilitar o corromper localStorage | SafeStorage conmuta a memoria sin interrumpir la partida. | APROBADO |
 | **Interfaz** | Responsive, orientación y lectores de pantalla | Menús ARIA semánticos, separadores claros y Scorecard Grid al terminar. | APROBADO |
-| **Accesibilidad** | Alerta perimetral a < 65 m | Capa visual sobre canvas, pulso lento (< 1 Hz), respeta reduced-motion. | APROBADO |
+| **Accesibilidad** | Alerta perimetral a < 65 m | Capa visual sobre canvas (#yetiAlert), pulso lento (< 1 Hz), respeta reduced-motion. | APROBADO |
+| **Coherencia Nutria** | Gafas (#bdefff), bufanda (1.8x) y cola | Parámetros visuales certificados y sincronizados con suite de pruebas. | APROBADO |
+| **Compatibilidad Universal** | Apertura directa como archivo local (`file:///`) | CSS inline y bundle IIFE sin bloqueo de CORS por Origin null en navegadores modernos. | APROBADO |
+| **Lanzador Windows** | Ejecución mediante `jugar.bat` | Menú interactivo para lanzar Portal, servidor local Vite o versiones standalone en 1 clic. | APROBADO |
 
 ================================================================================
 FIN DEL CERTIFICADO — SISTEMA DE CALIDAD SNOW ESCAPE SUITE

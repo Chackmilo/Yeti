@@ -129,13 +129,30 @@ El sistema de terreno infinito en [`WorldGenerator.js`](../games/3d-pro/src/worl
 
 ---
 
-## 📁 6. Mapa de Módulos del Proyecto
+## 📦 6. Pipeline de Empaquetado & Compatibilidad Universal (`file:///` y `http://`)
+
+Para garantizar que el juego funcione sin fricción tanto en servidores web tradicionales como al abrir directamente el archivo HTML en Windows mediante doble clic (`file:///`), la arquitectura implementa una estrategia de empaquetado dual y post-procesado:
+
+1. **Problema de Protocolo `file:///` en Navegadores Modernos:**
+   - Los navegadores basados en Chromium tratan el protocolo `file:` con origen nulo (`Origin: null`), bloqueando por CORS las hojas de estilo externas (`<link rel="stylesheet" crossorigin>`) y los módulos ES6 nativos (`<script type="module">`).
+2. **Solución Implementada:**
+   - **Vite 6 (ESM):** Genera el bundle de producción moderno con code-splitting para servidores HTTP.
+   - **esbuild (IIFE Standalone):** Genera un bundle autocontenido (`app.iife.js`, ~552 KB) que no depende de `type="module"`.
+   - **Script Postbuild ([`scripts/postbuild.js`](../games/3d-pro/scripts/postbuild.js)):**
+     - Inyecta el CSS compilado como bloque `<style>` inline en el `<head>`, garantizando la aplicación inmediata de la estética alpina sin peticiones de red.
+     - Inserta un cargador universal que detecta `location.protocol === 'file:'` y carga `app.iife.js`, o conmuta al bundle ESM en entornos HTTP.
+
+---
+
+## 📁 7. Mapa de Módulos del Proyecto
 
 ```
 games/3d-pro/
 ├── index.html                   # Shell HTML accesible y semántico
 ├── vite.config.js               # Empaquetado y code-splitting
 ├── package.json                 # Manifiesto y scripts npm (v4.5.0-ai)
+├── scripts/
+│   └── postbuild.js             # Inyección CSS inline y cargador universal
 ├── tests/                       # Suite de 33 tests unitarios (Node.js nativo)
 │   ├── ai.test.js               # Tests de Behavior Trees, Lead Pursuit y DDA (13 tests)
 │   ├── coherence.test.js        # Tests de coherencia de configuración, safeHalf 4.2 y corredor (3 tests)

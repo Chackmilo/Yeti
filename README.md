@@ -48,8 +48,10 @@ Yeti/
 │       │   ├── ui.test.js           # Pruebas de alerta de proximidad, HUD y menú accesible (8 tests)
 │       │   └── entities.test.js     # Pruebas de nutria (lente, bufanda) y puntos de slalom (3 tests)
 │       ├── src/                     # Código fuente desacoplado en 22 módulos ES
-│       └── dist/                    # Bundle de producción optimizado
+│       ├── scripts/                 # Postbuild: inyección CSS inline y bundle IIFE universal
+│       └── dist/                    # Bundle de producción optimizado (ESM + IIFE fallback)
 ├── index.html                       # 🏔️ Portal Web Hub Unificado
+├── jugar.bat                        # 🎮 Lanzador interactivo 1-clic para Windows (Hub / Local Vite / Standalone)
 ├── package.json                     # Orquestador Monorepo (workspaces y scripts universales)
 ├── Dockerfile                       # Multi-stage build (Node 22 test+build -> Nginx Alpine ~26.5 MB)
 ├── docker-compose.yml               # Orquestación de producción en puerto configurable (8088:80)
@@ -85,6 +87,14 @@ Yeti/
 
 ## 🚀 Inicio Rápido y Comandos Universales
 
+### 🎮 Opción A: Lanzador 1-Clic para Windows
+Si estás en Windows, simplemente haz doble clic en [`jugar.bat`](jugar.bat) o ejecútalo en terminal:
+```cmd
+jugar.bat
+```
+Te permitirá abrir el **Portal Hub**, iniciar el servidor local de alta velocidad para **Snow Escape PRO**, o abrir las versiones clásicas sin configuración previa.
+
+### 💻 Opción B: Comandos de Terminal (npm workspaces)
 Al utilizar **npm workspaces**, puedes ejecutar todos los comandos directamente desde la **raíz del proyecto**:
 
 ```bash
@@ -97,8 +107,11 @@ npm test
 # 3. Iniciar entorno de desarrollo interactivo de la edición PRO (Vite HMR)
 npm run dev
 
-# 4. Compilar bundle de producción optimizado
+# 4. Compilar bundle de producción optimizado (Soporte universal file:/// y HTTP)
 npm run build
+
+# 5. Previsualizar la build de producción en servidor local de alto rendimiento
+npm run preview
 ```
 
 ---

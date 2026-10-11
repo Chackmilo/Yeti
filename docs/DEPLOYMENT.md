@@ -89,3 +89,21 @@ Dado que la suite es 100% estática en el cliente, puedes alojarla gratuitamente
 * **Cloudflare Pages:** Conecta tu repositorio de GitHub, comando de build: `npm run build`, directorio de salida: `.`.
 * **Vercel / Netlify:** Build command: `npm run build`, output: `.`.
 * **GitHub Pages:** Habilita GitHub Pages apuntando a la rama `main` tras compilar `dist/`.
+
+---
+
+## 💻 Opción 4: Ejecución Local en Windows (Sin Servidor Remoto)
+
+Para probar o jugar de manera inmediata en una máquina local con Windows sin necesidad de levantar infraestructura:
+
+1. **Lanzador Interactivo 1-Clic (`jugar.bat`):**
+   - Ejecuta [`jugar.bat`](../jugar.bat) para abrir un menú interactivo en terminal que permite abrir el **Portal Hub**, iniciar el servidor local de alta velocidad (`npm run preview`), o abrir las ediciones 2D y 3D standalone.
+2. **Servidor Local de Alto Rendimiento:**
+   ```bash
+   npm run build
+   npm run preview
+   ```
+   Disponible inmediatamente en `http://localhost:4173/`.
+3. **Modo Directo Offline (`file:///`):**
+   - Gracias al bundle IIFE y los estilos CSS inline generados durante `npm run build`, puedes hacer doble clic directamente en `games/3d-pro/dist/index.html` o `index.html` en el explorador de archivos.
+
