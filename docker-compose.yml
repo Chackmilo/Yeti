@@ -1,0 +1,11 @@
+services:
+  snow-escape:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: snow-escape-suite
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8088}:80"
+    environment:
+      - NODE_ENV=production

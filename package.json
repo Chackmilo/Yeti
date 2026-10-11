@@ -1,0 +1,33 @@
+{
+  "name": "snow-escape-suite",
+  "version": "4.5.0-ai",
+  "description": "Infinite Alpine Skiing Arcade Suite featuring 2D Canvas, 3D Standalone, and 3D PRO with AI Behavior Trees, Autopilot MPC, DDA Flow Engine and HRTF Audio",
+  "private": true,
+  "workspaces": [
+    "games/3d-pro"
+  ],
+  "scripts": {
+    "dev": "npm --workspace=games/3d-pro run dev",
+    "dev:pro": "npm --workspace=games/3d-pro run dev",
+    "build": "npm --workspace=games/3d-pro run build",
+    "test": "npm --workspace=games/3d-pro run test",
+    "preview": "npm --workspace=games/3d-pro run preview",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "keywords": [
+    "threejs",
+    "game-ai",
+    "behavior-trees",
+    "autonomous-agent",
+    "skifree",
+    "vite",
+    "webgl",
+    "spatial-audio",
+    "docker",
+    "nginx"
+  ],
+  "license": "MIT"
+}

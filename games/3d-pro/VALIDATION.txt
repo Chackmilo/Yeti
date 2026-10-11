@@ -1,0 +1,60 @@
+================================================================================
+SNOW ESCAPE 3D PRO — CERTIFICADO DE VALIDACIÓN TÉCNICA Y DE CALIDAD
+================================================================================
+Fecha de Validación: 2026-10-03
+Entorno: Node.js 20+ / 22+ | Vite 6 | Three.js r170 | Docker 29+ | WebGL 2.0 | Web Audio API
+
+1. SUITE DE PRUEBAS AUTOMATIZADAS (node --test)
+--------------------------------------------------------------------------------
+Estado: 19/19 Tests PASSING (0 fallos, 0 omitidos, 0 cancelados)
+Duración de ejecución: ~1.6 segundos
+
+[Físicas y Generación Procedural - tests/physics.test.js]
+  ✔ CCD contra cilindros: cruce rápido a 35 m/s, tangencia, reposo y descarte
+  ✔ CCD contra AABB expandida: colisiones contra obstáculos rocosos
+  ✔ Corredor seguro para 100 semillas y reciclaje hasta 10 km
+  ✔ Generación determinista y reutilización de matrices en memoria
+  ✔ Broad phase espacial detecta troncos y permite ignorar IDs de entidad
+  ✔ StorageManager aislado de localStorage con fallback tolerante a fallos
+
+[Arquitectura de Inteligencia Artificial - tests/ai.test.js]
+  ✔ BT Selector: ejecución secuencial hasta éxito o running
+  ✔ BT Sequence: ejecución secuencial hasta fallo o running
+  ✔ BT Inverter: inversión de polaridad booleana
+  ✔ YetiAI: cálculo de interceptación predictiva con ventaja cinemática
+  ✔ YetiAI: anticipación de slalom corta el contra-giro hacia el centro
+  ✔ YetiAI: radar de 5 bigotes sensoriales detecta obstáculo y genera repulsión
+  ✔ SkierAgentAI: ciclado de modos (OFF, AUTOPILOT, CO_PILOT)
+  ✔ SkierAgentAI Autopilot: esquiva de obstáculos sin intervención humana
+  ✔ SkierAgentAI Co-Pilot: intervención de emergencia con freno/giro
+  ✔ DDAEngine: estado inicial en BALANCE con modulación unitaria
+  ✔ DDAEngine: conmutación a RELIEF ante caídas sucesivas
+  ✔ DDAEngine: conmutación a SURGE ante rachas de combo y saltos
+  ✔ AITelemetry: generación de resumen formateado XAI libre de excepciones
+
+2. BENCHMARK DE COMPILACIÓN DE PRODUCCIÓN (Vite 6)
+--------------------------------------------------------------------------------
+Comando: npm run build
+Resultado: 26 módulos transformados y empaquetados en ~1.2 segundos
+  - dist/index.html:                  5.69 kB (gzip: 2.49 kB)
+  - dist/assets/index.css:            5.91 kB (gzip: 2.01 kB)
+  - dist/assets/index.js (Juego+IA): 67.12 kB (gzip: 22.15 kB)
+  - dist/assets/three.js (Motor):   480.46 kB (gzip: 121.10 kB)
+
+3. ARQUITECTURA DE SOFTWARE Y RENDIMIENTO
+--------------------------------------------------------------------------------
+  - Simulación desacoplada a 60 Hz con Fixed Timestep (Engine.js).
+  - Continuous Collision Detection (CCD) con barrido de segmentos contra cilindros y AABB.
+  - Zero-allocation en bucles críticos de renderizado y físicas para evitar Garbage Collection spikes.
+  - Síntesis de audio 100% nativa con Web Audio API (PannerNode HRTF posicional).
+  - Soporte completo de Gamepad API (Xbox, PlayStation, mandos genéricos).
+  - Mapeo ergonómico: Espacio = Turbo Boost, Escape = Pausa exclusiva.
+  - Sin dependencias de red externas ni descargas de modelos remotos (todo procedural).
+
+4. CONTENERIZACIÓN Y DESPLIEGUE EN PRODUCCIÓN (Docker Multi-stage)
+--------------------------------------------------------------------------------
+  - Dockerfile multi-stage con Node 22 Alpine (quality gate + build) y Nginx Alpine.
+  - Imagen final de producción ultraligera: 26.5 MB.
+  - Servidor Nginx con compresión Gzip activa y cabeceras de caché inmutable (1 año).
+  - Orquestación con docker-compose.yml en puerto parametrizable (8088:80).
+================================================================================

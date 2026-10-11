@@ -1,0 +1,30 @@
+{
+  "name": "snow-escape",
+  "version": "4.5.0-ai",
+  "description": "Procedural 3D Alpine Skiing Arcade with Behavior Tree Yeti AI, Autonomous Skier Autopilot, DDA Flow Engine, and Web Audio HRTF",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": [
+    "threejs",
+    "game-ai",
+    "behavior-trees",
+    "autonomous-agent",
+    "skifree",
+    "vite",
+    "webgl",
+    "spatial-audio"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "three": "0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  }
+}

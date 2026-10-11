@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#071524">
+  <title>Snow Escape — Portal de Juegos Alpinos</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>⛷️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       RESET & BASE DESIGN SYSTEM
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-dark: #071524;
+      --bg-card: rgba(13, 31, 51, 0.75);
+      --bg-card-hover: rgba(20, 48, 77, 0.85);
+      --border-card: rgba(140, 233, 255, 0.18);
+      --border-card-hover: rgba(140, 233, 255, 0.55);
+      --accent-cyan: #5fe6ff;
+      --accent-glow: rgba(95, 230, 255, 0.35);
+      --accent-emerald: #4ade80;
+      --accent-gold: #fbc02d;
+      --text-main: #f0f8ff;
+      --text-muted: #94b4cb;
+      --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', Consolas, monospace;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-display);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient Snow Particle Background */
+    #snow-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Radial Backlight Glows */
+    .ambient-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.45;
+    }
+    .glow-1 {
+      top: -100px;
+      left: 10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, #0284c7 0%, transparent 70%);
+    }
+    .glow-2 {
+      bottom: -150px;
+      right: 5%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, #0f766e 0%, transparent 70%);
+    }
+
+    /* Main Container */
+    .portal-container {
+      position: relative;
+      z-index: 2;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+    }
+
+    /* ==========================================================================
+       HEADER & HERO
+       ========================================================================== */
+    header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .badge-hub {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(95, 230, 255, 0.1);
+      border: 1px solid rgba(95, 230, 255, 0.3);
+      color: var(--accent-cyan);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      box-shadow: 0 0 20px rgba(95, 230, 255, 0.15);
+    }
+
+    .badge-hub span.pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan);
+      animation: pulseAnim 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseAnim {
+      0%, 100% { opacity: 0.4; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    h1.hero-title {
+      font-size: clamp(2.8rem, 6vw, 4.6rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ffffff 20%, #90e8fa 60%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 10px 40px rgba(2, 132, 199, 0.35);
+    }
+
+    p.hero-desc {
+      max-width: 680px;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* Live Records Bar */
+    .records-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 8px;
+      padding: 10px 20px;
+      background: rgba(13, 27, 44, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .record-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+    .record-item strong {
+      color: #ffe082;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+    }
+
+    /* ==========================================================================
+       GAMES GRID (3 CARDS)
+       ========================================================================== */
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    .game-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 24px;
+      padding: 32px 28px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+      overflow: hidden;
+    }
+
+    .game-card:hover {
+      transform: translateY(-8px);
+      background: var(--bg-card-hover);
+      border-color: var(--border-card-hover);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6), 0 0 30px var(--accent-glow);
+    }
+
+    /* Featured Badge for Pro Edition */
+    .game-card.pro-card {
+      border-color: rgba(95, 230, 255, 0.4);
+      background: linear-gradient(165deg, rgba(14, 40, 68, 0.9) 0%, rgba(9, 26, 44, 0.85) 100%);
+    }
+    .game-card.pro-card::before {
+      content: 'RECOMENDADO';
+      position: absolute;
+      top: 18px;
+      right: 22px;
+      background: linear-gradient(135deg, #0284c7, #06b6d4);
+      color: #ffffff;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .card-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+    }
+
+    .card-title-group h2 {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .card-tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      margin-top: 3px;
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      flex-grow: 1;
+    }
+
+    /* Specs & Tech List */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 26px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .spec-item {
+      background: rgba(7, 18, 32, 0.6);
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .spec-label {
+      display: block;
+      font-size: 0.68rem;
+      color: #7b9bb2;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .spec-val {
+      font-size: 0.82rem;
+      color: #e2f1fc;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    /* Feature Pills */
+    .pills-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 26px;
+    }
+    .pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* Launch Button */
+    .btn-launch {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 15px 22px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      text-decoration: none;
+      color: #071524;
+      background: linear-gradient(135deg, #a7f3d0 0%, #38bdf8 100%);
+      box-shadow: 0 8px 24px rgba(56, 189, 248, 0.35);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-launch:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+      box-shadow: 0 12px 30px rgba(56, 189, 248, 0.5);
+    }
+    .btn-launch:active {
+      transform: scale(0.98);
+    }
+
+    .btn-pro {
+      background: linear-gradient(135deg, #7dd3fc 0%, #0284c7 50%, #38bdf8 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 26px rgba(2, 132, 199, 0.5);
+    }
+
+    /* Keyboard Shortcut Hint */
+    .key-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* ==========================================================================
+       COMPARISON ACCORDION / SPECS SECTION
+       ========================================================================== */
+    .details-section {
+      background: rgba(13, 31, 51, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 28px;
+      backdrop-filter: blur(10px);
+    }
+
+    .details-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #ffffff;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table.compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+    table.compare-table th {
+      color: var(--accent-cyan);
+      font-weight: 700;
+      padding: 12px 14px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.12);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+    }
+    table.compare-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      color: #d1e2f0;
+    }
+    table.compare-table tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* ==========================================================================
+       FOOTER
+       ========================================================================== */
+    footer {
+      text-align: center;
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    footer a {
+      color: #38bdf8;
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .portal-container {
+        padding: 24px 16px 40px;
+        gap: 24px;
+      }
+      .game-card {
+        padding: 24px 20px;
+      }
+      .specs-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Background & Radial Glows -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <canvas id="snow-bg"></canvas>
+
+  <main class="portal-container">
+
+    <!-- HEADER / HERO -->
+    <header>
+      <div class="badge-hub">
+        <span class="pulse"></span>
+        Arcade Alpine Collection
+      </div>
+      <h1 class="hero-title">Snow Escape</h1>
+      <p class="hero-desc">
+        Desciende a toda velocidad por la montaña alpina infinita y burla al Yeti.
+        Selecciona tu dimensión preferida entre tres arquitecturas independientes y listas para jugar.
+      </p>
+
+      <div class="records-bar">
+        <div class="record-item">
+          <span>🏆 Récord Clásico:</span>
+          <strong id="rec-classic">0 m</strong>
+        </div>
+        <div style="opacity:0.3;">|</div>
+        <div class="record-item">
+          <span>⚡ Récord Moderno:</span>
+          <strong id="rec-modern">0 m</strong>
+        </div>
+      </div>
+    </header>
+
+    <!-- 3 GAMES SHOWCASE GRID -->
+    <section class="games-grid" aria-label="Juegos Disponibles">
+
+      <!-- CARD 1: 2D RETRO CANVAS -->
+      <article class="game-card">
+        <div class="card-header">
+          <div class="card-icon" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8;">👾</div>
+          <div class="card-title-group">
+            <h2>Snow Escape 2D</h2>
+            <span class="card-tag">Retro Canvas · SkiFree</span>
+          </div>
+        </div>
+
+        <p class="card-desc">
+          Nostalgia arcade pura en vista cenital. Protagonizada por la intrépida Nutria Esquiadora con casco dorado, bufanda flotante y cola que se balancea al girar. Estelas en la nieve, obstáculos procedurales y persecución clásica del Yeti.
+        </p>
+
+        <div class="specs-grid">
+          <div class="spec-item">
+            <span class="spec-label">Motor</span>
+            <span class="spec-val">HTML5 Canvas 2D</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Dependencias</span>
+            <span class="spec-val">0 (100% Autocontenido)</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Audio</span>
+            <span class="spec-val">Web Audio Estéreo</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Dispositivos</span>
+            <span class="spec-val">Teclado + Touch</span>
+          </div>
+        </div>
+
+        <div class="pills-wrap">
+          <span class="pill">Slalom & Combos</span>
+          <span class="pill">Rampas 360° (+250)</span>
+          <span class="pill">Recarga Turbo</span>
+          <span class="pill">Latido de Tensión</span>
+        </div>
+
+        <a href="./games/2d-retro/index.html" class="btn-launch" id="launch-2d">
+          <span>Jugar Versión 2D</span>
+          <span class="key-badge">[Tecla 1]</span>
+        </a>
+      </article>
+
+      <!-- CARD 2: 3D ALPINO STANDALONE -->
+      <article class="game-card">
+        <div class="card-header">
+          <div class="card-icon" style="background: rgba(95, 230, 255, 0.12); color: #5fe6ff;">🏔️</div>
+          <div class="card-title-group">
+            <h2>Snow Escape 3D</h2>
+            <span class="card-tag">Alpine Standalone · ESM</span>
+          </div>
+        </div>
+
+        <p class="card-desc">
+          Toda la potencia de Three.js concentrada en un único archivo ultraligero de ~51 KB. Protagonizado por la Nutria 3D con cola oscilante reactiva, terreno ondulado, árboles instanciados, sombras suaves y audio 3D HRTF.
+        </p>
+
+        <div class="specs-grid">
+          <div class="spec-item">
+            <span class="spec-label">Motor</span>
+            <span class="spec-val">Three.js r170 (ESM)</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Rendimiento</span>
+            <span class="spec-val">60 FPS Objetivo (~60 Draws)</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Audio</span>
+            <span class="spec-val">3D Posicional HRTF</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Archivo</span>
+            <span class="spec-val">~51 KB (Standalone)</span>
+          </div>
+        </div>
+
+        <div class="pills-wrap">
+          <span class="pill">Slalom + Combo</span>
+          <span class="pill">Rampas PBR 360°</span>
+          <span class="pill">Pisadas HRTF</span>
+          <span class="pill">InstancedMesh</span>
+        </div>
+
+        <a href="./games/3d-standalone/index.html" class="btn-launch" id="launch-3d">
+          <span>Jugar 3D Standalone</span>
+          <span class="key-badge">[Tecla 2]</span>
+        </a>
+      </article>
+
+      <!-- CARD 3: 3D PRO MODULAR (VITE) -->
+      <article class="game-card pro-card">
+        <div class="card-header">
+          <div class="card-icon" style="background: rgba(2, 132, 199, 0.2); color: #67e8f9;">⚡</div>
+          <div class="card-title-group">
+            <h2>Snow Escape PRO</h2>
+            <span class="card-tag">Modular Engine · Vite 6</span>
+          </div>
+        </div>
+
+        <p class="card-desc">
+          Arquitectura modular de nivel producción con la Nutria 3D PBR, simulación desacoplada a 60 Hz (Fixed Timestep), Continuous Collision Detection (CCD), soporte nativo de mandos de consola (Gamepad API) y suite de tests.
+        </p>
+
+        <div class="specs-grid">
+          <div class="spec-item">
+            <span class="spec-label">Empaquetador</span>
+            <span class="spec-val">Vite 6 + Code Split</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Física</span>
+            <span class="spec-val">Swept CCD a 60 Hz</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">IA Avanzada</span>
+            <span class="spec-val">BTs + Autopilot + DDA</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Pruebas</span>
+            <span class="spec-val">22/22 Tests Passing</span>
+          </div>
+        </div>
+
+        <div class="pills-wrap">
+          <span class="pill">🤖 Piloto IA Autopiloto</span>
+          <span class="pill">🧠 Behavior Tree Yeti</span>
+          <span class="pill">🎯 Interceptación Predictiva</span>
+          <span class="pill">📈 DDA Flow Engine</span>
+          <span class="pill">Gamepad Triggers</span>
+          <span class="pill">HRTF 3D Panner</span>
+        </div>
+
+        <a href="./games/3d-pro/dist/index.html" class="btn-launch btn-pro" id="launch-pro">
+          <span>Jugar Edición Pro</span>
+          <span class="key-badge">[Tecla 3]</span>
+        </a>
+      </article>
+
+    </section>
+
+    <!-- TECHNICAL COMPARISON TABLE -->
+    <section class="details-section">
+      <h3 class="details-title">
+        <span>📊 Comparativa Técnica y de Capacidades</span>
+      </h3>
+
+      <div class="table-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Característica</th>
+              <th>Snow Escape 2D</th>
+              <th>Snow Escape 3D</th>
+              <th>Snow Escape 3D PRO (AI Engine)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Protagonista</strong></td>
+              <td>Nutria 2D (Casco, bufanda, esquís y cola)</td>
+              <td>Nutria 3D con cola oscilante</td>
+              <td>Nutria 3D PBR articulada completa</td>
+            </tr>
+            <tr>
+              <td><strong>Dimensiones y Gráficos</strong></td>
+              <td>2D Canvas (480×720 lógico nítido)</td>
+              <td>3D PBR Three.js (~51 KB standalone)</td>
+              <td>3D PBR Three.js + Adaptador DPR</td>
+            </tr>
+            <tr>
+              <td><strong>Inteligencia Artificial (IA)</strong></td>
+              <td>Lead Pursuit + Evasión sensorial 2D</td>
+              <td>Lead Pursuit + Repulsión de árboles</td>
+              <td><strong>Behavior Trees, Piloto IA Autopiloto, DDA Flow y XAI</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Slalom y Rampas (Opción A)</strong></td>
+              <td>Puertas combo + Rampas 360° aéreas</td>
+              <td>Puertas combo + Rampas PBR con tuck</td>
+              <td>Puertas combo + Vuelo 2.8m y acrobacias acrobáticas</td>
+            </tr>
+            <tr>
+              <td><strong>Físicas y Colisiones</strong></td>
+              <td>Substep Swept contra troncos</td>
+              <td>Swept XZ (Cilindros de madera)</td>
+              <td>Swept CCD (Continuous Collision Detection)</td>
+            </tr>
+            <tr>
+              <td><strong>Audio y Sonido</strong></td>
+              <td>Web Audio Estéreo + Tensión</td>
+              <td>Audio Espacial HRTF + Pisadas 3D</td>
+              <td>Audio Espacial HRTF + Viento resonante</td>
+            </tr>
+            <tr>
+              <td><strong>Soporte de Mandos</strong></td>
+              <td>Teclado y Táctil multitouch</td>
+              <td>Teclado y Táctil multitouch</td>
+              <td><strong>Gamepad API</strong> (Xbox, PS, Genéricos)</td>
+            </tr>
+            <tr>
+              <td><strong>Estructura de Archivos</strong></td>
+              <td>1 archivo autocontenido (HTML/JS)</td>
+              <td>1 archivo (~51 KB CDN)</td>
+              <td>Arquitectura modular en 22 módulos ES</td>
+            </tr>
+            <tr>
+              <td><strong>Suite de Tests</strong></td>
+              <td>Pruebas de interfaz integradas</td>
+              <td>Invariantes matemáticas en consola</td>
+              <td><strong>22 tests nativos automatizados (<code>node --test</code>)</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div>Presiona <span class="key-badge">1</span>, <span class="key-badge">2</span> o <span class="key-badge">3</span> en el teclado para iniciar instantáneamente cualquier juego.</div>
+      <div>Snow Escape Alpine Collection &bull; Código abierto y procedural &bull; Sin assets externos requeridos durante el juego</div>
+    </footer>
+
+  </main>
+
+  <!-- SNOW PARTICLE SIMULATION & RECORDS INITIALIZATION -->
+  <script>
+    // 1. Read High Scores from LocalStorage
+    try {
+      const c = localStorage.getItem('snow_escape_hi_classic') || 0;
+      const m = localStorage.getItem('snow_escape_hi_modern') || 0;
+      document.getElementById('rec-classic').textContent = Number(c).toLocaleString('es-ES') + ' m';
+      document.getElementById('rec-modern').textContent = Number(m).toLocaleString('es-ES') + ' m';
+    } catch (e) {}
+
+    // 2. Keyboard Launch Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.key === '1') document.getElementById('launch-2d').click();
+      if (e.key === '2') document.getElementById('launch-3d').click();
+      if (e.key === '3') document.getElementById('launch-pro').click();
+    });
+
+    // 3. Falling Snow Animation Canvas
+    const canvas = document.getElementById('snow-bg');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    const SNOWFLAKES = 85;
+    const flakes = Array.from({ length: SNOWFLAKES }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r: 1 + Math.random() * 2.8,
+      speedY: 0.6 + Math.random() * 1.5,
+      speedX: (Math.random() - 0.5) * 0.8,
+      opacity: 0.2 + Math.random() * 0.6,
+      wobble: Math.random() * Math.PI * 2,
+      wobbleSpeed: 0.02 + Math.random() * 0.03
+    }));
+
+    function renderSnow() {
+      ctx.clearRect(0, 0, width, height);
+      for (let i = 0; i < SNOWFLAKES; i++) {
+        const f = flakes[i];
+        f.wobble += f.wobbleSpeed;
+        f.y += f.speedY;
+        f.x += f.speedX + Math.sin(f.wobble) * 0.4;
+
+        if (f.y > height + 5) {
+          f.y = -5;
+          f.x = Math.random() * width;
+        }
+        if (f.x > width + 5) f.x = -5;
+        if (f.x < -5) f.x = width + 5;
+
+        ctx.fillStyle = `rgba(220, 242, 255, ${f.opacity})`;
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      requestAnimationFrame(renderSnow);
+    }
+    renderSnow();
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>

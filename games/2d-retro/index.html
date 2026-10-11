@@ -1,0 +1,3843 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Snow Escape - Juego de Esquí Retro</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>⛷️</text></svg>">
+  <style>
+    /* ==========================================================================
+       RESET & BASE STYLES
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0b1320;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      touch-action: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* ==========================================================================
+       GAME CONTAINER & VIEWPORT (Fixed 480x720 aspect ratio)
+       ========================================================================== */
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      max-width: calc(100vh * (480 / 720));
+      max-height: calc(100vw * (720 / 480));
+      aspect-ratio: 480 / 720;
+      background: #eaf3fa;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    #gameCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+
+    /* ==========================================================================
+       UI OVERLAYS (MENU, PAUSE, GAME OVER, HUD)
+       ========================================================================== */
+    .ui-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    .ui-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 20, 35, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      pointer-events: auto;
+      z-index: 20;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+
+    .ui-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Common Card & Typography */
+    .card {
+      background: rgba(22, 33, 54, 0.95);
+      border: 2px solid #38bdf8;
+      border-radius: 12px;
+      padding: 24px 20px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    h1.title {
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #f8fafc;
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.8), 2px 2px 0 #0284c7;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #94a3b8;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    /* Mode Selection Tabs */
+    .mode-selector {
+      display: flex;
+      gap: 8px;
+      background: #0f172a;
+      padding: 4px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      border: 1px solid #334155;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 10px 8px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mode-btn.active {
+      background: #0284c7;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.5);
+    }
+
+    .mode-desc {
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 10px 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-left: 3px solid #38bdf8;
+    }
+
+    .record-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      display: block;
+      width: 100%;
+      padding: 14px 20px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #ffffff;
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      transition: transform 0.1s ease, filter 0.15s ease;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+      filter: brightness(0.9);
+    }
+
+    .btn-secondary {
+      display: block;
+      width: 100%;
+      padding: 10px 16px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #cbd5e1;
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:active {
+      background: #334155;
+    }
+
+    /* Audio Toggle */
+    .audio-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: transparent;
+      border: 1px solid #475569;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .audio-toggle-btn.on {
+      border-color: #38bdf8;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    /* Instruction pill */
+    .controls-hint {
+      margin-top: 18px;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      line-height: 1.5;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 12px;
+    }
+
+    .controls-hint kbd {
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 0.72rem;
+      font-family: inherit;
+      color: #38bdf8;
+    }
+
+    /* ==========================================================================
+       IN-GAME HUD
+       ========================================================================== */
+    #hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+      z-index: 15;
+    }
+
+    .hud-stat-box {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border-radius: 8px;
+      padding: 6px 12px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .hud-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #94a3b8;
+    }
+
+    .hud-value {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #f8fafc;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hud-unit {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #38bdf8;
+      margin-left: 2px;
+    }
+
+    .hud-right {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      pointer-events: auto;
+    }
+
+    .hud-icon-btn {
+      width: 38px;
+      height: 38px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 8px;
+      color: #f8fafc;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .hud-icon-btn:active {
+      background: #0284c7;
+    }
+
+    /* Turbo Stamina Gauge */
+    #turbo-gauge-wrap {
+      position: absolute;
+      top: 64px;
+      left: 14px;
+      width: 140px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 6px;
+      padding: 3px 6px;
+      backdrop-filter: blur(4px);
+      pointer-events: none;
+      display: none;
+    }
+
+    #turbo-gauge-wrap.active {
+      display: block;
+    }
+
+    .gauge-label {
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #38bdf8;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+
+    .gauge-track {
+      width: 100%;
+      height: 8px;
+      background: #0f172a;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #334155;
+    }
+
+    .gauge-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #f59e0b 0%, #38bdf8 100%);
+      transition: width 0.05s linear;
+      border-radius: 3px;
+    }
+
+    /* Yeti Banner & Threat Alerts */
+    #yeti-alert-banner {
+      position: absolute;
+      top: 110px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, rgba(220, 38, 38, 0.95), rgba(185, 28, 28, 0.95));
+      border: 2px solid #fecaca;
+      box-shadow: 0 0 20px rgba(220, 38, 38, 0.8);
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+      z-index: 18;
+      animation: alert-pulse 0.4s infinite alternate;
+      white-space: nowrap;
+    }
+
+    @keyframes alert-pulse {
+      0% { transform: translateX(-50%) scale(1); filter: brightness(1); }
+      100% { transform: translateX(-50%) scale(1.05); filter: brightness(1.25); }
+    }
+
+    #escape-banner {
+      position: absolute;
+      top: 110px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+      border: 2px solid #a7f3d0;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 0.9rem;
+      font-weight: 900;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      display: none;
+      pointer-events: none;
+      z-index: 18;
+      animation: alert-pulse 0.5s infinite alternate;
+    }
+
+    /* ==========================================================================
+       TOUCH CONTROLS (Mobile Ergonomics)
+       ========================================================================== */
+    #touch-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 140px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 12px 14px;
+      pointer-events: none;
+      z-index: 16;
+    }
+
+    .touch-group {
+      display: flex;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .touch-btn {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.7);
+      border: 2px solid rgba(56, 189, 248, 0.5);
+      color: #f8fafc;
+      font-size: 1.3rem;
+      font-weight: 900;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      touch-action: none;
+      transition: transform 0.08s ease, background 0.08s ease, border-color 0.08s ease;
+    }
+
+    .touch-btn:active, .touch-btn.active {
+      transform: scale(0.92);
+      background: rgba(2, 132, 199, 0.85);
+      border-color: #ffffff;
+    }
+
+    .touch-btn-sub {
+      font-size: 0.5rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    .touch-btn.brake-btn {
+      border-color: rgba(239, 68, 68, 0.6);
+      color: #fca5a5;
+    }
+    .touch-btn.brake-btn:active, .touch-btn.brake-btn.active {
+      background: rgba(220, 38, 38, 0.85);
+      border-color: #ffffff;
+      color: #ffffff;
+    }
+
+    .touch-btn.turbo-btn {
+      border-color: rgba(245, 158, 11, 0.6);
+      color: #fde68a;
+    }
+    .touch-btn.turbo-btn:active, .touch-btn.turbo-btn.active {
+      background: rgba(217, 119, 6, 0.85);
+      border-color: #ffffff;
+      color: #ffffff;
+    }
+
+    /* ==========================================================================
+       DEBUG OVERLAY
+       ========================================================================== */
+    #debug-panel {
+      position: absolute;
+      bottom: 145px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid #10b981;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-family: Consolas, monospace;
+      font-size: 0.68rem;
+      color: #34d399;
+      pointer-events: auto;
+      z-index: 25;
+      display: none;
+      max-width: 280px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    }
+
+    #debug-panel.active {
+      display: block;
+    }
+
+    .debug-title {
+      font-weight: bold;
+      color: #10b981;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .debug-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 2px 0;
+    }
+
+    .debug-btn-row {
+      margin-top: 6px;
+      display: flex;
+      gap: 4px;
+    }
+
+    .debug-btn {
+      flex: 1;
+      padding: 4px;
+      background: #064e3b;
+      border: 1px solid #10b981;
+      color: #a7f3d0;
+      font-size: 0.62rem;
+      font-weight: bold;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .debug-btn:active {
+      background: #10b981;
+      color: #000;
+    }
+
+    /* Game Over details */
+    .gameover-stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .stat-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .stat-card.record {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .stat-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: #ffffff;
+      margin-top: 2px;
+    }
+
+    .new-record-tag {
+      display: inline-block;
+      background: #f59e0b;
+      color: #000000;
+      font-weight: 900;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="game-container">
+    <canvas id="gameCanvas" width="480" height="720"></canvas>
+
+    <!-- IN-GAME HUD -->
+    <div id="hud">
+      <div class="hud-stat-box">
+        <span class="hud-label">Puntos</span>
+        <span class="hud-value"><span id="hud-score">0</span></span>
+      </div>
+
+      <div class="hud-stat-box" style="margin-left: 6px;">
+        <span class="hud-label">Distancia</span>
+        <span class="hud-value"><span id="hud-distance">0</span><span class="hud-unit">m</span></span>
+      </div>
+
+      <div class="hud-stat-box" style="margin-left: 6px;">
+        <span class="hud-label">Velocidad</span>
+        <span class="hud-value"><span id="hud-speed">0</span><span class="hud-unit">km/h</span></span>
+      </div>
+
+      <div class="hud-stat-box" style="margin-left: 6px;">
+        <span id="hud-yeti-label" class="hud-label">Yeti en</span>
+        <span class="hud-value"><span id="hud-yeti-dist">500</span><span class="hud-unit">m</span></span>
+      </div>
+
+      <div class="hud-right">
+        <button id="btn-sound-hud" class="hud-icon-btn" title="Alternar Sonido" aria-label="Sonido">🔊</button>
+        <button id="btn-pause-hud" class="hud-icon-btn" title="Pausar (Escape)" aria-label="Pausa">⏸</button>
+      </div>
+    </div>
+
+    <!-- TURBO STAMINA GAUGE (Modern Mode) -->
+    <div id="turbo-gauge-wrap">
+      <div class="gauge-label">
+        <span>Turbo</span>
+        <span id="gauge-pct">100%</span>
+      </div>
+      <div class="gauge-track">
+        <div id="gauge-fill" class="gauge-fill"></div>
+      </div>
+    </div>
+
+    <!-- YETI ALERT BANNER -->
+    <div id="yeti-alert-banner">
+      <span>⚠️ ¡ALERTA: YETI APROXIMÁNDOSE!</span>
+    </div>
+
+    <!-- ESCAPE CELEBRATION BANNER -->
+    <div id="escape-banner">
+      <span>🎉 ¡ESCAPASTE DEL YETI!</span>
+    </div>
+
+    <!-- ON-SCREEN MOBILE TOUCH CONTROLS -->
+    <div id="touch-controls">
+      <div class="touch-group">
+        <button id="touch-left" class="touch-btn" aria-label="Girar a la izquierda">
+          ◀
+          <span class="touch-btn-sub">Izq</span>
+        </button>
+        <button id="touch-right" class="touch-btn" aria-label="Girar a la derecha">
+          ▶
+          <span class="touch-btn-sub">Der</span>
+        </button>
+      </div>
+
+      <div class="touch-group">
+        <button id="touch-brake" class="touch-btn brake-btn" aria-label="Frenar">
+          ⛔
+          <span class="touch-btn-sub">Freno</span>
+        </button>
+        <button id="touch-turbo" class="touch-btn turbo-btn" aria-label="Turbo">
+          ⚡
+          <span class="touch-btn-sub">Turbo</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN MENU OVERLAY -->
+    <div id="menu-overlay" class="ui-overlay active">
+      <div class="card">
+        <h1 class="title">🦦 Snow Escape</h1>
+        <div class="subtitle">Retro Ski Challenge &bull; Nutria Alpina</div>
+
+        <div class="mode-selector">
+          <button id="btn-mode-classic" class="mode-btn active" data-mode="classic">Modo Clásico</button>
+          <button id="btn-mode-modern" class="mode-btn" data-mode="modern">Modo Moderno</button>
+        </div>
+
+        <div id="mode-description" class="mode-desc">
+          Modo Clásico: Turbo ilimitado con inercia a alta velocidad (76% autoridad de giro). Slalom otorga velocidad y combos.
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Aparición del Yeti</div>
+          <div class="mode-selector" style="margin-bottom: 0;">
+            <button id="btn-yeti-500" class="mode-btn active" data-dist="500">500 m (Rápido)</button>
+            <button id="btn-yeti-1000" class="mode-btn" data-dist="1000">1.000 m</button>
+            <button id="btn-yeti-2000" class="mode-btn" data-dist="2000">2.000 m</button>
+          </div>
+        </div>
+
+        <div class="record-badge">
+          <span>🏆 Récord:</span>
+          <span id="menu-highscore">0 m</span>
+        </div>
+
+        <button id="btn-play" class="btn-primary">Jugar [Enter]</button>
+
+        <button id="btn-audio-toggle" class="audio-toggle-btn on">
+          <span id="audio-icon">🔊</span>
+          <span id="audio-text">Sonido: Activado</span>
+        </button>
+
+        <a href="../../index.html" class="btn-secondary" style="margin-top: 10px; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 700;">🏠 Volver al Portal de Juegos</a>
+
+        <div class="controls-hint">
+          <kbd>←</kbd> <kbd>→</kbd> / <kbd>A</kbd> <kbd>D</kbd> : Girar | <kbd>↑</kbd> / <kbd>W</kbd> : Frenar | <kbd>↓</kbd> / <kbd>S</kbd> : Descenso | <kbd>Espacio</kbd> / <kbd>Shift</kbd> / <kbd>F</kbd> : Turbo<br>
+          🚩 Cruza puertas de slalom para combo y turbo | 🏂 Salta en rampas para acrobacias 360° (+250 PTS)<br>
+          <kbd>Escape</kbd> : Pausa | <kbd>R</kbd> : Reiniciar | <kbd>~</kbd> / <kbd>F2</kbd> : Debug
+        </div>
+      </div>
+    </div>
+
+    <!-- PAUSE OVERLAY -->
+    <div id="pause-overlay" class="ui-overlay">
+      <div class="card">
+        <h1 class="title" style="font-size: 2rem;">Pausa</h1>
+        <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px;">Desviado temporalmente de la pista</p>
+
+        <button id="btn-resume" class="btn-primary">Reanudar</button>
+        <button id="btn-restart-pause" class="btn-secondary">Reiniciar Pista [R]</button>
+        <button id="btn-menu-pause" class="btn-secondary">Volver al Menú</button>
+
+        <div class="controls-hint" style="margin-top: 15px;">
+          Pulsa <kbd>Escape</kbd> para continuar
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME OVER OVERLAY -->
+    <div id="gameover-overlay" class="ui-overlay">
+      <div class="card">
+        <h1 class="title" style="font-size: 1.9rem; color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.8);">¡Atrapado!</h1>
+        <p style="color: #cbd5e1; font-size: 0.85rem; margin-bottom: 12px;">¡Un abrazo alpino demasiado fuerte te sacó de la pista!</p>
+
+        <div class="gameover-stat-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+          <div class="stat-card">
+            <div class="stat-label">Puntos</div>
+            <div id="gameover-score" class="stat-value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Distancia</div>
+            <div id="gameover-distance" class="stat-value">0 m</div>
+          </div>
+          <div class="stat-card record">
+            <div class="stat-label">Récord</div>
+            <div id="gameover-best" class="stat-value">0 m</div>
+            <div id="gameover-new-record" class="new-record-tag" style="display: none;">¡Nuevo Récord!</div>
+          </div>
+        </div>
+
+        <button id="btn-replay" class="btn-primary">Volver a Jugar [R]</button>
+        <button id="btn-menu-gameover" class="btn-secondary">Volver al Menú</button>
+      </div>
+    </div>
+
+    <!-- DEBUG PANEL -->
+    <div id="debug-panel">
+      <div class="debug-title">
+        <span>DEBUG MONITOR</span>
+        <span id="debug-fps">60 FPS</span>
+      </div>
+      <div class="debug-row"><span>Estado:</span><span id="debug-state">MENU</span></div>
+      <div class="debug-row"><span>Objetos Activos:</span><span id="debug-objects">0</span></div>
+      <div class="debug-row"><span>Semilla:</span><span id="debug-seed">0</span></div>
+      <div class="debug-row"><span>Jugador (X, Y):</span><span id="debug-pos">0, 0</span></div>
+      <div class="debug-row"><span>Velocidad (vy):</span><span id="debug-vel">0</span></div>
+      <div class="debug-row"><span>Yeti Estado:</span><span id="debug-yeti-state">INACTIVO</span></div>
+      <div class="debug-row"><span>Distancia Yeti:</span><span id="debug-yeti-dist">-</span></div>
+      <div class="debug-btn-row">
+        <button id="dbg-btn-yeti" class="debug-btn">Invocar Yeti</button>
+        <button id="dbg-btn-turbo" class="debug-btn">Stamina Full</button>
+        <button id="dbg-btn-invul" class="debug-btn">Invencible</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /**
+     * SNOW ESCAPE - Retro 2D Skiing Arcade Game
+     * Single-file architecture with clean modular separation:
+     * - CONFIG: Central game tunables and physics parameters
+     * - PRNG: Seeded pseudo-random generator
+     * - StorageManager: LocalStorage safety wrapper for high scores & sound settings
+     * - AudioManager: Web Audio synthesizer for all sound effects
+     * - InputManager: Unified multi-touch, keyboard, pointer cancellation & focus handling
+     * - SkiTracks: Procedural snow tracks system with trail fading
+     * - ParticleSystem: Snow spray and crash impact particle pool
+     * - Player: Kinematic steering, downhill physics, states, stamina
+     * - WorldGenerator: Procedural terrain segments, obstacle pooling, safe corridor guarantees
+     * - CollisionSystem: Substep swept checks with trunk-specific hitboxes
+     * - YetiController: Autonomous monster AI, chase physics, stumble recovery, escape tracker
+     * - Renderer: 480x720 logical Canvas pipeline, pixel ratio scaling, Y-depth sorting
+     * - GameState: Core state machine, fixed 60fps simulation accumulator, window blur handling
+     */
+    'use strict';
+
+    // =========================================================================
+    // 1. CONFIGURATION (CENTRALIZED PARAMETERS)
+    // =========================================================================
+    const CONFIG = Object.freeze({
+      // Resolution & Canvas
+      CANVAS_WIDTH: 480,
+      CANVAS_HEIGHT: 720,
+      MAX_DPR: 2.5,
+
+      // World units to meters conversion: 10 world units = 1 meter
+      UNITS_PER_METER: 10,
+      TRACK_HALF_WIDTH: 210, // World X bounds: [-210, +210] (Total width 420)
+
+      // Speeds (world units per second)
+      SPEED_NORMAL_BASE: 240,     // ~24 m/s (86.4 km/h) downhill cruise
+      SPEED_TURBO_MULT: 1.7,      // ~408 units/s (146.8 km/h)
+      SPEED_BRAKE_MIN: 50,        // Lowest speed when braking hard
+      BRAKE_DECEL: 360,           // Braking deceleration (units/s^2)
+      DOWN_ACCEL: 200,            // Acceleration back to max speed when tucking downhill
+      TURN_SPEED: 4.2,            // Steering angular rate (rad/s)
+      MAX_TURN_ANGLE: 1.25,       // Max turn angle (~71.6 degrees)
+
+      // Durations (seconds)
+      CRASH_DURATION: 0.8,
+      INVULNERABILITY_DURATION: 1.2,
+      YETI_WARNING_DURATION: 2.0,
+
+      // Modern Mode Turbo Energy
+      TURBO_DRAIN_TIME: 3.0,      // Continuous turbo duration (3.0s = -33.3%/s)
+      TURBO_RECHARGE_TIME: 6.0,   // Complete recharge time (6.0s = +16.7%/s)
+
+      // Yeti Parameters
+      YETI_SPAWN_METERS: 500,     // Default spawn distance in meters (500m = ~20s gameplay)
+      YETI_RESPAWN_METERS: 600,   // Distance after escape before next Yeti encounter
+      YETI_SPEED_MULT: 1.15,      // 1.15x normal speed (276 units/s) -> faster than normal, slower than turbo (1.7x)
+      YETI_TURN_SPEED: 2.2,       // Turns slower with higher inertia
+      YETI_STUMBLE_TIME: 0.45,    // Obstacle stumble penalty
+      YETI_ESCAPE_DISTANCE: 420,  // Units separation behind player required to escape
+      YETI_ESCAPE_TIME: 5.0,      // Seconds player must maintain separation to win chase
+
+      // World & Obstacle Density
+      SEGMENT_STEP: 70,           // Distance in world Y between generation evaluation
+      MIN_OBSTACLE_SPACING: 42,   // Minimum separation between generated obstacles
+      SAFE_CORRIDOR_WIDTH: 130,   // Guaranteed passable corridor width
+
+      // Fixed Simulation Timestep
+      FIXED_DT: 1 / 60,
+      MAX_FRAME_ACCUM: 0.1,       // Prevent spiral of death if tab hangs
+      MAX_SUB_STEPS: 4
+    });
+
+    // =========================================================================
+    // 2. PRNG (MULBERRY32 SEEDED GENERATOR)
+    // =========================================================================
+    class PRNG {
+      constructor(seed = 123456789) {
+        this.seed = seed >>> 0;
+      }
+      reseed(seed) {
+        this.seed = seed >>> 0;
+      }
+      next() {
+        let t = (this.seed += 0x6D2B79F5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      }
+      range(min, max) {
+        return min + this.next() * (max - min);
+      }
+      rangeInt(min, max) {
+        return Math.floor(this.range(min, max + 1));
+      }
+      chance(prob) {
+        return this.next() < prob;
+      }
+    }
+
+    // =========================================================================
+    // 3. STORAGE MANAGER
+    // =========================================================================
+    class StorageManager {
+      static isAvailable() {
+        try {
+          const testKey = '__test_snow_storage__';
+          window.localStorage.setItem(testKey, '1');
+          window.localStorage.removeItem(testKey);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      static getHighScore(mode) {
+        if (!this.isAvailable()) return 0;
+        try {
+          const key = `snow_escape_hi_${mode}`;
+          const val = parseInt(window.localStorage.getItem(key), 10);
+          return Number.isFinite(val) && val >= 0 ? val : 0;
+        } catch (e) {
+          return 0;
+        }
+      }
+
+      static saveHighScore(mode, distance) {
+        if (!this.isAvailable()) return;
+        try {
+          const current = this.getHighScore(mode);
+          if (distance > current) {
+            window.localStorage.setItem(`snow_escape_hi_${mode}`, Math.floor(distance).toString());
+          }
+        } catch (e) {
+          // Ignore write failure
+        }
+      }
+
+      static getAudioEnabled() {
+        if (!this.isAvailable()) return true;
+        try {
+          const val = window.localStorage.getItem('snow_escape_audio');
+          return val === null ? true : val === 'true';
+        } catch (e) {
+          return true;
+        }
+      }
+
+      static saveAudioEnabled(enabled) {
+        if (!this.isAvailable()) return;
+        try {
+          window.localStorage.setItem('snow_escape_audio', enabled ? 'true' : 'false');
+        } catch (e) {}
+      }
+    }
+
+    // =========================================================================
+    // 4. AUDIO MANAGER (SYNTHESIZED SOUND VIA WEB AUDIO API)
+    // =========================================================================
+    class AudioManager {
+      constructor() {
+        this.ctx = null;
+        this.enabled = StorageManager.getAudioEnabled();
+        this.masterGain = null;
+        this.initialized = false;
+
+        // Continuous wind / glide node
+        this.windGain = null;
+        this.windFilter = null;
+        this.windSource = null;
+      }
+
+      init() {
+        if (this.initialized) return;
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) return;
+          this.ctx = new AudioContextClass();
+          this.masterGain = this.ctx.createGain();
+          this.masterGain.gain.setValueAtTime(this.enabled ? 0.35 : 0, this.ctx.currentTime);
+          this.masterGain.connect(this.ctx.destination);
+          this.setupWindSynth();
+          this.initialized = true;
+        } catch (err) {
+          console.warn('Web Audio no disponible:', err);
+        }
+      }
+
+      resumeContext() {
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+      }
+
+      toggleAudio() {
+        this.enabled = !this.enabled;
+        StorageManager.saveAudioEnabled(this.enabled);
+        if (this.masterGain && this.ctx) {
+          this.masterGain.gain.setValueAtTime(this.enabled ? 0.35 : 0, this.ctx.currentTime);
+        }
+        return this.enabled;
+      }
+
+      setupWindSynth() {
+        if (!this.ctx) return;
+        // White noise buffer for wind/sliding effect
+        const bufferSize = this.ctx.sampleRate * 2;
+        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+
+        this.windSource = this.ctx.createBufferSource();
+        this.windSource.buffer = noiseBuffer;
+        this.windSource.loop = true;
+
+        this.windFilter = this.ctx.createBiquadFilter();
+        this.windFilter.type = 'bandpass';
+        this.windFilter.frequency.setValueAtTime(450, this.ctx.currentTime);
+        this.windFilter.Q.setValueAtTime(1.5, this.ctx.currentTime);
+
+        this.windGain = this.ctx.createGain();
+        this.windGain.gain.setValueAtTime(0, this.ctx.currentTime);
+
+        this.windSource.connect(this.windFilter);
+        this.windFilter.connect(this.windGain);
+        this.windGain.connect(this.masterGain);
+
+        this.windSource.start();
+      }
+
+      updateGlideSound(speedRatio, isSkiing, isTurbo) {
+        if (!this.enabled || !this.windGain || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        if (!isSkiing || speedRatio <= 0.05) {
+          this.windGain.gain.setTargetAtTime(0, now, 0.08);
+          return;
+        }
+
+        const targetGain = 0.08 + speedRatio * 0.16 + (isTurbo ? 0.1 : 0);
+        const targetFreq = 350 + speedRatio * 450 + (isTurbo ? 300 : 0);
+
+        this.windGain.gain.setTargetAtTime(targetGain, now, 0.05);
+        this.windFilter.frequency.setTargetAtTime(targetFreq, now, 0.05);
+      }
+
+      playCarve() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const filter = this.ctx.createBiquadFilter();
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
+
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(400, now);
+
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.linearRampToValueAtTime(0.001, now + 0.15);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.masterGain);
+
+          osc.start(now);
+          osc.stop(now + 0.16);
+        } catch (e) {}
+      }
+
+      playCrash() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          // Noise thump
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.exponentialRampToValueAtTime(30, now + 0.3);
+
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+          osc.connect(gain);
+          gain.connect(this.masterGain);
+
+          osc.start(now);
+          osc.stop(now + 0.36);
+        } catch (e) {}
+      }
+
+      playYetiRoar() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc1 = this.ctx.createOscillator();
+          const osc2 = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc1.type = 'sawtooth';
+          osc2.type = 'square';
+
+          osc1.frequency.setValueAtTime(110, now);
+          osc1.frequency.linearRampToValueAtTime(55, now + 0.8);
+
+          osc2.frequency.setValueAtTime(115, now);
+          osc2.frequency.linearRampToValueAtTime(50, now + 0.8);
+
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.9);
+
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(this.masterGain);
+
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + 0.9);
+          osc2.stop(now + 0.9);
+        } catch (e) {}
+      }
+
+      playYetiStumble() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(80, now + 0.25);
+
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+          osc.connect(gain);
+          gain.connect(this.masterGain);
+
+          osc.start(now);
+          osc.stop(now + 0.26);
+        } catch (e) {}
+      }
+
+      playEscapeFanfare() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const notes = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+          notes.forEach((freq, idx) => {
+            const start = this.ctx.currentTime + idx * 0.1;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, start);
+
+            gain.gain.setValueAtTime(0.2, start);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+
+            osc.start(start);
+            osc.stop(start + 0.36);
+          });
+        } catch (e) {}
+      }
+
+      playGameOver() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const notes = [311.13, 293.66, 277.18, 233.08]; // Sad descending slide
+          notes.forEach((freq, idx) => {
+            const start = this.ctx.currentTime + idx * 0.2;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, start);
+
+            gain.gain.setValueAtTime(0.25, start);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.3);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+
+            osc.start(start);
+            osc.stop(start + 0.32);
+          });
+        } catch (e) {}
+      }
+
+      playHeartbeat(tension) {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const vol = 0.16 + tension * 0.28;
+          const o1 = this.ctx.createOscillator();
+          const g1 = this.ctx.createGain();
+          o1.type = 'sine';
+          o1.frequency.setValueAtTime(54, now);
+          o1.frequency.exponentialRampToValueAtTime(26, now + 0.08);
+          g1.gain.setValueAtTime(vol, now);
+          g1.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+          o1.connect(g1); g1.connect(this.masterGain);
+          o1.start(now); o1.stop(now + 0.09);
+
+          const o2 = this.ctx.createOscillator();
+          const g2 = this.ctx.createGain();
+          o2.type = 'sine';
+          o2.frequency.setValueAtTime(76, now + 0.11);
+          o2.frequency.exponentialRampToValueAtTime(32, now + 0.18);
+          g2.gain.setValueAtTime(vol * 0.82, now + 0.11);
+          g2.gain.exponentialRampToValueAtTime(0.001, now + 0.19);
+          o2.connect(g2); g2.connect(this.masterGain);
+          o2.start(now + 0.11); o2.stop(now + 0.19);
+        } catch (e) {}
+      }
+
+      playYetiStep(panX = 0) {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(68, now);
+          osc.frequency.exponentialRampToValueAtTime(28, now + 0.1);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+
+          if (this.ctx.createStereoPanner) {
+            const panner = this.ctx.createStereoPanner();
+            panner.pan.setValueAtTime(Math.max(-1, Math.min(1, panX)), now);
+            osc.connect(gain);
+            gain.connect(panner);
+            panner.connect(this.masterGain);
+          } else {
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+          }
+          osc.start(now);
+          osc.stop(now + 0.12);
+        } catch (e) {}
+      }
+
+      playClick() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+          osc.connect(gain);
+          gain.connect(this.masterGain);
+
+          osc.start(now);
+          osc.stop(now + 0.06);
+        } catch (e) {}
+      }
+
+      playGateChime() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const o1 = this.ctx.createOscillator(), g1 = this.ctx.createGain();
+          o1.type = 'sine'; o1.frequency.setValueAtTime(880, now); o1.frequency.exponentialRampToValueAtTime(1175, now + 0.12);
+          g1.gain.setValueAtTime(0.25, now); g1.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+          o1.connect(g1); g1.connect(this.masterGain); o1.start(now); o1.stop(now + 0.14);
+
+          const o2 = this.ctx.createOscillator(), g2 = this.ctx.createGain();
+          o2.type = 'sine'; o2.frequency.setValueAtTime(1320, now + 0.08); o2.frequency.exponentialRampToValueAtTime(1760, now + 0.22);
+          g2.gain.setValueAtTime(0.25, now + 0.08); g2.gain.exponentialRampToValueAtTime(0.001, now + 0.23);
+          o2.connect(g2); g2.connect(this.masterGain); o2.start(now + 0.08); o2.stop(now + 0.24);
+        } catch(e) {}
+      }
+
+      playJump() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+          osc.type = 'sine'; osc.frequency.setValueAtTime(320, now); osc.frequency.exponentialRampToValueAtTime(750, now + 0.25);
+          gain.gain.setValueAtTime(0.22, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          osc.connect(gain); gain.connect(this.masterGain); osc.start(now); osc.stop(now + 0.26);
+        } catch(e) {}
+      }
+
+      playLanding() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+          osc.type = 'triangle'; osc.frequency.setValueAtTime(120, now); osc.frequency.exponentialRampToValueAtTime(40, now + 0.18);
+          gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.connect(gain); gain.connect(this.masterGain); osc.start(now); osc.stop(now + 0.19);
+        } catch(e) {}
+      }
+    }
+
+    // =========================================================================
+    // 5. INPUT MANAGER (KEYBOARD + TOUCH + POINTERS)
+    // =========================================================================
+    class InputManager {
+      constructor() {
+        this.keys = {
+          left: false,
+          right: false,
+          up: false,      // brake
+          down: false,    // straight downhill
+          turbo: false,
+          pause: false,
+          restart: false,
+          start: false
+        };
+
+        this.touchStates = {
+          left: false,
+          right: false,
+          brake: false,
+          turbo: false
+        };
+
+        this.onPausePress = null;
+        this.onRestartPress = null;
+        this.onStartPress = null;
+        this.onDebugToggle = null;
+        this.onDebugYeti = null;
+
+        this.initKeyboard();
+        this.initTouch();
+        this.initFocusHandling();
+      }
+
+      initKeyboard() {
+        const preventKeys = new Set([
+          'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'Escape', 'KeyW', 'KeyS', 'KeyA', 'KeyD'
+        ]);
+
+        window.addEventListener('keydown', (e) => {
+          if (preventKeys.has(e.code) && document.activeElement !== document.body) {
+            // Avoid scroll
+          }
+          if (preventKeys.has(e.code) || e.code === 'Space') {
+            e.preventDefault();
+          }
+
+          switch (e.code) {
+            case 'ArrowLeft':
+            case 'KeyA':
+              this.keys.left = true;
+              break;
+            case 'ArrowRight':
+            case 'KeyD':
+              this.keys.right = true;
+              break;
+            case 'ArrowUp':
+            case 'KeyW':
+              this.keys.up = true;
+              break;
+            case 'ArrowDown':
+            case 'KeyS':
+              this.keys.down = true;
+              break;
+            case 'KeyF':
+            case 'ShiftLeft':
+            case 'ShiftRight':
+            case 'Space':
+              this.keys.turbo = true;
+              break;
+            case 'Escape':
+              if (!e.repeat && this.onPausePress) this.onPausePress();
+              break;
+            case 'KeyR':
+              if (!e.repeat && this.onRestartPress) this.onRestartPress();
+              break;
+            case 'Enter':
+              if (!e.repeat && this.onStartPress) this.onStartPress();
+              break;
+            case 'Backquote':
+            case 'F2':
+              e.preventDefault();
+              if (!e.repeat && this.onDebugToggle) this.onDebugToggle();
+              break;
+            case 'KeyY':
+              if (!e.repeat && this.onDebugYeti) this.onDebugYeti();
+              break;
+          }
+        }, { passive: false });
+
+        window.addEventListener('keyup', (e) => {
+          switch (e.code) {
+            case 'ArrowLeft':
+            case 'KeyA':
+              this.keys.left = false;
+              break;
+            case 'ArrowRight':
+            case 'KeyD':
+              this.keys.right = false;
+              break;
+            case 'ArrowUp':
+            case 'KeyW':
+              this.keys.up = false;
+              break;
+            case 'ArrowDown':
+            case 'KeyS':
+              this.keys.down = false;
+              break;
+            case 'KeyF':
+            case 'ShiftLeft':
+            case 'ShiftRight':
+            case 'Space':
+              this.keys.turbo = false;
+              break;
+          }
+        });
+      }
+
+      bindPointerButton(elemId, stateKey) {
+        const btn = document.getElementById(elemId);
+        if (!btn) return;
+
+        const setPressed = (val) => {
+          this.touchStates[stateKey] = val;
+          if (val) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        };
+
+        btn.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          btn.setPointerCapture(e.pointerId);
+          setPressed(true);
+        }, { passive: false });
+
+        btn.addEventListener('pointerup', (e) => {
+          e.preventDefault();
+          try { btn.releasePointerCapture(e.pointerId); } catch (_) {}
+          setPressed(false);
+        }, { passive: false });
+
+        btn.addEventListener('pointercancel', (e) => {
+          setPressed(false);
+        });
+
+        btn.addEventListener('pointerleave', (e) => {
+          // pointerleave happens when pointer slides off without capture
+          if (!btn.hasPointerCapture(e.pointerId)) {
+            setPressed(false);
+          }
+        });
+      }
+
+      initTouch() {
+        this.bindPointerButton('touch-left', 'left');
+        this.bindPointerButton('touch-right', 'right');
+        this.bindPointerButton('touch-brake', 'brake');
+        this.bindPointerButton('touch-turbo', 'turbo');
+      }
+
+      initFocusHandling() {
+        window.addEventListener('blur', () => {
+          this.clearAllInputs();
+        });
+      }
+
+      clearAllInputs() {
+        for (const k in this.keys) {
+          this.keys[k] = false;
+        }
+        for (const k in this.touchStates) {
+          this.touchStates[k] = false;
+        }
+        document.querySelectorAll('.touch-btn').forEach(btn => btn.classList.remove('active'));
+      }
+
+      // Read combined active inputs
+      isTurningLeft() {
+        return this.keys.left || this.touchStates.left;
+      }
+      isTurningRight() {
+        return this.keys.right || this.touchStates.right;
+      }
+      isBraking() {
+        return this.keys.up || this.touchStates.brake;
+      }
+      isPointingDown() {
+        return this.keys.down;
+      }
+      isTurbo() {
+        return this.keys.turbo || this.touchStates.turbo;
+      }
+    }
+
+    // =========================================================================
+    // 6. SKI TRACKS & PARTICLES (JUICE & RETRO AESTHETICS)
+    // =========================================================================
+    class SkiTracks {
+      constructor(maxTracks = 250) {
+        this.maxTracks = maxTracks;
+        this.tracks = []; // { x1, y1, x2, y2, life, maxLife }
+      }
+
+      reset() {
+        this.tracks = [];
+      }
+
+      addSegment(x1, y1, x2, y2) {
+        this.tracks.push({
+          x1, y1, x2, y2,
+          life: 4.5,
+          maxLife: 4.5
+        });
+        if (this.tracks.length > this.maxTracks) {
+          this.tracks.shift();
+        }
+      }
+
+      update(dt) {
+        for (let i = this.tracks.length - 1; i >= 0; i--) {
+          const t = this.tracks[i];
+          t.life -= dt;
+          if (t.life <= 0) {
+            this.tracks.splice(i, 1);
+          }
+        }
+      }
+
+      draw(ctx, camY) {
+        ctx.save();
+        ctx.lineWidth = 1.8;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#c4daf2';
+
+        for (let i = 0; i < this.tracks.length; i++) {
+          const t = this.tracks[i];
+          if (Math.max(t.y1, t.y2) < camY - 50 || Math.min(t.y1, t.y2) > camY + CONFIG.CANVAS_HEIGHT + 50) continue;
+
+          const alpha = (t.life / t.maxLife) * 0.45;
+          ctx.globalAlpha = alpha;
+          ctx.beginPath();
+          ctx.moveTo(t.x1, t.y1);
+          ctx.lineTo(t.x2, t.y2);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+
+    class ParticleSystem {
+      constructor(maxParticles = 200) {
+        this.maxParticles = maxParticles;
+        this.particles = [];
+      }
+
+      reset() {
+        this.particles = [];
+      }
+
+      emitSnowSpray(x, y, vx, vy, count = 3, color = '#ffffff') {
+        for (let i = 0; i < count; i++) {
+          if (this.particles.length >= this.maxParticles) break;
+          this.particles.push({
+            x, y,
+            vx: vx + (Math.random() - 0.5) * 50,
+            vy: vy + (Math.random() - 0.5) * 30,
+            size: 1.5 + Math.random() * 2.5,
+            life: 0.35 + Math.random() * 0.3,
+            maxLife: 0.6,
+            color
+          });
+        }
+      }
+
+      emitCrashBurst(x, y, count = 25) {
+        for (let i = 0; i < count; i++) {
+          if (this.particles.length >= this.maxParticles) break;
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 40 + Math.random() * 120;
+          this.particles.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            size: 2 + Math.random() * 3.5,
+            life: 0.5 + Math.random() * 0.4,
+            maxLife: 0.9,
+            color: Math.random() < 0.3 ? '#fef08a' : '#ffffff' // star spark or snow
+          });
+        }
+      }
+
+      update(dt) {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+          const p = this.particles[i];
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.vx *= 0.93;
+          p.vy *= 0.93;
+          p.life -= dt;
+          if (p.life <= 0) {
+            this.particles.splice(i, 1);
+          }
+        }
+      }
+
+      draw(ctx, camY) {
+        ctx.save();
+        for (let i = 0; i < this.particles.length; i++) {
+          const p = this.particles[i];
+          if (p.y < camY - 30 || p.y > camY + CONFIG.CANVAS_HEIGHT + 30) continue;
+
+          const alpha = Math.max(0, p.life / p.maxLife);
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+
+    // =========================================================================
+    // 7. PLAYER ENTITY
+    // =========================================================================
+    const PlayerState = Object.freeze({
+      SKIING: 'SKIING',
+      CRASHED: 'CRASHED',
+      INVULNERABLE: 'INVULNERABLE',
+      CAUGHT: 'CAUGHT'
+    });
+
+    class Player {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = 0;                    // Centered on track
+        this.y = 80;                   // Initial downhill start
+        this.prevX = 0;
+        this.prevY = 80;
+        this.vx = 0;
+        this.vy = CONFIG.SPEED_NORMAL_BASE;
+        this.angle = 0;                // 0 rad = straight downhill (+Y)
+        this.targetAngle = 0;
+        this.state = PlayerState.SKIING;
+
+        // Timers
+        this.stateTimer = 0;           // Timer for crash recovery or invulnerability
+
+        // Turbo stamina (Modern mode)
+        this.stamina = 1.0;            // 0.0 to 1.0 (100%)
+        this.isTurboActive = false;
+
+        // Slalom & Jumping mechanics
+        this.score = 0;
+        this.slalomCombo = 0;
+        this.isJumping = false;
+        this.jumpTimer = 0;
+        this.jumpDuration = 0.85;
+        this.airHeight = 0;
+        this.airSpin = 0;
+
+        // Visual animation helper
+        this.carveTimer = 0;
+        this.spinAngle = 0;            // For crash tumble animation
+        this.animTime = 0;             // Continuous animation time for otter tail and scarf
+      }
+
+      update(dt, input, mode, audioManager, skiTracks, particleSystem) {
+        this.animTime = (this.animTime || 0) + dt;
+
+        // Handle CAUGHT state (Yeti got player)
+        if (this.state === PlayerState.CAUGHT) {
+          this.vx = 0;
+          this.vy = 0;
+          return;
+        }
+
+        // Handle CRASHED state
+        if (this.state === PlayerState.CRASHED) {
+          this.stateTimer -= dt;
+          this.spinAngle += dt * 14;   // Spin comically in snow
+          this.vx *= 0.88;
+          this.vy *= 0.88;
+          this.x += this.vx * dt;
+          this.y += this.vy * dt;
+
+          if (this.stateTimer <= 0) {
+            // Recover from crash into invulnerability
+            this.state = PlayerState.INVULNERABLE;
+            this.stateTimer = CONFIG.INVULNERABILITY_DURATION;
+            this.angle = 0;
+            this.targetAngle = 0;
+            this.spinAngle = 0;
+            this.vy = CONFIG.SPEED_NORMAL_BASE * 0.5;
+          }
+          return;
+        }
+
+        // Handle INVULNERABLE timer countdown
+        if (this.state === PlayerState.INVULNERABLE) {
+          this.stateTimer -= dt;
+          if (this.stateTimer <= 0) {
+            this.state = PlayerState.SKIING;
+          }
+        }
+
+        // Handle Jumping physics (aerial trick arc)
+        if (this.isJumping) {
+          this.jumpTimer += dt;
+          const t = Math.min(1.0, this.jumpTimer / this.jumpDuration);
+          this.airHeight = Math.sin(t * Math.PI) * 26; // Visual elevation in 2D pixels
+          this.airSpin = t * Math.PI * 2;              // Full 360-degree trick spin
+
+          if (t >= 1.0) {
+            // Landing!
+            this.isJumping = false;
+            this.airHeight = 0;
+            this.airSpin = 0;
+            this.score += 250;
+            this.vy = Math.max(this.vy, CONFIG.SPEED_NORMAL_BASE * CONFIG.SPEED_TURBO_MULT * 0.95);
+            audioManager.playLanding();
+            particleSystem.emitCrashBurst(this.x, this.y, 20);
+          }
+        }
+
+        // -------------------------------------------------------------
+        // TURBO LOGIC
+        // -------------------------------------------------------------
+        const wantsTurbo = input.isTurbo();
+        this.mode = mode;
+        if (mode === 'classic') {
+          this.isTurboActive = wantsTurbo;
+          this.stamina = 1.0;
+        } else {
+          // Modern Mode: Stamina drain and recharge
+          if (wantsTurbo && this.stamina > 0.05) {
+            this.isTurboActive = true;
+            this.stamina = Math.max(0, this.stamina - (dt / CONFIG.TURBO_DRAIN_TIME));
+          } else {
+            this.isTurboActive = false;
+            this.stamina = Math.min(1.0, this.stamina + (dt / CONFIG.TURBO_RECHARGE_TIME));
+          }
+        }
+
+        // -------------------------------------------------------------
+        // STEERING & ANGLE
+        // -------------------------------------------------------------
+        const isLeft = input.isTurningLeft();
+        const isRight = input.isTurningRight();
+        const isBraking = input.isBraking();
+        const isDown = input.isPointingDown();
+
+        if (isLeft && !isRight) {
+          this.targetAngle = -CONFIG.MAX_TURN_ANGLE;
+        } else if (isRight && !isLeft) {
+          this.targetAngle = CONFIG.MAX_TURN_ANGLE;
+        } else if (isDown) {
+          this.targetAngle = 0; // Quick tuck straight downhill
+        } else {
+          // Natural return towards straight downhill when no keys pressed
+          this.targetAngle = 0;
+        }
+
+        // Smooth angular interpolation with high-speed turbo inertia
+        const turnMult = (mode === 'classic' && this.isTurboActive) ? 0.76 : 1.0;
+        const turnSpeed = (isDown ? CONFIG.TURN_SPEED * 1.6 : CONFIG.TURN_SPEED) * turnMult;
+        if (this.angle < this.targetAngle) {
+          this.angle = Math.min(this.targetAngle, this.angle + turnSpeed * dt);
+        } else if (this.angle > this.targetAngle) {
+          this.angle = Math.max(this.targetAngle, this.angle - turnSpeed * dt);
+        }
+
+        // Sound & Snow spray when carving hard
+        if (Math.abs(this.angle) > 0.55 && Math.abs(this.vx) > 80) {
+          this.carveTimer += dt;
+          if (this.carveTimer > 0.18) {
+            audioManager.playCarve();
+            this.carveTimer = 0;
+          }
+          // Spray snow outward
+          const sprayDir = this.angle > 0 ? -1 : 1;
+          particleSystem.emitSnowSpray(this.x, this.y + 6, sprayDir * 40, -10, 2);
+        }
+
+        // -------------------------------------------------------------
+        // SPEED COMPUTATION
+        // -------------------------------------------------------------
+        let currentBaseSpeed = CONFIG.SPEED_NORMAL_BASE;
+        if (this.isTurboActive) {
+          currentBaseSpeed *= CONFIG.SPEED_TURBO_MULT;
+          // Spray snow behind in turbo
+          particleSystem.emitSnowSpray(this.x, this.y + 12, (Math.random() - 0.5) * 20, -60, 2);
+        }
+
+        if (isBraking) {
+          // Progressive braking
+          this.vy = Math.max(CONFIG.SPEED_BRAKE_MIN, this.vy - CONFIG.BRAKE_DECEL * dt);
+          particleSystem.emitSnowSpray(this.x - 8, this.y, -30, -20, 1);
+          particleSystem.emitSnowSpray(this.x + 8, this.y, 30, -20, 1);
+        } else {
+          // Accelerate back to target downhill speed
+          // Turning sharply reduces downhill component: cos(angle)
+          const targetVy = currentBaseSpeed * Math.max(0.25, Math.cos(this.angle));
+          if (this.vy < targetVy) {
+            this.vy = Math.min(targetVy, this.vy + CONFIG.DOWN_ACCEL * dt);
+          } else if (this.vy > targetVy) {
+            this.vy = Math.max(targetVy, this.vy - CONFIG.DOWN_ACCEL * 1.5 * dt);
+          }
+        }
+
+        // Lateral speed derived from angle
+        const targetVx = currentBaseSpeed * Math.sin(this.angle);
+        this.vx += (targetVx - this.vx) * 0.22;
+
+        // -------------------------------------------------------------
+        // POSITION UPDATE & TRACK BOUNDARIES
+        // -------------------------------------------------------------
+        this.prevX = this.x;
+        this.prevY = this.y;
+
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+
+        // Keep strictly within lateral boundaries
+        const bound = CONFIG.TRACK_HALF_WIDTH - 6;
+        if (this.x < -bound) {
+          this.x = -bound;
+          this.vx = 0;
+          if (this.angle < 0) this.angle = 0;
+        } else if (this.x > bound) {
+          this.x = bound;
+          this.vx = 0;
+          if (this.angle > 0) this.angle = 0;
+        }
+
+        // -------------------------------------------------------------
+        // SKI TRACKS GENERATION
+        // -------------------------------------------------------------
+        if (!this.isJumping && Math.hypot(this.x - this.prevX, this.y - this.prevY) > 6) {
+          // Two ski lines spaced ~6 units apart
+          const perpX = Math.cos(this.angle);
+          const perpY = -Math.sin(this.angle);
+          const offset = 4;
+
+          skiTracks.addSegment(
+            this.prevX - perpX * offset, this.prevY - perpY * offset,
+            this.x - perpX * offset, this.y - perpY * offset
+          );
+          skiTracks.addSegment(
+            this.prevX + perpX * offset, this.prevY + perpY * offset,
+            this.x + perpX * offset, this.y + perpY * offset
+          );
+        }
+
+        // Audio update
+        const speedRatio = this.vy / (CONFIG.SPEED_NORMAL_BASE * CONFIG.SPEED_TURBO_MULT);
+        audioManager.updateGlideSound(speedRatio, true, this.isTurboActive);
+      }
+
+      triggerCrash(audioManager, particleSystem) {
+        if (this.state === PlayerState.CRASHED || this.state === PlayerState.INVULNERABLE) return;
+        this.state = PlayerState.CRASHED;
+        this.stateTimer = CONFIG.CRASH_DURATION;
+        this.isTurboActive = false;
+        audioManager.playCrash();
+        particleSystem.emitCrashBurst(this.x, this.y);
+      }
+
+      getHitbox() {
+        // Skier footprint hitbox: compact 14x16 box around base
+        return {
+          x: this.x - 7,
+          y: this.y - 4,
+          w: 14,
+          h: 12
+        };
+      }
+
+      draw(ctx) {
+        const isBraking = Math.abs(this.angle) < 0.25 && this.vy < CONFIG.SPEED_NORMAL_BASE * 0.75;
+        dibujarNutria(ctx, {
+          x: this.x,
+          y: this.y,
+          angulo: this.angle,
+          escala: 0.55,
+          tiempo: this.animTime || 0,
+          isBraking,
+          isTurbo: this.isTurboActive,
+          isJumping: this.isJumping,
+          airHeight: this.airHeight,
+          airSpin: this.airSpin,
+          isCrashed: this.state === PlayerState.CRASHED,
+          spinAngle: this.spinAngle,
+          isInvulnerable: this.state === PlayerState.INVULNERABLE,
+          stateTimer: this.stateTimer
+        });
+      }
+    }
+
+    /**
+     * Dibuja a la Nutria Esquiadora protagonista en Canvas 2D.
+     * Incluye casco dorado, gafas, bufanda al viento, dos esquís turquesas y cola dinámica reactiva al giro.
+     */
+    function dibujarNutria(ctx, {
+      x, y, angulo = 0, escala = 0.55, tiempo = 0,
+      isBraking = false, isTurbo = false, isJumping = false,
+      airHeight = 0, airSpin = 0, isCrashed = false,
+      spinAngle = 0, isInvulnerable = false, stateTimer = 0
+    }) {
+      const ovalo = (cx, cy, rx, ry, color) => {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+        ctx.fill();
+      };
+
+      const linea = (x1, y1, x2, y2, color, grosor) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = grosor;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      };
+
+      ctx.save();
+      ctx.translate(x, y);
+
+      // Parpadeo durante el estado de invulnerabilidad tras caída
+      if (isInvulnerable && Math.floor(stateTimer * 12) % 2 === 0) {
+        ctx.globalAlpha = 0.45;
+      }
+
+      // Sombra proyectada en la nieve (escala y se contrae durante salto aéreo)
+      ctx.fillStyle = 'rgba(180, 205, 225, 0.55)';
+      ctx.beginPath();
+      if (isJumping) {
+        ctx.ellipse(0, 8 + airHeight * 0.75, Math.max(3, 14 - airHeight * 0.3), Math.max(1.5, 6 - airHeight * 0.12), 0, 0, Math.PI * 2);
+      } else {
+        ctx.ellipse(0, 8, 14, 6, 0, 0, Math.PI * 2);
+      }
+      ctx.fill();
+
+      // Desplazamiento y truco acrobático 360° en saltos
+      if (isJumping) {
+        ctx.translate(0, -airHeight);
+        ctx.rotate(airSpin);
+      }
+
+      // Animación de choque cómico (tumble en nieve con esquís disparados)
+      if (isCrashed) {
+        ctx.rotate(spinAngle);
+
+        // Esquís turquesas cruzados
+        linea(-14, -12, 14, 12, '#16b8c4', 3.5);
+        linea(-14, 12, 14, -12, '#16b8c4', 3.5);
+
+        // Puntas curvadas
+        linea(-14, -12, -11, -15, '#e4fcff', 2);
+        linea(14, 12, 17, 15, '#e4fcff', 2);
+
+        // Cuerpo rodante de la nutria
+        ovalo(0, 0, 10, 10, '#875735');
+        ovalo(0, 0, 5, 5, '#e8c69c');
+
+        // Casco caído
+        ovalo(8, -8, 5, 4, '#f5b936');
+
+        // Bufanda flotante
+        linea(-8, -4, 8, 8, '#ff684a', 4);
+
+        ctx.restore();
+        return;
+      }
+
+      // Orientación en descenso (dirección local +Y = hacia abajo de la pista)
+      ctx.rotate(angulo);
+      ctx.scale(escala, escala);
+
+      // Sombra suave bajo el vientre
+      ovalo(2, 6, 20, 28, "rgba(20, 45, 65, 0.16)");
+
+      // Esquís turquesas y fijaciones (abren en cuña V si frena en snowplow)
+      const brakeAngle = isBraking ? 0.28 : 0;
+      for (const lado of [-1, 1]) {
+        ctx.save();
+        if (isBraking) {
+          ctx.translate(lado * 12, 6);
+          ctx.rotate(lado * brakeAngle);
+          ctx.translate(-lado * 12, -6);
+        }
+        // Esquí base
+        linea(lado * 12, -22, lado * 12, 34, "#16b8c4", 7);
+        // Espátula / punta delantera
+        linea(lado * 12, 22, lado * 12, 32, "#e4fcff", 2.5);
+        // Fijación oscura
+        ovalo(lado * 12, 5, 5, 7, "#243346");
+        ctx.restore();
+      }
+
+      // Bastones de esquí con arandelas
+      linea(-14, -2, -21, 16, "#475569", 2);
+      linea(14, -2, 21, 16, "#475569", 2);
+      ovalo(-21, 16, 3, 2, "#1e293b");
+      ovalo(21, 16, 3, 2, "#1e293b");
+
+      // Cola visible: decorativa, situada detrás del cuerpo (-Y local)
+      // Se balancea orgánicamente con el tiempo y reacciona fuertemente al ángulo de giro
+      ctx.save();
+      ctx.translate(0, -12);
+      const balanceoCola = Math.sin(tiempo * 7) * 0.16 - angulo * 0.45;
+      ctx.rotate(balanceoCola);
+      ovalo(0, -13, 7, 20, "#67412d");
+      ctx.restore();
+
+      // Patas traseras y cuerpo aerodinámico
+      ovalo(-15, 3, 6, 11, "#754b32");
+      ovalo(15, 3, 6, 11, "#754b32");
+      ovalo(0, 0, 14, 21, "#875735");
+      ovalo(0, 6, 9, 12, "#c79866"); // Vientre claro
+
+      // Bufanda con extremo ondeante al viento
+      linea(-9, 12, 9, 12, "#ff684a", 6);
+      const scarfWind = Math.sin(tiempo * (isTurbo ? 16 : 9)) * (isTurbo ? 5.5 : 3.2);
+      linea(8, 12, 21 + scarfWind, -5, "#ff684a", 5);
+
+      // Orejas, cabeza y hocico
+      ovalo(-10, 16, 5, 5, "#67412d");
+      ovalo(10, 16, 5, 5, "#67412d");
+      ovalo(0, 19, 12, 11, "#875735");
+      ovalo(0, 25, 8, 5, "#e8c69c");
+      ovalo(0, 27, 3, 2, "#25242a"); // Trufa negra
+
+      // Casco protector y gafas de ventisca
+      ovalo(0, 15, 11, 7, "#f5b936"); // Casco dorado
+      linea(-7, 21, 7, 21, "#243346", 5); // Montura de gafas
+      linea(-5, 20, 0, 20, "#bdefff", 1.8); // Reflejo en lente
+
+      // Bigotes finos de nutria
+      for (const lado of [-1, 1]) {
+        linea(lado * 5, 25, lado * 15, 23, "#f4dfbd", 1);
+        linea(lado * 5, 27, lado * 15, 28, "#f4dfbd", 1);
+      }
+
+      // Propulsión / glow al activar turbo
+      if (isTurbo) {
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-6, -22);
+        ctx.lineTo(-6, -35 - Math.random() * 8);
+        ctx.moveTo(6, -22);
+        ctx.lineTo(6, -35 - Math.random() * 8);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(-6, -22);
+        ctx.lineTo(-6, -28 - Math.random() * 5);
+        ctx.moveTo(6, -22);
+        ctx.lineTo(6, -28 - Math.random() * 5);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    // =========================================================================
+    // 8. WORLD GENERATOR & OBSTACLES
+    // =========================================================================
+    const ObstacleType = Object.freeze({
+      PINE_SMALL: 'PINE_SMALL',
+      PINE_TALL: 'PINE_TALL',
+      ROCK: 'ROCK',
+      FLAG_GATE: 'FLAG_GATE',
+      SNOWMAN: 'SNOWMAN',
+      SLALOM_GATE: 'SLALOM_GATE',
+      RAMP: 'RAMP'
+    });
+
+    class WorldGenerator {
+      constructor(prng) {
+        this.prng = prng;
+        this.obstacles = [];
+        this.nextGenY = 320; // First obstacle segment starts safely downhill from player
+        this.corridorCenter = 0;
+      }
+
+      reset(seed) {
+        this.prng.reseed(seed);
+        this.obstacles = [];
+        this.nextGenY = 320;
+        this.corridorCenter = 0;
+
+        // Pre-generate initial chunks downhill
+        this.generateUntil(CONFIG.CANVAS_HEIGHT * 2.2, 'classic');
+      }
+
+      update(playerY, mode) {
+        // Keep generating chunks ahead of the camera viewport
+        const targetHorizon = playerY + CONFIG.CANVAS_HEIGHT * 2.2;
+        if (this.nextGenY < targetHorizon) {
+          this.generateUntil(targetHorizon, mode);
+        }
+
+        // Cull obstacles that have passed far behind camera
+        const cullThreshold = playerY - CONFIG.CANVAS_HEIGHT * 0.8;
+        this.obstacles = this.obstacles.filter(obs => obs.y > cullThreshold);
+      }
+
+      generateUntil(targetY, mode) {
+        while (this.nextGenY < targetY) {
+          this.generateRow(this.nextGenY, mode);
+          this.nextGenY += CONFIG.SEGMENT_STEP;
+        }
+      }
+
+      generateRow(rowY, mode) {
+        // Guaranteed traversable corridor weaves gently downhill
+        this.corridorCenter = Math.sin(rowY * 0.0022) * 100 + Math.sin(rowY * 0.0055) * 40;
+        this.corridorCenter = Math.max(-110, Math.min(110, this.corridorCenter));
+
+        // Density scaling:
+        let density = 0.30;
+        if (mode === 'modern') {
+          const depthRatio = Math.min(1.0, rowY / 35000);
+          density = 0.26 + depthRatio * 0.16; // up to 0.42
+        }
+
+        // 9 obstacle lanes covering the full width from -190 to +190 uniformly
+        const lanes = 9;
+        const minX = -190;
+        const maxX = 190;
+        const laneSpan = (maxX - minX) / (lanes - 1);
+
+        for (let i = 0; i < lanes; i++) {
+          const laneX = minX + i * laneSpan + this.prng.range(-6, 6);
+
+          // Corridor check: NEVER spawn within safe corridor!
+          const distToCorridor = Math.abs(laneX - this.corridorCenter);
+          if (distToCorridor < CONFIG.SAFE_CORRIDOR_WIDTH * 0.45) {
+            continue;
+          }
+
+          if (this.prng.chance(density)) {
+            // Check minimum spacing from other recent obstacles
+            let tooClose = false;
+            for (let j = this.obstacles.length - 1; j >= Math.max(0, this.obstacles.length - 16); j--) {
+              const other = this.obstacles[j];
+              if (Math.hypot(other.x - laneX, other.y - rowY) < CONFIG.MIN_OBSTACLE_SPACING) {
+                tooClose = true;
+                break;
+              }
+            }
+
+            if (!tooClose) {
+              const obs = this.createRandomObstacle(laneX, rowY);
+              this.obstacles.push(obs);
+            }
+          }
+        }
+
+        // Staggered border trees right along the boundary edges (guarding the borders)
+        // Inner border trees (guard the exact track edge)
+        this.obstacles.push({
+          type: ObstacleType.PINE_TALL,
+          x: -CONFIG.TRACK_HALF_WIDTH - this.prng.range(-2, 6),
+          y: rowY - 16 + this.prng.range(-4, 4),
+          collided: false,
+          scale: 1.1 + this.prng.range(-0.05, 0.15)
+        });
+        this.obstacles.push({
+          type: ObstacleType.PINE_TALL,
+          x: CONFIG.TRACK_HALF_WIDTH + this.prng.range(-2, 6),
+          y: rowY - 16 + this.prng.range(-4, 4),
+          collided: false,
+          scale: 1.1 + this.prng.range(-0.05, 0.15)
+        });
+
+        // Outer border trees
+        this.obstacles.push({
+          type: ObstacleType.PINE_TALL,
+          x: -CONFIG.TRACK_HALF_WIDTH - this.prng.range(8, 20),
+          y: rowY + 16 + this.prng.range(-4, 4),
+          collided: false,
+          scale: 1.1 + this.prng.range(-0.05, 0.15)
+        });
+        this.obstacles.push({
+          type: ObstacleType.PINE_TALL,
+          x: CONFIG.TRACK_HALF_WIDTH + this.prng.range(8, 20),
+          y: rowY + 16 + this.prng.range(-4, 4),
+          collided: false,
+          scale: 1.1 + this.prng.range(-0.05, 0.15)
+        });
+
+        // Boundary flags on the track boundary line
+        if (this.prng.chance(0.4)) {
+          this.obstacles.push({
+            type: ObstacleType.FLAG_GATE,
+            x: -CONFIG.TRACK_HALF_WIDTH,
+            y: rowY,
+            collided: false,
+            scale: 1.0
+          });
+        }
+        if (this.prng.chance(0.4)) {
+          this.obstacles.push({
+            type: ObstacleType.FLAG_GATE,
+            x: CONFIG.TRACK_HALF_WIDTH,
+            y: rowY,
+            collided: false,
+            scale: 1.0
+          });
+        }
+
+        // Slalom gates placed directly along the safe traversable corridor
+        const rowStepIndex = Math.round(rowY / CONFIG.SEGMENT_STEP);
+        if (rowY > 300 && rowStepIndex % 3 === 0) {
+          this.obstacles.push({
+            type: ObstacleType.SLALOM_GATE,
+            x: this.corridorCenter,
+            y: rowY,
+            gateWidth: 64,
+            isBlue: rowStepIndex % 2 === 0,
+            cleared: false,
+            collided: false,
+            scale: 1.0
+          });
+        }
+
+        // Jump Ramps placed along safe corridor
+        if (rowY > 500 && rowStepIndex % 6 === 2) {
+          this.obstacles.push({
+            type: ObstacleType.RAMP,
+            x: this.corridorCenter,
+            y: rowY,
+            cleared: false,
+            collided: false,
+            scale: 1.0
+          });
+        }
+      }
+
+      createRandomObstacle(x, y) {
+        const roll = this.prng.next();
+        let type = ObstacleType.PINE_SMALL;
+
+        if (roll < 0.45) {
+          type = ObstacleType.PINE_SMALL;
+        } else if (roll < 0.75) {
+          type = ObstacleType.PINE_TALL;
+        } else if (roll < 0.90) {
+          type = ObstacleType.ROCK;
+        } else if (roll < 0.96) {
+          type = ObstacleType.FLAG_GATE;
+        } else {
+          type = ObstacleType.SNOWMAN;
+        }
+
+        return {
+          type,
+          x,
+          y,
+          collided: false,
+          scale: 0.9 + this.prng.range(-0.1, 0.2)
+        };
+      }
+
+      getHitbox(obs) {
+        // Tight, fair hitboxes:
+        // Tree collision is strictly at the trunk base, not upper needles/foliage!
+        switch (obs.type) {
+          case ObstacleType.SLALOM_GATE:
+          case ObstacleType.RAMP:
+            return null; // Triggers evaluated via swept line in CollisionSystem
+          case ObstacleType.PINE_SMALL:
+            return {
+              x: obs.x - 7 * obs.scale,
+              y: obs.y + 4 * obs.scale,
+              w: 14 * obs.scale,
+              h: 10 * obs.scale
+            };
+          case ObstacleType.PINE_TALL:
+            return {
+              x: obs.x - 8 * obs.scale,
+              y: obs.y + 12 * obs.scale,
+              w: 16 * obs.scale,
+              h: 12 * obs.scale
+            };
+          case ObstacleType.ROCK:
+            return {
+              x: obs.x - 11 * obs.scale,
+              y: obs.y - 4 * obs.scale,
+              w: 22 * obs.scale,
+              h: 12 * obs.scale
+            };
+          case ObstacleType.FLAG_GATE:
+            return {
+              x: obs.x - 4 * obs.scale,
+              y: obs.y - 2 * obs.scale,
+              w: 8 * obs.scale,
+              h: 8 * obs.scale
+            };
+          case ObstacleType.SNOWMAN:
+            return {
+              x: obs.x - 8 * obs.scale,
+              y: obs.y + 2 * obs.scale,
+              w: 16 * obs.scale,
+              h: 12 * obs.scale
+            };
+          default:
+            return { x: obs.x - 6, y: obs.y - 6, w: 12, h: 12 };
+        }
+      }
+
+      drawObstacle(ctx, obs) {
+        const s = obs.scale;
+
+        ctx.save();
+        ctx.translate(obs.x, obs.y);
+
+        switch (obs.type) {
+          case ObstacleType.SLALOM_GATE:
+            this.drawSlalomGate(ctx, obs);
+            break;
+          case ObstacleType.RAMP:
+            this.drawRamp(ctx, obs);
+            break;
+          case ObstacleType.PINE_SMALL:
+            this.drawPineSmall(ctx, s);
+            break;
+          case ObstacleType.PINE_TALL:
+            this.drawPineTall(ctx, s);
+            break;
+          case ObstacleType.ROCK:
+            this.drawRock(ctx, s);
+            break;
+          case ObstacleType.FLAG_GATE:
+            this.drawFlag(ctx, s);
+            break;
+          case ObstacleType.SNOWMAN:
+            this.drawSnowman(ctx, s);
+            break;
+        }
+
+        ctx.restore();
+      }
+
+      drawPineSmall(ctx, s) {
+        // Drop shadow
+        ctx.fillStyle = 'rgba(180, 205, 225, 0.5)';
+        ctx.beginPath();
+        ctx.ellipse(3 * s, 12 * s, 14 * s, 6 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Trunk
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(-3 * s, 4 * s, 6 * s, 10 * s);
+
+        // Foliage tier (2 layered triangles with snow caps)
+        ctx.fillStyle = '#166534';
+        ctx.beginPath();
+        ctx.moveTo(0, -18 * s);
+        ctx.lineTo(-14 * s, 6 * s);
+        ctx.lineTo(14 * s, 6 * s);
+        ctx.closePath();
+        ctx.fill();
+
+        // Snow top
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.moveTo(0, -18 * s);
+        ctx.lineTo(-7 * s, -8 * s);
+        ctx.lineTo(7 * s, -8 * s);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      drawPineTall(ctx, s) {
+        // Shadow
+        ctx.fillStyle = 'rgba(180, 205, 225, 0.55)';
+        ctx.beginPath();
+        ctx.ellipse(4 * s, 20 * s, 20 * s, 8 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Trunk
+        ctx.fillStyle = '#451a03';
+        ctx.fillRect(-4 * s, 8 * s, 8 * s, 14 * s);
+
+        // Bottom tier
+        ctx.fillStyle = '#14532d';
+        ctx.beginPath();
+        ctx.moveTo(0, -10 * s);
+        ctx.lineTo(-20 * s, 12 * s);
+        ctx.lineTo(20 * s, 12 * s);
+        ctx.closePath();
+        ctx.fill();
+
+        // Middle tier
+        ctx.fillStyle = '#166534';
+        ctx.beginPath();
+        ctx.moveTo(0, -26 * s);
+        ctx.lineTo(-16 * s, -2 * s);
+        ctx.lineTo(16 * s, -2 * s);
+        ctx.closePath();
+        ctx.fill();
+
+        // Top tier
+        ctx.fillStyle = '#15803d';
+        ctx.beginPath();
+        ctx.moveTo(0, -38 * s);
+        ctx.lineTo(-11 * s, -18 * s);
+        ctx.lineTo(11 * s, -18 * s);
+        ctx.closePath();
+        ctx.fill();
+
+        // Snow patches on boughs
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.moveTo(0, -38 * s);
+        ctx.lineTo(-5 * s, -30 * s);
+        ctx.lineTo(5 * s, -30 * s);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillRect(-12 * s, -3 * s, 24 * s, 2.5 * s);
+        ctx.fillRect(-16 * s, 10 * s, 32 * s, 3 * s);
+      }
+
+      drawRock(ctx, s) {
+        // Shadow
+        ctx.fillStyle = 'rgba(180, 205, 225, 0.5)';
+        ctx.beginPath();
+        ctx.ellipse(3 * s, 6 * s, 14 * s, 6 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Granite Boulder Body
+        ctx.fillStyle = '#475569';
+        ctx.beginPath();
+        ctx.moveTo(-13 * s, 4 * s);
+        ctx.lineTo(-9 * s, -8 * s);
+        ctx.lineTo(6 * s, -10 * s);
+        ctx.lineTo(14 * s, 0);
+        ctx.lineTo(10 * s, 6 * s);
+        ctx.lineTo(-8 * s, 7 * s);
+        ctx.closePath();
+        ctx.fill();
+
+        // Facet shading
+        ctx.fillStyle = '#334155';
+        ctx.beginPath();
+        ctx.moveTo(0, -9 * s);
+        ctx.lineTo(14 * s, 0);
+        ctx.lineTo(10 * s, 6 * s);
+        ctx.lineTo(2 * s, 6 * s);
+        ctx.closePath();
+        ctx.fill();
+
+        // Snow Cap
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.moveTo(-9 * s, -8 * s);
+        ctx.lineTo(6 * s, -10 * s);
+        ctx.lineTo(8 * s, -6 * s);
+        ctx.lineTo(-5 * s, -4 * s);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      drawFlag(ctx, s) {
+        // Slalom flag
+        ctx.strokeStyle = '#0284c7';
+        ctx.lineWidth = 2 * s;
+        ctx.beginPath();
+        ctx.moveTo(0, 8 * s);
+        ctx.lineTo(0, -18 * s);
+        ctx.stroke();
+
+        // Banner
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(0, -18 * s);
+        ctx.lineTo(14 * s, -12 * s);
+        ctx.lineTo(0, -6 * s);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      drawSnowman(ctx, s) {
+        // Shadow
+        ctx.fillStyle = 'rgba(180, 205, 225, 0.5)';
+        ctx.beginPath();
+        ctx.ellipse(2 * s, 12 * s, 12 * s, 5 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bottom ball
+        ctx.fillStyle = '#f1f5f9';
+        ctx.beginPath();
+        ctx.arc(0, 6 * s, 8 * s, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Top ball
+        ctx.beginPath();
+        ctx.arc(0, -4 * s, 5.5 * s, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Coal eyes
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-2.5 * s, -6 * s, 1.5 * s, 1.5 * s);
+        ctx.fillRect(1.5 * s, -6 * s, 1.5 * s, 1.5 * s);
+
+        // Carrot nose
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath();
+        ctx.moveTo(0, -4 * s);
+        ctx.lineTo(5 * s, -3.5 * s);
+        ctx.lineTo(0, -3 * s);
+        ctx.fill();
+
+        // Top Hat
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(-6 * s, -10 * s, 12 * s, 2 * s);
+        ctx.fillRect(-3.5 * s, -16 * s, 7 * s, 6 * s);
+      }
+
+      drawSlalomGate(ctx, obs) {
+        const half = (obs.gateWidth || 64) / 2;
+        const color = obs.cleared ? '#10b981' : (obs.isBlue ? '#38bdf8' : '#ef4444');
+        const flagColor = obs.cleared ? '#34d399' : (obs.isBlue ? '#0284c7' : '#dc2626');
+
+        // Dashed crossing line between poles
+        ctx.save();
+        ctx.strokeStyle = obs.cleared ? 'rgba(16, 185, 129, 0.4)' : 'rgba(56, 189, 248, 0.45)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(-half, 0);
+        ctx.lineTo(half, 0);
+        ctx.stroke();
+        ctx.restore();
+
+        // Left and right slalom poles with fluttering triangular banners
+        for (const side of [-1, 1]) {
+          const px = side * half;
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 2.2;
+          ctx.beginPath();
+          ctx.moveTo(px, 6);
+          ctx.lineTo(px, -20);
+          ctx.stroke();
+
+          ctx.fillStyle = flagColor;
+          ctx.beginPath();
+          ctx.moveTo(px, -20);
+          ctx.lineTo(px + (side * -12), -14);
+          ctx.lineTo(px, -8);
+          ctx.closePath();
+          ctx.fill();
+
+          // Pole base in snow
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(px, 6, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      drawRamp(ctx, obs) {
+        // Acrobatic Snow Ramp Wedge
+        ctx.fillStyle = 'rgba(180, 205, 225, 0.6)';
+        ctx.beginPath();
+        ctx.ellipse(0, 10, 24, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Ramp incline body
+        ctx.fillStyle = '#bae6fd';
+        ctx.beginPath();
+        ctx.moveTo(-20, -10);
+        ctx.lineTo(20, -10);
+        ctx.lineTo(22, 10);
+        ctx.lineTo(-22, 10);
+        ctx.closePath();
+        ctx.fill();
+
+        // Wooden/Ice kicker edge
+        ctx.fillStyle = '#0284c7';
+        ctx.fillRect(-22, 8, 44, 3.5);
+
+        // Snow surface sheen
+        ctx.fillStyle = '#f0f9ff';
+        ctx.beginPath();
+        ctx.moveTo(-18, -8);
+        ctx.lineTo(18, -8);
+        ctx.lineTo(19, 6);
+        ctx.lineTo(-19, 6);
+        ctx.closePath();
+        ctx.fill();
+
+        // Jumping Chevron indicator
+        ctx.fillStyle = obs.cleared ? '#94a3b8' : '#f59e0b';
+        ctx.beginPath();
+        ctx.moveTo(0, -6);
+        ctx.lineTo(6, 2);
+        ctx.lineTo(-6, 2);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    // =========================================================================
+    // 9. COLLISION SYSTEM
+    // =========================================================================
+    class CollisionSystem {
+      static checkAABB(b1, b2) {
+        return (
+          b1.x < b2.x + b2.w &&
+          b1.x + b1.w > b2.x &&
+          b1.y < b2.y + b2.h &&
+          b1.y + b1.h > b2.y
+        );
+      }
+
+      static update(player, worldGen, audioManager, particleSystem) {
+        if (player.state === PlayerState.CRASHED || player.state === PlayerState.CAUGHT) {
+          return;
+        }
+
+        // 1. Process Slalom Gates and Acrobatic Jump Ramps
+        for (let i = 0; i < worldGen.obstacles.length; i++) {
+          const obs = worldGen.obstacles[i];
+
+          // Slalom gate crossing
+          if (obs.type === ObstacleType.SLALOM_GATE && !obs.cleared) {
+            if (player.prevY <= obs.y && player.y >= obs.y) {
+              const half = (obs.gateWidth || 64) / 2;
+              if (Math.abs(player.x - obs.x) <= half) {
+                obs.cleared = true;
+                player.slalomCombo = (player.slalomCombo || 0) + 1;
+                if (player.mode === 'classic') {
+                  player.vy = Math.min(CONFIG.SPEED_NORMAL_BASE * CONFIG.SPEED_TURBO_MULT + 50, player.vy + 45);
+                  player.score = (player.score || 0) + 150 * player.slalomCombo;
+                } else {
+                  player.score = (player.score || 0) + 100 * player.slalomCombo;
+                  player.stamina = Math.min(1.0, player.stamina + 0.25);
+                }
+                audioManager.playGateChime();
+                particleSystem.emitSnowSpray(player.x, player.y, 0, -20, 10, obs.isBlue ? '#38bdf8' : '#ef4444');
+              }
+            }
+          }
+
+          // Ramp takeoff
+          if (obs.type === ObstacleType.RAMP && !obs.cleared && !player.isJumping) {
+            if (player.prevY <= obs.y && player.y >= obs.y) {
+              if (Math.abs(player.x - obs.x) <= 22) {
+                obs.cleared = true;
+                player.isJumping = true;
+                player.jumpTimer = 0;
+                audioManager.playJump();
+                particleSystem.emitSnowSpray(player.x, player.y, 0, -50, 14, '#ffffff');
+              }
+            }
+          }
+        }
+
+        // When airborne during a ramp jump or invulnerable, player vaults over obstacles
+        if (player.isJumping || player.state === PlayerState.INVULNERABLE) {
+          return;
+        }
+
+        const playerBox = player.getHitbox();
+
+        // Check against active hazardous obstacles
+        for (let i = 0; i < worldGen.obstacles.length; i++) {
+          const obs = worldGen.obstacles[i];
+          if (obs.collided || obs.type === ObstacleType.SLALOM_GATE || obs.type === ObstacleType.RAMP) continue;
+
+          const obsBox = worldGen.getHitbox(obs);
+          if (obsBox && this.checkAABB(playerBox, obsBox)) {
+            obs.collided = true;
+            player.triggerCrash(audioManager, particleSystem);
+            break;
+          }
+        }
+      }
+    }
+
+    // =========================================================================
+    // 10. YETI CONTROLLER (AI, CHASE, STUMBLE, ESCAPE)
+    // =========================================================================
+    const YetiState = Object.freeze({
+      INACTIVE: 'INACTIVE',
+      WARNING: 'WARNING',
+      SPAWNING: 'SPAWNING',
+      CHASING: 'CHASING',
+      STUMBLED: 'STUMBLED',
+      ESCAPED: 'ESCAPED',
+      CAPTURED: 'CAPTURED'
+    });
+
+    class YetiController {
+      constructor() {
+        this.reset();
+      }
+
+      reset(spawnMeters = CONFIG.YETI_SPAWN_METERS) {
+        this.state = YetiState.INACTIVE;
+        this.x = 0;
+        this.y = -1000;
+        this.vx = 0;
+        this.vy = 0;
+        this.stateTimer = 0;
+        this.escapeTimer = 0;
+
+        // Next spawn threshold in meters
+        this.nextSpawnMeters = spawnMeters;
+
+        // Animation counters
+        this.runCycle = 0;
+        this.victoryTimer = 0;
+      }
+
+      triggerSpawn(playerY) {
+        if (this.state !== YetiState.INACTIVE) return;
+        this.state = YetiState.WARNING;
+        this.stateTimer = CONFIG.YETI_WARNING_DURATION;
+      }
+
+      update(dt, player, worldGen, audioManager, particleSystem, onCapture, onEscape) {
+        const playerDistanceMeters = player.y / CONFIG.UNITS_PER_METER;
+
+        // Trigger spawn when threshold crossed
+        if (this.state === YetiState.INACTIVE && playerDistanceMeters >= this.nextSpawnMeters) {
+          this.triggerSpawn(player.y);
+          audioManager.playYetiRoar();
+        }
+
+        // -------------------------------------------------------------
+        // STATE MACHINE
+        // -------------------------------------------------------------
+        switch (this.state) {
+          case YetiState.INACTIVE:
+            break;
+
+          case YetiState.WARNING:
+            this.stateTimer -= dt;
+            if (this.stateTimer <= 0) {
+              // Introduce Yeti from behind, directly inside top visible area
+              this.state = YetiState.SPAWNING;
+              this.x = player.x + (Math.random() - 0.5) * 50;
+              this.y = player.y - 180; // Right at top edge of visible screen
+              this.vx = 0;
+              this.vy = CONFIG.SPEED_NORMAL_BASE * CONFIG.YETI_SPEED_MULT * 1.1;
+              this.stateTimer = 0.35;
+              this.escapeTimer = 0;
+              particleSystem.emitCrashBurst(this.x, this.y, 25);
+            }
+            break;
+
+          case YetiState.SPAWNING:
+            this.stateTimer -= dt;
+            this.y += this.vy * dt;
+            if (this.stateTimer <= 0) {
+              this.state = YetiState.CHASING;
+            }
+            break;
+
+          case YetiState.CHASING:
+          case YetiState.STUMBLED:
+            this.updateChase(dt, player, worldGen, audioManager, particleSystem, onCapture, onEscape);
+            break;
+
+          case YetiState.ESCAPED:
+            this.stateTimer -= dt;
+            // Yeti falls behind and stops chasing
+            this.vy = CONFIG.SPEED_NORMAL_BASE * 0.3;
+            this.y += this.vy * dt;
+            if (this.stateTimer <= 0) {
+              this.state = YetiState.INACTIVE;
+              // Schedule next encounter after respawn meters
+              this.nextSpawnMeters = (player.y / CONFIG.UNITS_PER_METER) + CONFIG.YETI_RESPAWN_METERS;
+            }
+            break;
+
+          case YetiState.CAPTURED:
+            this.victoryTimer += dt;
+            break;
+        }
+      }
+
+      updateChase(dt, player, worldGen, audioManager, particleSystem, onCapture, onEscape) {
+        this.runCycle += dt * 9;
+
+        // Handle STUMBLED recovery
+        if (this.state === YetiState.STUMBLED) {
+          this.stateTimer -= dt;
+          this.vy = CONFIG.SPEED_NORMAL_BASE * 0.4;
+          this.vx *= 0.85;
+          this.y += this.vy * dt;
+          this.x += this.vx * dt;
+
+          if (this.stateTimer <= 0) {
+            this.state = YetiState.CHASING;
+          }
+          return;
+        }
+
+        // Predictive Lead Interception (Lead Pursuit Algorithm)
+        const relativeSpeed = Math.max(10, (CONFIG.SPEED_NORMAL_BASE * CONFIG.YETI_SPEED_MULT) - (player.vy || 0) * 0.5);
+        const timeToIntercept = Math.min(1.8, Math.max(0.2, (player.y - this.y) / relativeSpeed));
+        const leadTargetX = player.x + (player.vx || 0) * timeToIntercept * 0.85;
+        const leadTargetY = player.y + (player.vy || 0) * timeToIntercept * 0.35;
+
+        // Sensory Obstacle Avoidance: scans nearby trees/rocks to dodge stumbles
+        let avoidX = 0, avoidY = 0;
+        const scanDist = 110;
+        for (let i = 0; i < worldGen.obstacles.length; i++) {
+          const obs = worldGen.obstacles[i];
+          if (obs.collided || obs.y < this.y - 10 || obs.y > this.y + scanDist) continue;
+          const odx = obs.x - this.x;
+          const ody = obs.y - this.y;
+          const odist = Math.hypot(odx, ody);
+          if (odist < 52) {
+            const weight = (1 - odist / 52) * 1.6;
+            avoidX -= (odx / (odist || 1)) * weight;
+            avoidY -= (ody / (odist || 1)) * weight;
+          }
+        }
+
+        // Target: blended predictive intercept + obstacle repulsion
+        const dx = (leadTargetX + avoidX * 45) - this.x;
+        const dy = (leadTargetY + avoidY * 15) - this.y;
+        const dist = Math.hypot(dx, dy);
+
+        // Turn rate limit: Yeti has high momentum
+        const targetAngle = Math.atan2(dx, dy);
+        let currentAngle = Math.atan2(this.vx, this.vy);
+
+        let angleDiff = targetAngle - currentAngle;
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+
+        const maxTurn = CONFIG.YETI_TURN_SPEED * dt;
+        currentAngle += Math.max(-maxTurn, Math.min(maxTurn, angleDiff));
+
+        // Speed
+        const speed = CONFIG.SPEED_NORMAL_BASE * CONFIG.YETI_SPEED_MULT;
+        this.vx = Math.sin(currentAngle) * speed;
+        this.vy = Math.cos(currentAngle) * speed;
+
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+
+        // Footprint snow puffs & spatial footstep crunch
+        const prevCycle = this.prevRunCycle || 0;
+        if (Math.floor(this.runCycle / 2.8) !== Math.floor(prevCycle / 2.8)) {
+          particleSystem.emitSnowSpray(this.x, this.y + 14, 0, 10, 1);
+          audioManager.playYetiStep((this.x - player.x) / 160);
+        }
+        this.prevRunCycle = this.runCycle;
+
+        // Check collision with obstacles (Yeti gets stumbled!)
+        const yetiBox = this.getHitbox();
+        for (let i = 0; i < worldGen.obstacles.length; i++) {
+          const obs = worldGen.obstacles[i];
+          if (obs.collided) continue;
+
+          const obsBox = worldGen.getHitbox(obs);
+          if (CollisionSystem.checkAABB(yetiBox, obsBox)) {
+            obs.collided = true;
+            this.state = YetiState.STUMBLED;
+            this.stateTimer = CONFIG.YETI_STUMBLE_TIME;
+            audioManager.playYetiStumble();
+            particleSystem.emitCrashBurst(this.x, this.y, 12);
+            break;
+          }
+        }
+
+        // Check if Yeti captured player
+        if (player.state !== PlayerState.CAUGHT) {
+          const playerBox = player.getHitbox();
+          if (CollisionSystem.checkAABB(yetiBox, playerBox)) {
+            this.state = YetiState.CAPTURED;
+            player.state = PlayerState.CAUGHT;
+            audioManager.playCrash();
+            audioManager.playYetiRoar();
+            if (onCapture) onCapture();
+            return;
+          }
+        }
+
+        // Check ESCAPE condition:
+        // Player maintains distance separation for required time
+        const separation = player.y - this.y;
+        if (separation >= CONFIG.YETI_ESCAPE_DISTANCE) {
+          this.escapeTimer += dt;
+          if (this.escapeTimer >= CONFIG.YETI_ESCAPE_TIME) {
+            // Player successfully escaped the Yeti!
+            this.state = YetiState.ESCAPED;
+            this.stateTimer = 4.0;
+            audioManager.playEscapeFanfare();
+            if (onEscape) onEscape();
+          }
+        } else {
+          this.escapeTimer = Math.max(0, this.escapeTimer - dt * 1.5);
+        }
+      }
+
+      getHitbox() {
+        return {
+          x: this.x - 16,
+          y: this.y - 12,
+          w: 32,
+          h: 28
+        };
+      }
+
+      draw(ctx) {
+        if (this.state === YetiState.INACTIVE || this.state === YetiState.WARNING) return;
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        // Big Yeti Drop Shadow
+        ctx.fillStyle = 'rgba(180, 205, 225, 0.65)';
+        ctx.beginPath();
+        ctx.ellipse(0, 16, 22, 9, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (this.state === YetiState.CAPTURED) {
+          // Comical Victory pose: Yeti holding up caught skier!
+          this.drawVictoryPose(ctx);
+          ctx.restore();
+          return;
+        }
+
+        // Running Yeti Animation
+        const bounce = Math.sin(this.runCycle) * 3;
+        const armSwing = Math.cos(this.runCycle) * 16;
+        const legSwing = Math.sin(this.runCycle) * 14;
+
+        // Big Snowy Legs
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(-14, 6, 9, 12 + legSwing * 0.4);
+        ctx.fillRect(5, 6, 9, 12 - legSwing * 0.4);
+
+        // Feet / Claws
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillRect(-16, 18, 11, 5);
+        ctx.fillRect(5, 18, 11, 5);
+
+        // Furry Torso
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.roundRect(-18, -16 + bounce, 36, 26, 8);
+        ctx.fill();
+
+        // Shaggy Fur Outline details
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(-16, -6 + bounce, 32, 4);
+
+        // Huge Flailing Arms
+        ctx.fillStyle = '#f8fafc';
+        // Left arm
+        ctx.save();
+        ctx.translate(-18, -10 + bounce);
+        ctx.rotate((-armSwing * Math.PI) / 180);
+        ctx.fillRect(-6, 0, 8, 22);
+        ctx.fillStyle = '#94a3b8'; // Claws
+        ctx.fillRect(-6, 22, 8, 3);
+        ctx.restore();
+
+        // Right arm
+        ctx.save();
+        ctx.translate(18, -10 + bounce);
+        ctx.rotate((armSwing * Math.PI) / 180);
+        ctx.fillRect(-2, 0, 8, 22);
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(-2, 22, 8, 3);
+        ctx.restore();
+
+        // Head
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.arc(0, -22 + bounce, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Blue Frosty Face Mask
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.roundRect(-8, -25 + bounce, 16, 10, 3);
+        ctx.fill();
+
+        // Glowing Red Monster Eyes
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(-5, -23 + bounce, 3, 3);
+        ctx.fillRect(2, -23 + bounce, 3, 3);
+
+        // Mouth & Sharp cartoon Fangs
+        if (this.state === YetiState.STUMBLED) {
+          // Dizzy / ouch mouth
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(-5, -17 + bounce);
+          ctx.lineTo(5, -17 + bounce);
+          ctx.stroke();
+
+          // Stars around head
+          ctx.fillStyle = '#facc15';
+          ctx.fillRect(-14, -32 + bounce, 4, 4);
+          ctx.fillRect(10, -32 + bounce, 4, 4);
+        } else {
+          // Roaring sharp toothy mouth
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(-6, -18 + bounce, 12, 6);
+          // Fangs
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(-5, -18 + bounce, 2, 2);
+          ctx.fillRect(3, -18 + bounce, 2, 2);
+          ctx.fillRect(-1, -14 + bounce, 2, 2);
+        }
+
+        ctx.restore();
+      }
+
+      drawVictoryPose(ctx) {
+        // Yeti holding player upside down comically
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.roundRect(-20, -18, 40, 30, 8);
+        ctx.fill();
+
+        // Raised arms holding player
+        ctx.fillRect(-24, -38, 10, 24);
+        ctx.fillRect(14, -38, 10, 24);
+
+        // Yeti Smiling Head
+        ctx.beginPath();
+        ctx.arc(0, -22, 13, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(-8, -25, 16, 10);
+
+        // Happy squint eyes
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(-5, -23, 3, 3);
+        ctx.fillRect(2, -23, 3, 3);
+
+        // Huge grinning mouth
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-7, -18, 14, 7);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-5, -18, 3, 3);
+        ctx.fillRect(2, -18, 3, 3);
+
+        // Caught Skier held aloft upside down!
+        ctx.save();
+        ctx.translate(0, -42);
+        ctx.rotate(Math.PI);
+        ctx.fillStyle = '#0284c7';
+        ctx.fillRect(-5, -6, 10, 10);
+        ctx.fillStyle = '#f43f5e';
+        ctx.beginPath();
+        ctx.arc(0, -9, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-8, 6);
+        ctx.lineTo(8, 6);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // =========================================================================
+    // 11. RENDERER (CANVAS SCALING, DEPTH SORTING, HUD)
+    // =========================================================================
+    class Renderer {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.dpr = 1;
+        this.camX = 0;
+        this.camY = 0;
+
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+      }
+
+      resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, CONFIG.MAX_DPR);
+        this.dpr = dpr;
+
+        this.canvas.width = Math.round(CONFIG.CANVAS_WIDTH * dpr);
+        this.canvas.height = Math.round(CONFIG.CANVAS_HEIGHT * dpr);
+
+        // Reset transform to logical coordinates
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      render(gameState, player, worldGen, yeti, skiTracks, particleSystem, debug) {
+        const ctx = this.ctx;
+        const width = CONFIG.CANVAS_WIDTH;
+        const height = CONFIG.CANVAS_HEIGHT;
+
+        // Update Camera:
+        // camY follows player downhill, keeping player at ~28% from top
+        const targetCamY = player.y - 200;
+        this.camY += (targetCamY - this.camY) * 0.16;
+
+        // camX softly tracks player X, keeping track centered and framed
+        const targetCamX = Math.max(-30, Math.min(30, player.x * 0.2));
+        this.camX += (targetCamX - this.camX) * 0.12;
+
+        // 1. CLEAR & DRAW SNOW BACKGROUND
+        ctx.fillStyle = '#f1f7fc';
+        ctx.fillRect(0, 0, width, height);
+
+        // 2. WORLD RENDERING (Camera Transform)
+        ctx.save();
+        ctx.translate(Math.round(width / 2 - this.camX), Math.round(-this.camY));
+
+        // Background snow contours & side forest snowbanks
+        this.drawSnowContours(ctx, this.camY);
+        this.drawTrackBorders(ctx, this.camY);
+
+        // Ski tracks
+        skiTracks.draw(ctx, this.camY);
+
+        // Depth-sort visible entities
+        const renderQueue = [];
+
+        // Player
+        renderQueue.push({
+          y: player.y,
+          draw: () => player.draw(ctx)
+        });
+
+        // Yeti
+        if (yeti.state !== YetiState.INACTIVE && yeti.state !== YetiState.WARNING) {
+          renderQueue.push({
+            y: yeti.y,
+            draw: () => yeti.draw(ctx)
+          });
+        }
+
+        // Obstacles (culled to visible vertical span)
+        for (let i = 0; i < worldGen.obstacles.length; i++) {
+          const obs = worldGen.obstacles[i];
+          if (obs.y > this.camY - 60 && obs.y < this.camY + height + 60) {
+            renderQueue.push({
+              y: obs.y,
+              draw: () => worldGen.drawObstacle(ctx, obs)
+            });
+          }
+        }
+
+        // Sort by world Y coordinate
+        renderQueue.sort((a, b) => a.y - b.y);
+
+        // Draw sorted entities
+        for (let i = 0; i < renderQueue.length; i++) {
+          renderQueue[i].draw();
+        }
+
+        // Particles
+        particleSystem.draw(ctx, this.camY);
+
+        // Debug Hitbox Overlay
+        if (debug.enabled) {
+          this.drawDebugOverlay(ctx, player, worldGen, yeti);
+        }
+
+        ctx.restore();
+      }
+
+      drawSnowContours(ctx, camY) {
+        ctx.save();
+        ctx.strokeStyle = '#e2ecf5';
+        ctx.lineWidth = 1.5;
+
+        const step = 80;
+        const startY = Math.floor(camY / step) * step;
+
+        for (let y = startY - step; y < camY + CONFIG.CANVAS_HEIGHT + step; y += step) {
+          ctx.beginPath();
+          ctx.moveTo(-250, y + Math.sin(y * 0.05) * 8);
+          ctx.bezierCurveTo(
+            -90, y + Math.sin(y * 0.05 + 1) * 12,
+            90, y + Math.cos(y * 0.05 + 2) * 12,
+            250, y + Math.sin(y * 0.05) * 8
+          );
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      drawTrackBorders(ctx, camY) {
+        ctx.save();
+        const trackHW = CONFIG.TRACK_HALF_WIDTH;
+        const viewH = CONFIG.CANVAS_HEIGHT + 100;
+        const topY = camY - 50;
+
+        // 1. Shaded side forest snow banks
+        ctx.fillStyle = '#e4edf5';
+        ctx.fillRect(-260, topY, -trackHW - (-260), viewH);
+        ctx.fillRect(trackHW, topY, 260 - trackHW, viewH);
+
+        // 2. Dashed boundary lines
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([8, 8]);
+
+        ctx.beginPath();
+        ctx.moveTo(-trackHW, topY);
+        ctx.lineTo(-trackHW, topY + viewH);
+        ctx.moveTo(trackHW, topY);
+        ctx.lineTo(trackHW, topY + viewH);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      drawDebugOverlay(ctx, player, worldGen, yeti) {
+        ctx.save();
+        ctx.lineWidth = 1.5;
+
+        // Player Hitbox (Green)
+        const pb = player.getHitbox();
+        ctx.strokeStyle = '#10b981';
+        ctx.strokeRect(pb.x, pb.y, pb.w, pb.h);
+
+        // Obstacles Hitboxes (Red)
+        ctx.strokeStyle = '#ef4444';
+        for (let i = 0; i < worldGen.obstacles.length; i++) {
+          const obs = worldGen.obstacles[i];
+          const b = worldGen.getHitbox(obs);
+          if (b && b.y > this.camY - 30 && b.y < this.camY + CONFIG.CANVAS_HEIGHT + 30) {
+            ctx.strokeRect(b.x, b.y, b.w, b.h);
+          }
+        }
+
+        // Yeti Hitbox (Orange)
+        if (yeti.state !== YetiState.INACTIVE && yeti.state !== YetiState.WARNING) {
+          const yb = yeti.getHitbox();
+          ctx.strokeStyle = '#f59e0b';
+          ctx.strokeRect(yb.x, yb.y, yb.w, yb.h);
+        }
+
+        ctx.restore();
+      }
+    }
+
+    // =========================================================================
+    // 12. GAME STATE MACHINE & CONTROLLER
+    // =========================================================================
+    const State = Object.freeze({
+      MENU: 'MENU',
+      PLAYING: 'PLAYING',
+      PAUSED: 'PAUSED',
+      GAME_OVER: 'GAME_OVER'
+    });
+
+    class Game {
+      constructor() {
+        this.state = State.MENU;
+        this.mode = 'classic'; // 'classic' | 'modern'
+        this.seed = Date.now() & 0xffffffff;
+
+        // Managers & Systems
+        this.prng = new PRNG(this.seed);
+        this.audio = new AudioManager();
+        this.input = new InputManager();
+        this.skiTracks = new SkiTracks();
+        this.particles = new ParticleSystem();
+        this.player = new Player();
+        this.world = new WorldGenerator(this.prng);
+        this.yeti = new YetiController();
+        this.selectedYetiDistance = CONFIG.YETI_SPAWN_METERS;
+
+        const canvas = document.getElementById('gameCanvas');
+        this.renderer = new Renderer(canvas);
+
+        // Debug state
+        this.debug = {
+          enabled: false,
+          fps: 60,
+          fpsTimer: 0,
+          frameCount: 0
+        };
+
+        // Timing & Simulation Accumulator
+        this.lastTime = performance.now();
+        this.accumulator = 0;
+
+        // Banners timers
+        this.escapeBannerTimer = 0;
+
+        // DOM elements cache
+        this.cacheDOM();
+        this.bindEvents();
+        this.updateMenuHighScore();
+
+        // Wire inputs
+        this.input.onPausePress = () => this.togglePause();
+        this.input.onRestartPress = () => this.handleRestartKey();
+        this.input.onStartPress = () => {
+          if (this.state === State.MENU) this.startGame();
+        };
+        this.input.onDebugToggle = () => this.toggleDebug();
+        this.input.onDebugYeti = () => {
+          if (this.debug.enabled && this.state === State.PLAYING) {
+            this.yeti.triggerSpawn(this.player.y);
+          }
+        };
+
+        // Start animation loop
+        requestAnimationFrame((t) => this.mainLoop(t));
+      }
+
+      cacheDOM() {
+        this.dom = {
+          menuOverlay: document.getElementById('menu-overlay'),
+          pauseOverlay: document.getElementById('pause-overlay'),
+          gameoverOverlay: document.getElementById('gameover-overlay'),
+          hud: document.getElementById('hud'),
+          hudScore: document.getElementById('hud-score'),
+          hudDistance: document.getElementById('hud-distance'),
+          hudSpeed: document.getElementById('hud-speed'),
+          hudYetiDist: document.getElementById('hud-yeti-dist'),
+          hudSoundBtn: document.getElementById('btn-sound-hud'),
+          hudPauseBtn: document.getElementById('btn-pause-hud'),
+          hudYetiLabel: document.getElementById('hud-yeti-label'),
+          canvas: document.getElementById('gameCanvas'),
+          turboGaugeWrap: document.getElementById('turbo-gauge-wrap'),
+          gaugePct: document.getElementById('gauge-pct'),
+          gaugeFill: document.getElementById('gauge-fill'),
+          yetiAlertBanner: document.getElementById('yeti-alert-banner'),
+          escapeBanner: document.getElementById('escape-banner'),
+          menuHighScore: document.getElementById('menu-highscore'),
+          modeDesc: document.getElementById('mode-description'),
+          btnModeClassic: document.getElementById('btn-mode-classic'),
+          btnModeModern: document.getElementById('btn-mode-modern'),
+          btnYeti500: document.getElementById('btn-yeti-500'),
+          btnYeti1000: document.getElementById('btn-yeti-1000'),
+          btnYeti2000: document.getElementById('btn-yeti-2000'),
+          btnPlay: document.getElementById('btn-play'),
+          btnAudioToggle: document.getElementById('btn-audio-toggle'),
+          audioIcon: document.getElementById('audio-icon'),
+          audioText: document.getElementById('audio-text'),
+          btnResume: document.getElementById('btn-resume'),
+          btnRestartPause: document.getElementById('btn-restart-pause'),
+          btnMenuPause: document.getElementById('btn-menu-pause'),
+          btnReplay: document.getElementById('btn-replay'),
+          btnMenuGameover: document.getElementById('btn-menu-gameover'),
+          gameoverScore: document.getElementById('gameover-score'),
+          gameoverDistance: document.getElementById('gameover-distance'),
+          gameoverBest: document.getElementById('gameover-best'),
+          gameoverNewRecord: document.getElementById('gameover-new-record'),
+          debugPanel: document.getElementById('debug-panel'),
+          debugFps: document.getElementById('debug-fps'),
+          debugState: document.getElementById('debug-state'),
+          debugObjects: document.getElementById('debug-objects'),
+          debugSeed: document.getElementById('debug-seed'),
+          debugPos: document.getElementById('debug-pos'),
+          debugVel: document.getElementById('debug-vel'),
+          debugYetiState: document.getElementById('debug-yeti-state'),
+          debugYetiDist: document.getElementById('debug-yeti-dist'),
+          dbgBtnYeti: document.getElementById('dbg-btn-yeti'),
+          dbgBtnTurbo: document.getElementById('dbg-btn-turbo'),
+          dbgBtnInvul: document.getElementById('dbg-btn-invul')
+        };
+      }
+
+      bindEvents() {
+        // Mode Selector Buttons
+        this.dom.btnModeClassic.addEventListener('click', () => this.setMode('classic'));
+        this.dom.btnModeModern.addEventListener('click', () => this.setMode('modern'));
+
+        // Yeti Distance Selector Buttons
+        const setYetiDistance = (dist) => {
+          this.selectedYetiDistance = dist;
+          [this.dom.btnYeti500, this.dom.btnYeti1000, this.dom.btnYeti2000].forEach(btn => {
+            if (btn) btn.classList.toggle('active', parseInt(btn.dataset.dist, 10) === dist);
+          });
+          this.audio.playClick();
+        };
+
+        if (this.dom.btnYeti500) this.dom.btnYeti500.addEventListener('click', () => setYetiDistance(500));
+        if (this.dom.btnYeti1000) this.dom.btnYeti1000.addEventListener('click', () => setYetiDistance(1000));
+        if (this.dom.btnYeti2000) this.dom.btnYeti2000.addEventListener('click', () => setYetiDistance(2000));
+
+        // Play Button
+        this.dom.btnPlay.addEventListener('click', () => {
+          this.audio.init();
+          this.audio.resumeContext();
+          this.audio.playClick();
+          this.startGame();
+        });
+
+        // Audio Toggles
+        const toggleAudioHandler = () => {
+          this.audio.init();
+          this.audio.resumeContext();
+          const on = this.audio.toggleAudio();
+          this.updateAudioUI(on);
+          this.audio.playClick();
+        };
+
+        this.dom.btnAudioToggle.addEventListener('click', toggleAudioHandler);
+        this.dom.hudSoundBtn.addEventListener('click', toggleAudioHandler);
+
+        // Pause / Resume Buttons
+        this.dom.hudPauseBtn.addEventListener('click', () => this.togglePause());
+        this.dom.btnResume.addEventListener('click', () => {
+          this.audio.playClick();
+          this.resumeGame();
+        });
+
+        // Restart Buttons
+        this.dom.btnRestartPause.addEventListener('click', () => {
+          this.audio.playClick();
+          this.restartGame();
+        });
+        this.dom.btnReplay.addEventListener('click', () => {
+          this.audio.playClick();
+          this.restartGame();
+        });
+
+        // Return to Menu Buttons
+        this.dom.btnMenuPause.addEventListener('click', () => {
+          this.audio.playClick();
+          this.goToMenu();
+        });
+        this.dom.btnMenuGameover.addEventListener('click', () => {
+          this.audio.playClick();
+          this.goToMenu();
+        });
+
+        // Debug buttons
+        this.dom.dbgBtnYeti.addEventListener('click', () => {
+          this.yeti.triggerSpawn(this.player.y);
+        });
+        this.dom.dbgBtnTurbo.addEventListener('click', () => {
+          this.player.stamina = 1.0;
+        });
+        this.dom.dbgBtnInvul.addEventListener('click', () => {
+          this.player.state = PlayerState.INVULNERABLE;
+          this.player.stateTimer = 999;
+        });
+
+        // Auto pause on tab blur / visibilitychange
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden && this.state === State.PLAYING) {
+            this.pauseGame();
+          }
+        });
+      }
+
+      setMode(mode) {
+        this.mode = mode;
+        if (mode === 'classic') {
+          this.dom.btnModeClassic.classList.add('active');
+          this.dom.btnModeModern.classList.remove('active');
+          this.dom.modeDesc.textContent = 'Modo Clásico: Turbo ilimitado con inercia a alta velocidad (76% autoridad de giro). Slalom otorga velocidad y combos.';
+        } else {
+          this.dom.btnModeModern.classList.add('active');
+          this.dom.btnModeClassic.classList.remove('active');
+          this.dom.modeDesc.textContent = 'Modo Moderno: Barra de estamina táctica (6 s). Slalom recarga +25% de energía.';
+        }
+        this.updateMenuHighScore();
+      }
+
+      updateMenuHighScore() {
+        const hi = StorageManager.getHighScore(this.mode);
+        this.dom.menuHighScore.textContent = `${hi} m`;
+      }
+
+      updateAudioUI(enabled) {
+        if (enabled) {
+          this.dom.btnAudioToggle.classList.add('on');
+          this.dom.audioIcon.textContent = '🔊';
+          this.dom.audioText.textContent = 'Sonido: Activado';
+          this.dom.hudSoundBtn.textContent = '🔊';
+        } else {
+          this.dom.btnAudioToggle.classList.remove('on');
+          this.dom.audioIcon.textContent = '🔇';
+          this.dom.audioText.textContent = 'Sonido: Desactivado';
+          this.dom.hudSoundBtn.textContent = '🔇';
+        }
+      }
+
+      startGame() {
+        this.seed = (Date.now() ^ (Math.random() * 0x7fffffff)) >>> 0;
+        this.player.reset();
+        this.world.reset(this.seed);
+        this.yeti.reset(this.selectedYetiDistance);
+        this.skiTracks.reset();
+        this.particles.reset();
+        this.input.clearAllInputs();
+
+        // UI state
+        this.dom.menuOverlay.classList.remove('active');
+        this.dom.pauseOverlay.classList.remove('active');
+        this.dom.gameoverOverlay.classList.remove('active');
+
+        if (this.mode === 'modern') {
+          this.dom.turboGaugeWrap.classList.add('active');
+        } else {
+          this.dom.turboGaugeWrap.classList.remove('active');
+        }
+
+        this.dom.yetiAlertBanner.style.display = 'none';
+        this.dom.escapeBanner.style.display = 'none';
+
+        this.state = State.PLAYING;
+        this.lastTime = performance.now();
+        this.accumulator = 0;
+      }
+
+      pauseGame() {
+        if (this.state !== State.PLAYING) return;
+        this.state = State.PAUSED;
+        this.input.clearAllInputs();
+        this.dom.pauseOverlay.classList.add('active');
+      }
+
+      resumeGame() {
+        if (this.state !== State.PAUSED) return;
+        this.dom.pauseOverlay.classList.remove('active');
+        this.input.clearAllInputs();
+        this.lastTime = performance.now();
+        this.accumulator = 0;
+        this.state = State.PLAYING;
+      }
+
+      togglePause() {
+        if (this.state === State.PLAYING) {
+          this.audio.playClick();
+          this.pauseGame();
+        } else if (this.state === State.PAUSED) {
+          this.audio.playClick();
+          this.resumeGame();
+        }
+      }
+
+      restartGame() {
+        this.startGame();
+      }
+
+      handleRestartKey() {
+        if (this.state === State.PAUSED || this.state === State.GAME_OVER) {
+          this.restartGame();
+        }
+      }
+
+      goToMenu() {
+        this.state = State.MENU;
+        this.dom.pauseOverlay.classList.remove('active');
+        this.dom.gameoverOverlay.classList.remove('active');
+        this.dom.menuOverlay.classList.add('active');
+        this.dom.yetiAlertBanner.style.display = 'none';
+        this.dom.escapeBanner.style.display = 'none';
+        this.updateMenuHighScore();
+      }
+
+      onPlayerCaptured() {
+        // Delay to allow comical capture animation to play
+        setTimeout(() => {
+          if (this.state === State.PLAYING) {
+            this.triggerGameOver();
+          }
+        }, 1700);
+      }
+
+      onPlayerEscaped() {
+        // Show celebration banner
+        this.escapeBannerTimer = 3.5;
+        this.dom.escapeBanner.style.display = 'block';
+      }
+
+      triggerGameOver() {
+        this.state = State.GAME_OVER;
+        this.input.clearAllInputs();
+        this.audio.playGameOver();
+
+        const distance = Math.floor(this.player.y / CONFIG.UNITS_PER_METER);
+        const oldBest = StorageManager.getHighScore(this.mode);
+        const isNewRecord = !this.debug.enabled && distance > oldBest;
+
+        if (isNewRecord) {
+          StorageManager.saveHighScore(this.mode, distance);
+        }
+
+        this.dom.gameoverDistance.textContent = `${distance} m`;
+        this.dom.gameoverBest.textContent = `${Math.max(distance, oldBest)} m`;
+        this.dom.gameoverNewRecord.style.display = isNewRecord ? 'inline-block' : 'none';
+        if (this.dom.gameoverScore) {
+          this.dom.gameoverScore.textContent = Math.floor(this.player.score || 0).toString();
+        }
+
+        this.dom.yetiAlertBanner.style.display = 'none';
+        this.dom.escapeBanner.style.display = 'none';
+        this.dom.gameoverOverlay.classList.add('active');
+      }
+
+      toggleDebug() {
+        this.debug.enabled = !this.debug.enabled;
+        if (this.debug.enabled) {
+          this.dom.debugPanel.classList.add('active');
+        } else {
+          this.dom.debugPanel.classList.remove('active');
+        }
+      }
+
+      // =======================================================================
+      // MAIN GAME LOOP (FIXED TIMESTEP ACCUMULATOR)
+      // =======================================================================
+      mainLoop(currentTime) {
+        requestAnimationFrame((t) => this.mainLoop(t));
+
+        let frameTime = (currentTime - this.lastTime) / 1000;
+        this.lastTime = currentTime;
+
+        // Clamp frame time to prevent spiral of death on tab unfocus
+        if (frameTime > CONFIG.MAX_FRAME_ACCUM) {
+          frameTime = CONFIG.MAX_FRAME_ACCUM;
+        }
+
+        // FPS calculation for debug panel
+        this.debug.frameCount++;
+        this.debug.fpsTimer += frameTime;
+        if (this.debug.fpsTimer >= 0.5) {
+          this.debug.fps = Math.round((this.debug.frameCount / this.debug.fpsTimer));
+          this.debug.frameCount = 0;
+          this.debug.fpsTimer = 0;
+        }
+
+        if (this.state === State.PLAYING) {
+          this.accumulator += frameTime;
+          let subSteps = 0;
+
+          while (this.accumulator >= CONFIG.FIXED_DT && subSteps < CONFIG.MAX_SUB_STEPS) {
+            this.fixedUpdate(CONFIG.FIXED_DT);
+            this.accumulator -= CONFIG.FIXED_DT;
+            subSteps++;
+          }
+        }
+
+        // Render current visual frame
+        this.renderer.render(
+          this,
+          this.player,
+          this.world,
+          this.yeti,
+          this.skiTracks,
+          this.particles,
+          this.debug
+        );
+
+        // Update UI & Debug monitor
+        this.updateHUD();
+        if (this.debug.enabled) {
+          this.updateDebugMonitor();
+        }
+      }
+
+      fixedUpdate(dt) {
+        // Update entities
+        this.player.update(dt, this.input, this.mode, this.audio, this.skiTracks, this.particles);
+        this.world.update(this.player.y, this.mode);
+        this.skiTracks.update(dt);
+        this.particles.update(dt);
+
+        // Check Obstacle collisions
+        CollisionSystem.update(this.player, this.world, this.audio, this.particles);
+
+        // Update Yeti AI & Chase logic
+        this.yeti.update(
+          dt,
+          this.player,
+          this.world,
+          this.audio,
+          this.particles,
+          () => this.onPlayerCaptured(),
+          () => this.onPlayerEscaped()
+        );
+
+        // Update Yeti Alert Banner
+        if (this.yeti.state === YetiState.WARNING) {
+          this.dom.yetiAlertBanner.style.display = 'flex';
+        } else {
+          this.dom.yetiAlertBanner.style.display = 'none';
+        }
+
+        // Escape banner timer
+        if (this.escapeBannerTimer > 0) {
+          this.escapeBannerTimer -= dt;
+          if (this.escapeBannerTimer <= 0) {
+            this.dom.escapeBanner.style.display = 'none';
+          }
+        }
+
+        // Procedural chase tension heartbeat
+        if ((this.yeti.state === YetiState.CHASING || this.yeti.state === YetiState.WARNING) && this.player.state !== PlayerState.CRASHED) {
+          const separation = Math.max(0, this.player.y - this.yeti.y);
+          if (separation < 500) {
+            const tension = Math.max(0, Math.min(1, (500 - separation) / 440));
+            const tempo = 0.82 - tension * 0.52; // Tempo accelerating from ~73 to ~187 BPM
+            this.heartbeatTimer = (this.heartbeatTimer || 0) + dt;
+            if (this.heartbeatTimer >= tempo) {
+              this.heartbeatTimer = 0;
+              this.audio.playHeartbeat(tension);
+            }
+          } else {
+            this.heartbeatTimer = 0;
+          }
+        } else {
+          this.heartbeatTimer = 0;
+        }
+      }
+
+      updateHUD() {
+        const meters = Math.max(0, Math.floor(this.player.y / CONFIG.UNITS_PER_METER));
+        const kmh = Math.round((this.player.vy / CONFIG.UNITS_PER_METER) * 3.6);
+
+        if (this.dom.hudScore) {
+          this.dom.hudScore.textContent = Math.floor(this.player.score || 0).toString();
+        }
+        this.dom.hudDistance.textContent = meters.toString();
+        this.dom.hudSpeed.textContent = kmh.toString();
+
+        // Update Yeti Threat Indicator in HUD (persecución legible con soporte visual accesible)
+        if (this.dom.hudYetiDist) {
+          if (this.yeti.state === YetiState.INACTIVE) {
+            const rem = Math.max(0, Math.ceil(this.yeti.nextSpawnMeters - meters));
+            if (this.dom.hudYetiLabel) this.dom.hudYetiLabel.textContent = 'El Yeti aparece en:';
+            this.dom.hudYetiDist.textContent = rem.toString();
+            this.dom.hudYetiDist.style.color = rem <= 100 ? '#f59e0b' : '#f8fafc';
+            if (this.dom.canvas) this.dom.canvas.style.boxShadow = 'none';
+          } else if (this.yeti.state === YetiState.WARNING || this.yeti.state === YetiState.SPAWNING || this.yeti.state === YetiState.CHASING) {
+            if (this.dom.hudYetiLabel) this.dom.hudYetiLabel.textContent = '¡El Yeti está a:';
+            const sepMeters = Math.max(0, Math.round((this.player.y - this.yeti.y) / CONFIG.UNITS_PER_METER));
+            this.dom.hudYetiDist.textContent = sepMeters.toString();
+            this.dom.hudYetiDist.style.color = '#ef4444';
+            // Indicador visual de proximidad accesible para jugar sin sonido
+            if (sepMeters < 65) {
+              const alpha = Math.min(0.65, 0.2 + (65 - sepMeters) / 75);
+              if (this.dom.canvas) this.dom.canvas.style.boxShadow = `inset 0 0 50px rgba(239, 68, 68, ${alpha.toFixed(2)})`;
+            } else {
+              if (this.dom.canvas) this.dom.canvas.style.boxShadow = 'none';
+            }
+          } else if (this.yeti.state === YetiState.ESCAPED) {
+            if (this.dom.hudYetiLabel) this.dom.hudYetiLabel.textContent = 'Estado:';
+            this.dom.hudYetiDist.textContent = '¡BURLADO!';
+            this.dom.hudYetiDist.style.color = '#10b981';
+            if (this.dom.canvas) this.dom.canvas.style.boxShadow = 'none';
+          }
+        }
+
+        if (this.mode === 'classic') {
+          this.dom.gaugePct.textContent = '∞';
+          this.dom.gaugeFill.style.width = '100%';
+          this.dom.gaugeFill.style.background = '#38bdf8';
+        } else {
+          const pct = Math.round(this.player.stamina * 100);
+          this.dom.gaugePct.textContent = `${pct}%`;
+          this.dom.gaugeFill.style.width = `${pct}%`;
+          this.dom.gaugeFill.style.background = pct < 25 ? '#ef4444' : '#10b981';
+        }
+      }
+
+      updateDebugMonitor() {
+        this.dom.debugFps.textContent = `${this.debug.fps} FPS`;
+        this.dom.debugState.textContent = `${this.state} (${this.player.state})`;
+        this.dom.debugObjects.textContent = this.world.obstacles.length.toString();
+        this.dom.debugSeed.textContent = this.seed.toString(16).toUpperCase();
+        this.dom.debugPos.textContent = `${Math.round(this.player.x)}, ${Math.round(this.player.y)}`;
+        this.dom.debugVel.textContent = `${Math.round(this.player.vy)} u/s`;
+        this.dom.debugYetiState.textContent = this.yeti.state;
+
+        if (this.yeti.state !== YetiState.INACTIVE) {
+          const dist = Math.round(Math.hypot(this.player.x - this.yeti.x, this.player.y - this.yeti.y));
+          this.dom.debugYetiDist.textContent = `${dist} u`;
+        } else {
+          this.dom.debugYetiDist.textContent = `Spawn @ ${this.yeti.nextSpawnMeters}m`;
+        }
+      }
+    }
+
+    // Initialize game once DOM is loaded
+    window.addEventListener('DOMContentLoaded', () => {
+      window.snowGame = new Game();
+    });
+  </script>
+</body>
+</html>
