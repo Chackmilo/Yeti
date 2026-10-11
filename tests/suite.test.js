@@ -28,8 +28,9 @@ test('Suite: las páginas solo enlazan archivos locales relativos que se desplie
     let refs = 0;
     for (const [, raw] of read(page).matchAll(REF)) {
       refs++;
+      if (EXTERNAL.test(raw)) continue;
       const ref = decodeURIComponent(raw.split(/[?#]/)[0]);
-      if (!ref || EXTERNAL.test(raw) || GENERATED.test(ref)) continue;
+      if (!ref || GENERATED.test(ref)) continue;
       const viteSource = page === 'games/3d-pro/index.html' && ref.startsWith('/src/');
       if (ref.startsWith('/') && !viteSource) {
         problems.push(`${page}: ruta absoluta ${raw} (rompe file:// y subrutas)`);
@@ -86,7 +87,10 @@ test('Portal: prólogo ligero y accesible, galería operable con teclado', () =>
   assert.match(html, /matchMedia\('\(prefers-reduced-motion: reduce\)'\)/);
   assert.match(html, /location\.hash === '#prologo'/);
   assert.match(html, /\.inert = true/);
+  assert.match(html, /try\s*\{\s*autoDisabled\s*=\s*localStorage\.getItem\(/, 'la lectura de localStorage debe ir protegida con try/catch (modo privado o almacenamiento bloqueado)');
+  assert.match(html, /getAnimations\?\.\(\{\s*subtree:\s*true\s*\}\)/, 'showModal debe completar las transiciones de visibility antes de enfocar (si no, el foco no entra al modal)');
+  assert.match(html, /openIntro\(\s*true\s*,\s*!quietStart\s*\)/, '#prologo debe abrir el modal sin reproducir con movimiento reducido ni ahorro de datos');
   const cards = (html.match(/<article class="character-card"/g) || []).length;
-  const buttons = (html.match(/<button type="button" class="character-zoom-hint">/g) || []).length;
-  assert.ok(cards > 0 && buttons === cards, 'cada tarjeta necesita un botón "Ampliar" alcanzable con teclado');
+  const buttons = (html.match(/<button type="button" class="character-zoom-hint" aria-label="Ampliar arte: [^"]+">/g) || []).length;
+  assert.ok(cards > 0 && buttons === cards, 'cada tarjeta necesita un botón "Ampliar" con nombre accesible propio, alcanzable con teclado');
 });
