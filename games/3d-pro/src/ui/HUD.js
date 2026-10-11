@@ -22,6 +22,7 @@ export class HUD {
     this.score = document.getElementById('score');
     this.yetiLabel = document.getElementById('yetiLabel');
     this.yetiDistance = document.getElementById('yetiDistance');
+    this.yetiUnit = document.getElementById('yetiUnit');
     this.energyText = document.getElementById('energyText');
     this.energyFill = document.getElementById('energyFill');
     this.debugText = document.getElementById('debugText');
@@ -77,6 +78,7 @@ export class HUD {
     const active = yeti.status === 'chase' || yeti.status === 'warning' || yeti.status === 'caught';
     this.yetiLabel.textContent = active ? 'EL YETI ESTÁ A' : yeti.status === 'gone' ? '¡YETI BURLADO!' : 'EL YETI APARECE EN';
     this.yetiDistance.textContent = yeti.status === 'gone' ? '—' : String(Math.max(0, active ? Math.round(player.d - yeti.d) : Math.ceil(yeti.next - player.d)));
+    if (this.yetiUnit) this.yetiUnit.hidden = yeti.status === 'gone';
     const level = Math.round(yetiAlertLevel(state, yeti.status, player.d - yeti.d) * 100) / 100;
     if (this.alert && level !== this.alertLevel) {
       this.alertLevel = level;

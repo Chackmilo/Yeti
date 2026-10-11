@@ -2,6 +2,13 @@
  * @file MenuManager.js
  * @description Manages UI views, difficulty modes, settings, audio toggles, and AI Autopilot controls.
  */
+/** Marca un botón de un radiogroup como seleccionado (clase visual + aria-checked). */
+export function selectRadio(buttons, selected) {
+  for (const o of buttons) {
+    o.classList.toggle('selected', o === selected);
+    o.setAttribute('aria-checked', String(o === selected));
+  }
+}
 
 export class MenuManager {
   constructor(storage, handlers) {
@@ -27,7 +34,7 @@ export class MenuManager {
     for (const b of this.modeButtons) {
       b.onclick = () => {
         this.mode = b.dataset.mode;
-        for (const o of this.modeButtons) o.classList.toggle('selected', o === b);
+        selectRadio(this.modeButtons, b);
         this.sync();
       };
     }
@@ -35,7 +42,7 @@ export class MenuManager {
     for (const b of this.distanceButtons) {
       b.onclick = () => {
         this.spawnAt = Number(b.dataset.distance);
-        for (const o of this.distanceButtons) o.classList.toggle('selected', o === b);
+        selectRadio(this.distanceButtons, b);
       };
     }
 

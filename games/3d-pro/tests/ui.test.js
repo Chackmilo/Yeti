@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { CONFIG as C } from '../src/config.js';
 import { HUD, yetiAlertLevel } from '../src/ui/HUD.js';
+import { selectRadio } from '../src/ui/MenuManager.js';
 
 // DOM mínimo para instanciar HUD/MenuManager en Node (sin navegador)
 function fakeElement() {
@@ -83,4 +84,24 @@ test('Alerta Yeti: pulso lento (< 3 destellos/s) y sin animación con reduced-mo
   assert.ok(pulse && Number(pulse[1]) >= 0.5, 'medio ciclo del pulso >= 0.5 s');
   assert.match(css, /@media \(prefers-reduced-motion:reduce\)\{#yetiAlert\.on::before\{animation:none\}\}/);
   assert.match(css, /#yetiAlert\{[^}]*pointer-events:none/);
+});
+
+test('Menú: selectRadio sincroniza la clase selected y aria-checked', () => {
+  const buttons = [fakeElement(), fakeElement(), fakeElement()];
+  selectRadio(buttons, buttons[1]);
+  assert.deepEqual(buttons.map(b => b.attributes['aria-checked']), ['false', 'true', 'false']);
+  assert.deepEqual(buttons.map(b => b.classList.contains('selected')), [false, true, false]);
+  selectRadio(buttons, buttons[2]);
+  assert.deepEqual(buttons.map(b => b.attributes['aria-checked']), ['false', 'false', 'true']);
+});
+
+test('HUD: con el Yeti burlado se oculta la unidad "m" y vuelve con la cuenta atrás', () => {
+  const elements = fakeDom();
+  const hud = new HUD();
+  updateHud(hud, 'playing', { status: 'gone', d: 40, next: 700 });
+  assert.equal(elements.get('yetiLabel').textContent, '¡YETI BURLADO!');
+  assert.equal(elements.get('yetiUnit').hidden, true);
+  updateHud(hud, 'playing', { status: 'sleep', d: 0, next: 700 });
+  assert.equal(elements.get('yetiLabel').textContent, 'EL YETI APARECE EN');
+  assert.equal(elements.get('yetiUnit').hidden, false);
 });
