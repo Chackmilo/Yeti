@@ -441,6 +441,507 @@
       text-decoration: underline;
     }
 
+    /* ==========================================================================
+       CINEMATIC INTRO MODAL & VIDEO THEATER
+       ========================================================================== */
+    .intro-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(4, 12, 22, 0.94);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s ease;
+    }
+
+    .intro-modal-backdrop.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .intro-modal-content {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      max-height: 92vh;
+      overflow-y: auto;
+      background: linear-gradient(165deg, rgba(14, 34, 56, 0.96) 0%, rgba(7, 21, 36, 0.98) 100%);
+      border: 1px solid rgba(95, 230, 255, 0.4);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85), 0 0 50px rgba(95, 230, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      transform: translateY(0) scale(1);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .intro-modal-backdrop.hidden .intro-modal-content {
+      transform: translateY(20px) scale(0.96);
+    }
+
+    .intro-modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .intro-modal-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .intro-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+    }
+
+    .intro-modal-title {
+      font-size: clamp(1.4rem, 3.2vw, 2.1rem);
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .intro-modal-desc {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      max-width: 680px;
+    }
+
+    .btn-close-modal {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .btn-close-modal:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.08);
+      border-color: var(--accent-cyan);
+    }
+
+    .intro-video-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #020812;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+    }
+
+    .intro-video-wrapper video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .intro-video-overlay-ctrls {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      display: flex;
+      gap: 10px;
+      z-index: 5;
+    }
+
+    .btn-video-ctrl {
+      background: rgba(7, 21, 36, 0.88);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-video-ctrl:hover {
+      background: rgba(14, 40, 68, 0.95);
+      border-color: var(--accent-cyan);
+      transform: translateY(-2px);
+    }
+
+    .intro-modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .intro-auto-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .intro-auto-toggle input {
+      accent-color: var(--accent-cyan);
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+    }
+
+    .intro-action-btns {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-enter-hub {
+      background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.45);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-enter-hub:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(2, 132, 199, 0.6);
+      filter: brightness(1.1);
+    }
+
+    /* ==========================================================================
+       HERO CINEMATIC ACTION BUTTON
+       ========================================================================== */
+    .hero-actions-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    .btn-hero-cinematic {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.25) 0%, rgba(6, 182, 212, 0.18) 100%);
+      border: 1px solid rgba(95, 230, 255, 0.45);
+      color: #f0f8ff;
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(95, 230, 255, 0.2);
+      transition: all 0.25s ease;
+    }
+    .btn-hero-cinematic:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.45) 0%, rgba(6, 182, 212, 0.35) 100%);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 28px rgba(95, 230, 255, 0.35);
+    }
+
+    .badge-pill {
+      background: var(--accent-cyan);
+      color: #071524;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 999px;
+      letter-spacing: 0.8px;
+    }
+
+    /* ==========================================================================
+       CARD MEDIA BANNERS
+       ========================================================================== */
+    .card-media-banner {
+      position: relative;
+      width: 100%;
+      height: 190px;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+      background: #061524;
+    }
+
+    .card-media-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 25%;
+      display: block;
+      transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.45s ease;
+    }
+
+    .game-card:hover .card-media-img {
+      transform: scale(1.06);
+      filter: brightness(1.06);
+    }
+
+    .card-media-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 40%, rgba(7, 21, 36, 0.88) 100%);
+      display: flex;
+      align-items: flex-end;
+      padding: 12px 14px;
+      pointer-events: none;
+    }
+
+    .media-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: rgba(7, 21, 36, 0.85);
+      border: 1px solid rgba(95, 230, 255, 0.35);
+      color: var(--accent-cyan);
+      padding: 4px 10px;
+      border-radius: 6px;
+      backdrop-filter: blur(6px);
+    }
+
+    /* ==========================================================================
+       CHARACTER SHOWCASE & CONCEPT ART GALLERY
+       ========================================================================== */
+    .character-showcase-section {
+      background: rgba(13, 31, 51, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 34px 28px;
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+    }
+
+    .showcase-header {
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .showcase-title {
+      font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+      font-weight: 900;
+      color: #ffffff;
+    }
+
+    .showcase-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .character-gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .character-card {
+      background: rgba(8, 22, 38, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+    }
+
+    .character-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(95, 230, 255, 0.45);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(95, 230, 255, 0.2);
+    }
+
+    .character-card-img-wrap {
+      width: 100%;
+      height: 250px;
+      position: relative;
+      overflow: hidden;
+      background: #020914;
+    }
+
+    .character-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      transition: transform 0.4s ease;
+      display: block;
+    }
+
+    .character-card:hover .character-card-img {
+      transform: scale(1.06);
+    }
+
+    .character-zoom-hint {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      color: #ffffff;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .character-card:hover .character-zoom-hint {
+      opacity: 1;
+    }
+
+    .character-card-body {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-grow: 1;
+    }
+
+    .character-card-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .character-card-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .character-card-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ==========================================================================
+       IMAGE LIGHTBOX MODAL
+       ========================================================================== */
+    .lightbox-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .lightbox-modal.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .lightbox-img-wrap {
+      max-width: 90vw;
+      max-height: 82vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .lightbox-img {
+      max-width: 100%;
+      max-height: 75vh;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .lightbox-caption {
+      margin-top: 16px;
+      color: #ffffff;
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .btn-lightbox-close {
+      position: absolute;
+      top: 24px;
+      right: 28px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-lightbox-close:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.1);
+      border-color: var(--accent-cyan);
+    }
+
     @media (max-width: 768px) {
       .portal-container {
         padding: 24px 16px 40px;
@@ -452,10 +953,70 @@
       .specs-grid {
         grid-template-columns: 1fr;
       }
+      .card-media-banner {
+        height: 160px;
+      }
+      .intro-modal-content {
+        padding: 20px;
+        border-radius: 20px;
+      }
     }
   </style>
 </head>
 <body>
+
+  <!-- CINEMATIC START VIDEO MODAL (CAFÉ EN EL LAGO) -->
+  <div id="intro-modal" class="intro-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+    <div class="intro-modal-content">
+      <div class="intro-modal-header">
+        <div class="intro-modal-title-group">
+          <div class="intro-badge">
+            <span class="pulse"></span>
+            Prólogo Cinematográfico · Inicio
+          </div>
+          <h2 id="intro-title" class="intro-modal-title">El Café Matutino en el Lago Alpino</h2>
+          <p class="intro-modal-desc">
+            Antes de ajustar sus esquís y desafiar la ladera del Yeti, la intrépida nutria saborea una taza de café humeante frente a las aguas gélidas de la montaña.
+          </p>
+        </div>
+        <button id="btn-close-intro" class="btn-close-modal" aria-label="Cerrar cinemática e ingresar al portal">✕</button>
+      </div>
+
+      <div class="intro-video-wrapper">
+        <video id="intro-video" playsinline controls loop preload="auto" poster="./assets/otter_3d_coffee.jpg">
+          <source src="./assets/intro_lake.mp4" type="video/mp4">
+          <source src="./Otter_pouring_coffee_by_lake_20261011143032.mp4" type="video/mp4">
+          Tu navegador no soporta la reproducción de video HTML5.
+        </video>
+        <div class="intro-video-overlay-ctrls">
+          <button id="btn-toggle-sound" class="btn-video-ctrl" type="button">
+            <span id="sound-icon">🔇</span> <span id="sound-label">Activar Sonido</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="intro-modal-footer">
+        <label class="intro-auto-toggle">
+          <input type="checkbox" id="cb-auto-intro" checked>
+          <span>Mostrar prólogo automáticamente al iniciar</span>
+        </label>
+        <div class="intro-action-btns">
+          <button id="btn-enter-hub" class="btn-enter-hub" type="button">
+            <span>⛷️ Entrar a la Montaña</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX PARA ARTE Y CONCEPTOS EN ALTA DEFINICIÓN -->
+  <div id="lightbox-modal" class="lightbox-modal hidden" role="dialog" aria-modal="true" aria-label="Visualizador de arte en alta definición">
+    <button id="btn-close-lightbox" class="btn-lightbox-close" aria-label="Cerrar imagen">✕</button>
+    <div class="lightbox-img-wrap">
+      <img id="lightbox-img" class="lightbox-img" src="" alt="Arte ampliado">
+      <div id="lightbox-caption" class="lightbox-caption"></div>
+    </div>
+  </div>
 
   <!-- Ambient Background & Radial Glows -->
   <div class="ambient-glow glow-1"></div>
@@ -487,6 +1048,14 @@
           <strong id="rec-modern">0 m</strong>
         </div>
       </div>
+
+      <div class="hero-actions-bar">
+        <button id="hero-btn-intro" class="btn-hero-cinematic" type="button">
+          <span class="icon-play">🎬</span>
+          <span>Ver Cinemática de Inicio: Café en el Lago</span>
+          <span class="badge-pill">Video</span>
+        </button>
+      </div>
     </header>
 
     <!-- 3 GAMES SHOWCASE GRID -->
@@ -494,6 +1063,13 @@
 
       <!-- CARD 1: 2D RETRO CANVAS -->
       <article class="game-card">
+        <div class="card-media-banner">
+          <img src="./assets/otter_2d_pixel.jpg" alt="Nutria Pixel-Art en la Nieve" class="card-media-img" loading="lazy">
+          <div class="card-media-overlay">
+            <span class="media-tag">Estilo Pixel 2D Retro</span>
+          </div>
+        </div>
+
         <div class="card-header">
           <div class="card-icon" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8;">👾</div>
           <div class="card-title-group">
@@ -540,6 +1116,13 @@
 
       <!-- CARD 2: 3D ALPINO STANDALONE -->
       <article class="game-card">
+        <div class="card-media-banner">
+          <img src="./assets/otter_cartoon_wanderer.jpg" alt="Nutria Exploradora Ilustrada" class="card-media-img" loading="lazy">
+          <div class="card-media-overlay">
+            <span class="media-tag">Estilo Concepto Alpino</span>
+          </div>
+        </div>
+
         <div class="card-header">
           <div class="card-icon" style="background: rgba(95, 230, 255, 0.12); color: #5fe6ff;">🏔️</div>
           <div class="card-title-group">
@@ -586,6 +1169,13 @@
 
       <!-- CARD 3: 3D PRO MODULAR (VITE) -->
       <article class="game-card pro-card">
+        <div class="card-media-banner">
+          <img src="./assets/otter_3d_coffee.jpg" alt="Nutria 3D PBR con Suéter de Lana y Café" class="card-media-img" loading="lazy">
+          <div class="card-media-overlay">
+            <span class="media-tag">Render 3D Cinematográfico</span>
+          </div>
+        </div>
+
         <div class="card-header">
           <div class="card-icon" style="background: rgba(2, 132, 199, 0.2); color: #67e8f9;">⚡</div>
           <div class="card-title-group">
@@ -632,6 +1222,69 @@
         </a>
       </article>
 
+    </section>
+
+    <!-- SECCIÓN DE ARTE Y LORE: LAS 3 FACETAS DE LA NUTRIA ALPINO -->
+    <section class="character-showcase-section" aria-label="Galería y Lore del Personaje">
+      <div class="showcase-header">
+        <span class="badge-hub">
+          <span class="pulse"></span>
+          Concept Art & Protagonista
+        </span>
+        <h2 class="showcase-title">Las 3 Facetas de la Nutria Esquiadora</h2>
+        <p class="showcase-desc">
+          Conoce las tres encarnaciones artísticas de nuestra intrépida heroína alpina. Cada edición del juego cobra vida a través de una dirección visual única: desde la calidez del modelado PBR y su reconfortante taza de café, pasando por la expedición exploradora, hasta la nostalgia del pixel-art clásico.
+        </p>
+      </div>
+
+      <div class="character-gallery-grid">
+
+        <!-- ARTE 1: NUTRIA 3D PBR -->
+        <article class="character-card" data-full="./assets/otter_3d_coffee.jpg" data-caption="Nutria Alpina 3D PBR — Suéter de lana acanalada mostaza, taza de café caliente y pelaje de alta definición. Protagonista de la Edición 3D PRO.">
+          <div class="character-card-img-wrap">
+            <img src="./assets/otter_3d_coffee.jpg" alt="Nutria 3D con suéter y café" class="character-card-img" loading="lazy">
+            <span class="character-zoom-hint">🔍 Ampliar Arte</span>
+          </div>
+          <div class="character-card-body">
+            <span class="character-card-tag">Three.js PBR · Edición Pro & 3D</span>
+            <h3 class="character-card-title">Nutria 3D Cinematográfica</h3>
+            <p class="character-card-desc">
+              Pelaje renderizado con sombreado PBR, suéter de punto trenzado amarillo ocre y su taza favorita de café humeante frente al lago helado antes de descender a 120 km/h.
+            </p>
+          </div>
+        </article>
+
+        <!-- ARTE 2: NUTRIA RETRO 2D -->
+        <article class="character-card" data-full="./assets/otter_2d_pixel.jpg" data-caption="Nutria Retro 2D Pixel-Art — Homenaje nostálgico al esquí arcade de los 90 y SkiFree. Protagonista de Otter Escape 2D.">
+          <div class="character-card-img-wrap">
+            <img src="./assets/otter_2d_pixel.jpg" alt="Nutria en Pixel Art en la nieve" class="character-card-img" loading="lazy">
+            <span class="character-zoom-hint">🔍 Ampliar Arte</span>
+          </div>
+          <div class="character-card-body">
+            <span class="character-card-tag">Pixel Art 16-Bit · Canvas 2D</span>
+            <h3 class="character-card-title">Nutria Arcade Retro</h3>
+            <p class="character-card-desc">
+              Estética nostálgica de la era de oro del arcade. Su icónica silueta y suéter mostaza se distinguen a través de la ventisca mientras burla al Yeti sobre la nieve procedural.
+            </p>
+          </div>
+        </article>
+
+        <!-- ARTE 3: NUTRIA EXPLORADORA ILUSTRADA -->
+        <article class="character-card" data-full="./assets/otter_cartoon_wanderer.jpg" data-caption="Nutria Exploradora Ilustrada — Concept art alpino con mochila de expedición, termo de café y saludo entusiasta de bienvenida.">
+          <div class="character-card-img-wrap">
+            <img src="./assets/otter_cartoon_wanderer.jpg" alt="Nutria con mochila y taza de café saludando" class="character-card-img" loading="lazy">
+            <span class="character-zoom-hint">🔍 Ampliar Arte</span>
+          </div>
+          <div class="character-card-body">
+            <span class="character-card-tag">Concept Art · Ilustración Alpina</span>
+            <h3 class="character-card-title">Nutria Exploradora</h3>
+            <p class="character-card-desc">
+              Lista para expediciones de alta montaña con mochila verde musgo, bufanda térmica y su lema inquebrantable: «Nunca bajes la colina sin una buena taza de café».
+            </p>
+          </div>
+        </article>
+
+      </div>
     </section>
 
     <!-- TECHNICAL COMPARISON TABLE -->
@@ -781,6 +1434,117 @@
     window.addEventListener('resize', () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
+    });
+
+    // 4. Cinematic Intro Video Modal Controls
+    const introModal = document.getElementById('intro-modal');
+    const introVideo = document.getElementById('intro-video');
+    const btnCloseIntro = document.getElementById('btn-close-intro');
+    const btnEnterHub = document.getElementById('btn-enter-hub');
+    const btnHeroIntro = document.getElementById('hero-btn-intro');
+    const btnToggleSound = document.getElementById('btn-toggle-sound');
+    const soundIcon = document.getElementById('sound-icon');
+    const soundLabel = document.getElementById('sound-label');
+    const cbAutoIntro = document.getElementById('cb-auto-intro');
+
+    function closeIntro() {
+      if (!introModal) return;
+      introModal.classList.add('hidden');
+      if (introVideo) introVideo.pause();
+    }
+
+    function openIntro() {
+      if (!introModal) return;
+      introModal.classList.remove('hidden');
+      if (introVideo) {
+        introVideo.currentTime = 0;
+        introVideo.play().catch(() => {});
+      }
+    }
+
+    if (btnCloseIntro) btnCloseIntro.addEventListener('click', closeIntro);
+    if (btnEnterHub) btnEnterHub.addEventListener('click', closeIntro);
+    if (btnHeroIntro) btnHeroIntro.addEventListener('click', openIntro);
+
+    if (btnToggleSound && introVideo) {
+      btnToggleSound.addEventListener('click', () => {
+        introVideo.muted = !introVideo.muted;
+        if (introVideo.muted) {
+          soundIcon.textContent = '🔇';
+          soundLabel.textContent = 'Activar Sonido';
+        } else {
+          soundIcon.textContent = '🔊';
+          soundLabel.textContent = 'Silenciar';
+        }
+      });
+    }
+
+    // Auto-play on startup logic
+    try {
+      const autoDisabled = localStorage.getItem('otter_intro_disabled') === 'true';
+      if (cbAutoIntro) cbAutoIntro.checked = !autoDisabled;
+
+      if (autoDisabled) {
+        introModal.classList.add('hidden');
+      } else {
+        introVideo.muted = true;
+        const playPromise = introVideo.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // Browser prevented unmuted or initial autoplay; video remains loaded
+          });
+        }
+      }
+
+      if (cbAutoIntro) {
+        cbAutoIntro.addEventListener('change', () => {
+          localStorage.setItem('otter_intro_disabled', cbAutoIntro.checked ? 'false' : 'true');
+        });
+      }
+    } catch (e) {}
+
+    // Close intro modal if clicking backdrop outside dialog card
+    if (introModal) {
+      introModal.addEventListener('click', (e) => {
+        if (e.target === introModal) closeIntro();
+      });
+    }
+
+    // 5. Artwork Lightbox Modal Controls
+    const lightboxModal = document.getElementById('lightbox-modal');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCaption = document.getElementById('lightbox-caption');
+    const btnCloseLightbox = document.getElementById('btn-close-lightbox');
+
+    function closeLightbox() {
+      if (lightboxModal) lightboxModal.classList.add('hidden');
+    }
+
+    if (btnCloseLightbox) btnCloseLightbox.addEventListener('click', closeLightbox);
+    if (lightboxModal) {
+      lightboxModal.addEventListener('click', (e) => {
+        if (e.target === lightboxModal) closeLightbox();
+      });
+    }
+
+    document.querySelectorAll('.character-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const full = card.getAttribute('data-full');
+        const cap = card.getAttribute('data-caption');
+        if (full && lightboxImg) {
+          lightboxImg.src = full;
+          lightboxCaption.textContent = cap || '';
+          lightboxModal.classList.remove('hidden');
+        }
+      });
+    });
+
+    // 6. Global Escape key handling
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeLightbox();
+        closeIntro();
+      }
     });
   </script>
 </body>

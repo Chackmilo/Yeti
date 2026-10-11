@@ -72,6 +72,27 @@ export class MenuManager {
     if (this.quality) {
       this.quality.onchange = () => handlers.quality(this.quality.value);
     }
+
+    const btnPrologue = document.getElementById('btnPrologue3D');
+    const closePrologue = document.getElementById('closePrologue3D');
+    const modalPrologue = document.getElementById('prologueModal');
+    const videoPrologue = document.getElementById('prologueVideo3D');
+    if (btnPrologue && modalPrologue) {
+      btnPrologue.onclick = () => {
+        modalPrologue.classList.remove('hidden');
+        if (videoPrologue) {
+          videoPrologue.currentTime = 0;
+          videoPrologue.play().catch(() => {});
+        }
+      };
+    }
+    if (closePrologue && modalPrologue) {
+      closePrologue.onclick = () => {
+        modalPrologue.classList.add('hidden');
+        if (videoPrologue) videoPrologue.pause();
+      };
+    }
+
     this.sync();
   }
 
