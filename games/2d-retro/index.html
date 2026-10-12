@@ -2947,7 +2947,7 @@
           if (obs.collided) continue;
 
           const obsBox = worldGen.getHitbox(obs);
-          if (CollisionSystem.checkAABB(yetiBox, obsBox)) {
+          if (obsBox && CollisionSystem.checkAABB(yetiBox, obsBox)) {
             obs.collided = true;
             this.state = YetiState.STUMBLED;
             this.stateTimer = CONFIG.YETI_STUMBLE_TIME;
