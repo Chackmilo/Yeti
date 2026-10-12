@@ -11,7 +11,6 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const read = path => readFileSync(resolve(ROOT, path), 'utf8');
 
 const PAGES = ['index.html', 'games/2d-retro/index.html', 'games/3d-standalone/index.html', 'games/3d-pro/index.html'];
-const EDITIONS = ['games/2d-retro/index.html', 'games/3d-standalone/index.html', 'games/3d-pro/index.html'];
 const REF = /\b(?:src|href|poster|data-full)="([^"]*)"/g;
 const EXTERNAL = /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i;
 const GENERATED = /(?:^|\/)games\/3d-pro\/dist\//;
@@ -65,11 +64,22 @@ test('Suite: nginx solo marca immutable los bundles con hash y no pierde cabecer
   }
 });
 
-test('Suite: la alerta de proximidad usa una capa visible en las tres ediciones', { todo: 'Tarea 4' }, () => {
-  for (const page of EDITIONS) {
+test('Suite: la alerta de proximidad es la misma capa visible en las tres ediciones', () => {
+  const editions = [
+    { page: 'games/2d-retro/index.html', css: 'games/2d-retro/index.html', js: 'games/2d-retro/index.html' },
+    { page: 'games/3d-standalone/index.html', css: 'games/3d-standalone/index.html', js: 'games/3d-standalone/index.html' },
+    { page: 'games/3d-pro/index.html', css: 'games/3d-pro/src/styles.css', js: 'games/3d-pro/src/ui/HUD.js' }
+  ];
+  for (const { page, css, js } of editions) {
     const html = read(page);
+    const style = read(css);
+    const code = read(js);
     assert.match(html, /id="yetiAlert"/, `${page}: falta la capa #yetiAlert`);
-    assert.doesNotMatch(html, /boxShadow\s*=\s*[`'"]inset/, `${page}: box-shadow inset queda bajo el canvas opaco`);
+    assert.doesNotMatch(html + code, /boxShadow\s*=\s*[`'"]inset/, `${page}: box-shadow inset queda bajo el canvas opaco`);
+    assert.match(style, /#yetiAlert\s*\{[^}]*pointer-events:\s*none/, `${css}: la capa debe dejar pasar los toques`);
+    assert.match(style, /animation:\s*\w+\s+0?\.9s[^;}]*alternate/, `${css}: pulso de 0.9 s con alternate`);
+    assert.match(style, /prefers-reduced-motion:\s*reduce\)\s*\{\s*#yetiAlert\.on::before\s*\{\s*animation:\s*none/, `${css}: sin animación con reduced-motion`);
+    assert.match(code, /0?\.35\s*\+\s*0?\.65\s*\*\s*\(\s*1\s*-[^;]*?\/\s*(?:65|range)\b/, `${js}: intensidad 0.35 + 0.65·(1 − gap/65)`);
   }
 });
 

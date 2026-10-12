@@ -57,6 +57,35 @@
       image-rendering: crisp-edges;
     }
 
+    #yetiAlert {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s linear;
+    }
+
+    #yetiAlert::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      box-shadow: inset 0 0 70px 10px rgba(239, 68, 68, 0.85);
+    }
+
+    #yetiAlert.on::before {
+      animation: yetiAlertPulse 0.9s ease-in-out infinite alternate;
+    }
+
+    @keyframes yetiAlertPulse {
+      from { opacity: 0.55; }
+      to { opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #yetiAlert.on::before { animation: none; }
+    }
+
     /* ==========================================================================
        UI OVERLAYS (MENU, PAUSE, GAME OVER, HUD)
        ========================================================================== */
@@ -637,6 +666,7 @@
 
   <div id="game-container">
     <canvas id="gameCanvas" width="480" height="720"></canvas>
+    <div id="yetiAlert" aria-hidden="true"></div>
 
     <!-- IN-GAME HUD -->
     <div id="hud">
@@ -3385,11 +3415,11 @@
           hudSoundBtn: document.getElementById('btn-sound-hud'),
           hudPauseBtn: document.getElementById('btn-pause-hud'),
           hudYetiLabel: document.getElementById('hud-yeti-label'),
-          canvas: document.getElementById('gameCanvas'),
           turboGaugeWrap: document.getElementById('turbo-gauge-wrap'),
           gaugePct: document.getElementById('gauge-pct'),
           gaugeFill: document.getElementById('gauge-fill'),
           yetiAlertBanner: document.getElementById('yeti-alert-banner'),
+          yetiAlert: document.getElementById('yetiAlert'),
           escapeBanner: document.getElementById('escape-banner'),
           menuHighScore: document.getElementById('menu-highscore'),
           modeDesc: document.getElementById('mode-description'),
@@ -3566,6 +3596,7 @@
 
         this.dom.yetiAlertBanner.style.display = 'none';
         this.dom.escapeBanner.style.display = 'none';
+        this.setYetiAlert(0);
 
         this.state = State.PLAYING;
         this.lastTime = performance.now();
@@ -3615,6 +3646,7 @@
         this.dom.menuOverlay.classList.add('active');
         this.dom.yetiAlertBanner.style.display = 'none';
         this.dom.escapeBanner.style.display = 'none';
+        this.setYetiAlert(0);
         this.updateMenuHighScore();
       }
 
@@ -3655,6 +3687,7 @@
 
         this.dom.yetiAlertBanner.style.display = 'none';
         this.dom.escapeBanner.style.display = 'none';
+        this.setYetiAlert(0);
         this.dom.gameoverOverlay.classList.add('active');
       }
 
@@ -3774,6 +3807,16 @@
         }
       }
 
+      setYetiAlert(level) {
+        const el = this.dom.yetiAlert;
+        if (!el) return;
+        const lvl = String(Math.round(level * 100) / 100);
+        if (el.dataset.level === lvl) return;
+        el.dataset.level = lvl;
+        el.style.opacity = lvl;
+        el.classList.toggle('on', Number(lvl) > 0);
+      }
+
       updateHUD() {
         const meters = Math.max(0, Math.floor(this.player.y / CONFIG.UNITS_PER_METER));
         const kmh = Math.round((this.player.vy / CONFIG.UNITS_PER_METER) * 3.6);
@@ -3791,24 +3834,19 @@
             if (this.dom.hudYetiLabel) this.dom.hudYetiLabel.textContent = 'El Yeti aparece en:';
             this.dom.hudYetiDist.textContent = rem.toString();
             this.dom.hudYetiDist.style.color = rem <= 100 ? '#f59e0b' : '#f8fafc';
-            if (this.dom.canvas) this.dom.canvas.style.boxShadow = 'none';
+            this.setYetiAlert(0);
           } else if (this.yeti.state === YetiState.WARNING || this.yeti.state === YetiState.SPAWNING || this.yeti.state === YetiState.CHASING) {
-            if (this.dom.hudYetiLabel) this.dom.hudYetiLabel.textContent = '¡El Yeti está a:';
+            if (this.dom.hudYetiLabel) this.dom.hudYetiLabel.textContent = 'El Yeti está a:';
             const sepMeters = Math.max(0, Math.round((this.player.y - this.yeti.y) / CONFIG.UNITS_PER_METER));
             this.dom.hudYetiDist.textContent = sepMeters.toString();
             this.dom.hudYetiDist.style.color = '#ef4444';
-            // Indicador visual de proximidad accesible para jugar sin sonido
-            if (sepMeters < 65) {
-              const alpha = Math.min(0.65, 0.2 + (65 - sepMeters) / 75);
-              if (this.dom.canvas) this.dom.canvas.style.boxShadow = `inset 0 0 50px rgba(239, 68, 68, ${alpha.toFixed(2)})`;
-            } else {
-              if (this.dom.canvas) this.dom.canvas.style.boxShadow = 'none';
-            }
+            // Indicador visual de proximidad accesible para jugar sin sonido (solo en partida: updateHUD corre también en menú y pausa)
+            this.setYetiAlert(this.state === State.PLAYING && sepMeters < 65 ? Math.min(1, 0.35 + 0.65 * (1 - sepMeters / 65)) : 0);
           } else if (this.yeti.state === YetiState.ESCAPED) {
             if (this.dom.hudYetiLabel) this.dom.hudYetiLabel.textContent = 'Estado:';
             this.dom.hudYetiDist.textContent = '¡BURLADO!';
             this.dom.hudYetiDist.style.color = '#10b981';
-            if (this.dom.canvas) this.dom.canvas.style.boxShadow = 'none';
+            this.setYetiAlert(0);
           }
         }
 
