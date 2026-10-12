@@ -66,11 +66,11 @@ test('Suite: nginx solo marca immutable los bundles con hash y no pierde cabecer
 
 test('Suite: la alerta de proximidad es la misma capa visible en las tres ediciones', () => {
   const editions = [
-    { page: 'games/2d-retro/index.html', css: 'games/2d-retro/index.html', js: 'games/2d-retro/index.html' },
-    { page: 'games/3d-standalone/index.html', css: 'games/3d-standalone/index.html', js: 'games/3d-standalone/index.html' },
-    { page: 'games/3d-pro/index.html', css: 'games/3d-pro/src/styles.css', js: 'games/3d-pro/src/ui/HUD.js' }
+    { page: 'games/2d-retro/index.html', css: 'games/2d-retro/index.html', js: 'games/2d-retro/index.html', gate: /sepMeters\s*<\s*65\s*\?\s*Math\.min\(1,\s*0\.35/ },
+    { page: 'games/3d-standalone/index.html', css: 'games/3d-standalone/index.html', js: 'games/3d-standalone/index.html', gate: /gap<65\?Math\.round\(Math\.min\(1,\.35/ },
+    { page: 'games/3d-pro/index.html', css: 'games/3d-pro/src/styles.css', js: 'games/3d-pro/src/ui/HUD.js', gate: /!\(gap\s*<\s*range\)/ }
   ];
-  for (const { page, css, js } of editions) {
+  for (const { page, css, js, gate } of editions) {
     const html = read(page);
     const style = read(css);
     const code = read(js);
@@ -80,6 +80,7 @@ test('Suite: la alerta de proximidad es la misma capa visible en las tres edicio
     assert.match(style, /animation:\s*\w+\s+0?\.9s[^;}]*alternate/, `${css}: pulso de 0.9 s con alternate`);
     assert.match(style, /prefers-reduced-motion:\s*reduce\)\s*\{\s*#yetiAlert\.on::before\s*\{\s*animation:\s*none/, `${css}: sin animación con reduced-motion`);
     assert.match(code, /0?\.35\s*\+\s*0?\.65\s*\*\s*\(\s*1\s*-[^;]*?\/\s*(?:65|range)\b/, `${js}: intensidad 0.35 + 0.65·(1 − gap/65)`);
+    assert.match(code, gate, `${js}: la alerta solo se enciende a menos de 65 m`);
   }
 });
 

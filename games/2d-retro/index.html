@@ -3575,6 +3575,10 @@
       }
 
       startGame() {
+        // Una captura de la partida anterior no debe terminar la nueva
+        clearTimeout(this.captureTimer);
+        this.captureTimer = null;
+        this.captureGameOverPending = false;
         this.seed = (Date.now() ^ (Math.random() * 0x7fffffff)) >>> 0;
         this.player.reset();
         this.world.reset(this.seed);
@@ -3617,6 +3621,10 @@
         this.lastTime = performance.now();
         this.accumulator = 0;
         this.state = State.PLAYING;
+        if (this.captureGameOverPending) {
+          this.captureGameOverPending = false;
+          this.triggerGameOver();
+        }
       }
 
       togglePause() {
@@ -3640,6 +3648,9 @@
       }
 
       goToMenu() {
+        clearTimeout(this.captureTimer);
+        this.captureTimer = null;
+        this.captureGameOverPending = false;
         this.state = State.MENU;
         this.dom.pauseOverlay.classList.remove('active');
         this.dom.gameoverOverlay.classList.remove('active');
@@ -3652,9 +3663,12 @@
 
       onPlayerCaptured() {
         // Delay to allow comical capture animation to play
-        setTimeout(() => {
+        this.captureTimer = setTimeout(() => {
           if (this.state === State.PLAYING) {
             this.triggerGameOver();
+          } else if (this.state === State.PAUSED) {
+            // Pausa (o pestaña oculta) dentro de la ventana: el game over llega al reanudar
+            this.captureGameOverPending = true;
           }
         }, 1700);
       }
@@ -3849,6 +3863,9 @@
             this.setYetiAlert(0);
           }
         }
+
+        // Fuera de PLAYING la viñeta se apaga también con el Yeti en STUMBLED/CAPTURED, que no tienen rama propia arriba
+        if (this.state !== State.PLAYING) this.setYetiAlert(0);
 
         if (this.mode === 'classic') {
           this.dom.gaugePct.textContent = '∞';
