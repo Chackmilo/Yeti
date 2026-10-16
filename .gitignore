@@ -29,3 +29,9 @@ Thumbs.db
 __pycache__/
 *.pyc
 .venv/
+
+# Originales de arte y video (fuente de assets/, fuera de git)
+art/
+
+# Repomix artifacts
+repomix-output.xml

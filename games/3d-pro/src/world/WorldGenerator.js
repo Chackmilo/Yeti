@@ -5,7 +5,7 @@ export class WorldGenerator {
     for(let b=0;b<C.blockCount;b++){
       const block={start:0,end:0,revision:0,items:[],flags:[],ramps:[]};
       for(let i=0;i<C.rowsPerBlock*22;i++)block.items.push({active:false,id:0,type:'tree',x:0,d:0,s:1,r:1});
-      for(let i=0;i<C.rowsPerBlock;i++){block.flags.push({active:false,x:0,d:0,blue:false,cleared:false});block.ramps.push({active:false,x:0,d:0,cleared:false});}
+      for(let i=0;i<C.rowsPerBlock;i++){block.flags.push({active:false,x:0,d:0,blue:false,cleared:false,rivalCleared:false});block.ramps.push({active:false,x:0,d:0,cleared:false});}
       this.blocks.push(block);
     }
   }
@@ -26,7 +26,7 @@ export class WorldGenerator {
         if(Math.abs(x-corridor(od))>C.safeHalf+1.8*s)this.assign(block.items[index++],type,x,od,s);
       }
       const f=block.flags[row],r=block.ramps[row],n=Math.round(d/C.rowStep);
-      f.active=d>20&&n%3===0;f.x=corridor(d);f.d=d;f.blue=n%2===0;f.cleared=false;
+      f.active=d>20&&n%3===0;f.x=corridor(d);f.d=d;f.blue=n%2===0;f.cleared=false;f.rivalCleared=false;
       r.active=d>45&&n%6===2;r.x=corridor(d)+((n%4)-1.5)*1.5;r.d=d;r.cleared=false;
     }
   }

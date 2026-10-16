@@ -5,16 +5,10 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app/games/3d-pro
 
-# Copia de manifiestos para aprovechar el caché de capas de Docker
 COPY games/3d-pro/package*.json ./
+RUN npm ci --workspaces=false
 
-# Instalación limpia de dependencias de producción y desarrollo
-RUN npm ci
-
-# Copia del código fuente y tests
 COPY games/3d-pro/ ./
-
-# Validación de tests unitarios y compilación del bundle de producción
 RUN npm test && npm run build
 
 # ==========================================
@@ -22,26 +16,17 @@ RUN npm test && npm run build
 # ==========================================
 FROM nginx:alpine AS runner
 
-# Limpiar archivos por defecto de Nginx
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copiar portal web principal y assets multimedia
 COPY index.html /usr/share/nginx/html/index.html
 COPY assets /usr/share/nginx/html/assets
-COPY Otter_pouring_coffee_by_lake_20261011143032.mp4 /usr/share/nginx/html/Otter_pouring_coffee_by_lake_20261011143032.mp4
-
-# Copiar ediciones autónomas y compiladas
 COPY games/2d-retro /usr/share/nginx/html/games/2d-retro
 COPY games/3d-standalone /usr/share/nginx/html/games/3d-standalone
 COPY --from=builder /app/games/3d-pro/dist /usr/share/nginx/html/games/3d-pro/dist
-
-# Copiar configuración optimizada de Nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Puerto estándar de Nginx
 EXPOSE 80
 
-# Comprobación de salud del contenedor
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://127.0.0.1/ || exit 1
 

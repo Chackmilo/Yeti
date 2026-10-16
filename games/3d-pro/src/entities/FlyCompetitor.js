@@ -15,6 +15,7 @@ export class FlyCompetitor {
   constructor(scene) {
     this.scene = scene;
     this.active = false;
+    this.resources = { geometries: [], materials: [] };
     this.model = this.buildModel();
     this.scene.add(this.model.root);
     this.reset();
@@ -29,7 +30,8 @@ export class FlyCompetitor {
       box: new THREE.BoxGeometry(1, 1, 1),
       sphere: new THREE.SphereGeometry(1, 12, 8),
       cylinder: new THREE.CylinderGeometry(1, 1, 1, 8),
-      cone: new THREE.ConeGeometry(1, 1, 8)
+      cone: new THREE.ConeGeometry(1, 1, 8),
+      torus: new THREE.TorusGeometry(0.24, 0.035, 8, 24)
     };
 
     const mat = {
@@ -39,8 +41,12 @@ export class FlyCompetitor {
       skis: new THREE.MeshStandardMaterial({ color: '#00e5ff', emissive: '#007799', emissiveIntensity: 0.4, roughness: 0.4 }),
       scarf: new THREE.MeshStandardMaterial({ color: '#00ffaa', roughness: 0.7 }),
       antenna: new THREE.MeshStandardMaterial({ color: '#ffd000', emissive: '#ffaa00', emissiveIntensity: 0.5, metalness: 0.8 }),
-      black: new THREE.MeshStandardMaterial({ color: '#0a0f14', roughness: 0.6 })
+      black: new THREE.MeshStandardMaterial({ color: '#0a0f14', roughness: 0.6 }),
+      halo: new THREE.MeshStandardMaterial({ color: '#00ffaa', emissive: '#00ff88', emissiveIntensity: 1.0, wireframe: true })
     };
+
+    this.resources.geometries = Object.values(geo);
+    this.resources.materials = Object.values(mat);
 
     const part = (parent, geometry, material, x, y, z, sx = 1, sy = 1, sz = 1) => {
       const o = new THREE.Mesh(geometry, material);
@@ -57,12 +63,11 @@ export class FlyCompetitor {
     part(body, geo.sphere, mat.chitin, 0, 1.25, 0, 0.34, 0.46, 0.28);
 
     // Head
-    const head = part(body, geo.sphere, mat.helmet, 0, 1.62, -0.05, 0.28, 0.25, 0.28);
+    part(body, geo.sphere, mat.helmet, 0, 1.62, -0.05, 0.28, 0.25, 0.28);
 
     // Compound Insectoid Facet Eyes (Left & Right)
     for (const s of [-1, 1]) {
       part(body, geo.sphere, mat.flyEyes, s * 0.16, 1.64, -0.22, 0.12, 0.14, 0.12);
-      // Antennae
       const ant = part(body, geo.cylinder, mat.antenna, s * 0.14, 1.86, -0.06, 0.018, 0.24, 0.018);
       ant.rotation.z = s * 0.35;
       ant.rotation.x = -0.2;
@@ -88,15 +93,7 @@ export class FlyCompetitor {
     }
 
     // Holographic Neural Pulse Halo above head
-    const brainHalo = new THREE.Mesh(
-      new THREE.TorusGeometry(0.24, 0.035, 8, 24),
-      new THREE.MeshStandardMaterial({
-        color: '#00ffaa',
-        emissive: '#00ff88',
-        emissiveIntensity: 1.0,
-        wireframe: true
-      })
-    );
+    const brainHalo = new THREE.Mesh(geo.torus, mat.halo);
     brainHalo.position.set(0, 2.05, -0.05);
     brainHalo.rotation.x = Math.PI * 0.5;
     body.add(brainHalo);
@@ -146,6 +143,7 @@ export class FlyCompetitor {
     this.crash = 0.9;
     this.protect = 1.6;
     this.speed = Math.max(3, this.speed * 0.35);
+    this.vx *= -0.25;
     this.turbo = false;
     this.isJumping = false;
     this.airborneY = 0;
@@ -154,10 +152,6 @@ export class FlyCompetitor {
 
   /**
    * Physics step for the Fly Competitor.
-   * @param {number} dt Delta time
-   * @param {Object} ai FlyBrainCompetitorAI
-   * @param {Object} collisions CollisionSystem
-   * @param {Object} world WorldGenerator
    */
   step(dt, ai, collisions, world) {
     if (!this.active) return;
@@ -204,7 +198,7 @@ export class FlyCompetitor {
     if (this.crash) target = 4;
 
     this.speed = damp(this.speed, target, braking ? 2.2 : 1.2, dt);
-    const turnAuthority = this.turbo ? 0.76 : 1.0;
+    const turnAuthority = this.turbo ? C.turnAuthorityTurbo : 1.0;
     this.vx = damp(this.vx, this.crash ? 0 : this.turn * (8 + this.speed * 0.18) * turnAuthority, 4, dt);
     this.x += this.vx * dt;
     this.d += this.speed * dt;
@@ -216,22 +210,23 @@ export class FlyCompetitor {
       this.fall();
     }
 
-    // Continuous Collision Detection
-    if (!this.isJumping && collisions && collisions.checkPoint) {
-      if (collisions.checkPoint(this.x, this.d, 0.45)) {
+    // Continuous Collision Detection (Swept CCD via CollisionSystem.hit)
+    if (!this.isJumping && !this.crash && !this.protect && collisions && typeof collisions.hit === 'function') {
+      if (collisions.hit(this.oldX, this.oldD, this.x, this.d, 0.39)) {
         this.fall();
       }
     }
 
-    // Slalom Gates Crossing Check
+    // Slalom Gates Crossing Check (gate half-width is C.safeHalf + 1.2)
     if (world && world.blocks) {
+      const gateHalfWidth = C.safeHalf + 1.2;
       for (let b = 0; b < world.blocks.length; b++) {
         const blk = world.blocks[b];
         if (!blk.flags || blk.end < this.d - 2 || blk.start > this.d + 2) continue;
         for (let i = 0; i < blk.flags.length; i++) {
           const f = blk.flags[i];
           if (f.active && !f.rivalCleared && this.oldD <= f.d && this.d >= f.d) {
-            if (Math.abs(this.x - f.x) <= f.spacing * 0.5) {
+            if (Math.abs(this.x - f.x) <= gateHalfWidth) {
               f.rivalCleared = true;
               this.gatesCleared++;
               this.score += 150;
@@ -243,29 +238,32 @@ export class FlyCompetitor {
   }
 
   /**
-   * Visual render update.
+   * Visual render update using Floating Origin relative to player.
+   * @param {Object} [player] Player reference for floating origin
    */
-  draw() {
+  draw(player) {
     if (!this.active || !this.model || !this.model.root) return;
 
-    const baseZ = -(this.d % C.chunkLength);
-    const groundY = snowHeight(this.x, this.d);
-    const finalY = groundY + this.airborneY;
+    const refD = player ? player.d : this.d;
+    const base = snowHeight(0, refD);
+    const z = refD - this.d;
+    const finalY = snowHeight(this.x, this.d) - base + this.airborneY;
 
-    this.model.root.position.set(this.x, finalY, baseZ);
+    this.model.root.position.set(this.x, finalY, z);
 
-    // Body Tilt and Lean
     const root = this.model.root;
-    root.rotation.y = -this.turn * 0.38;
+    root.rotation.y = -Math.atan2(this.vx, Math.max(2, this.speed));
     root.rotation.z = -this.turn * 0.18;
 
     if (this.isJumping) {
       this.model.body.rotation.y = this.airSpin;
+    } else if (this.crash > 0) {
+      const t = 1 - this.crash / 0.9;
+      this.model.body.rotation.x = t * Math.PI * 4;
     } else {
-      this.model.body.rotation.y = 0;
+      this.model.body.rotation.set(this.turbo ? -0.24 : 0.08, 0, -this.turn * 0.22);
     }
 
-    // Animate Scarf and Halo Pulse
     if (this.model.scarf) {
       this.model.scarf.rotation.z = Math.sin(this.clock * 16) * 0.25;
     }
@@ -274,5 +272,13 @@ export class FlyCompetitor {
       const pulseScale = 1.0 + Math.sin(this.clock * 8.0) * 0.15;
       this.model.brainHalo.scale.set(pulseScale, pulseScale, pulseScale);
     }
+  }
+
+  dispose() {
+    if (this.model && this.model.root) {
+      this.scene.remove(this.model.root);
+    }
+    for (const g of this.resources.geometries) g.dispose();
+    for (const m of this.resources.materials) m.dispose();
   }
 }

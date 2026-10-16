@@ -341,7 +341,7 @@ class SnowEscapeGame {
     this.terrain.update(this.player);
     this.obstacles.update(this.player);
     this.player.draw();
-    if (this.flyCompetitor.active) this.flyCompetitor.draw();
+    if (this.flyCompetitor.active) this.flyCompetitor.draw(this.player);
     this.yeti.draw(this.player, this.engine.camera);
     this.effects.draw(this.player);
 
@@ -386,7 +386,7 @@ class SnowEscapeGame {
     this.aiRenderer.dispose();
     this.flyBrainAI.dispose();
     this.engine.scene.remove(this.player.model.root, this.yeti.model.root, this.flyCompetitor.model.root);
-    this.factory.dispose();
+    this.flyCompetitor?.dispose();this.factory.dispose();
     this.engine.dispose();
   }
 }

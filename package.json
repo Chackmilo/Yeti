@@ -3,6 +3,7 @@
   "version": "4.5.0-ai",
   "description": "Otter Escape: Yeti Chase — Infinite Alpine Skiing Arcade Suite featuring 2D Canvas, 3D Standalone, and 3D PRO with AI Behavior Trees, Autopilot MPC, DDA Flow Engine and HRTF Audio",
   "private": true,
+  "type": "module",
   "workspaces": [
     "games/3d-pro"
   ],
@@ -10,12 +11,14 @@
     "dev": "npm --workspace=games/3d-pro run dev",
     "dev:pro": "npm --workspace=games/3d-pro run dev",
     "build": "npm --workspace=games/3d-pro run build",
-    "test": "npm --workspace=games/3d-pro run test",
+    "test": "npm --workspace=games/3d-pro run test && node --test tests/*.test.js",
     "preview": "npm --workspace=games/3d-pro run preview",
     "docker:build": "docker compose build",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f"
+    "docker:logs": "docker compose logs -f",
+    "setup": "cd games/3d-pro && npm ci --workspaces=false",
+    "serve": "cd games/3d-pro && npx vite preview --outDir ../.. --port 4173 --strictPort --open"
   },
   "keywords": [
     "threejs",

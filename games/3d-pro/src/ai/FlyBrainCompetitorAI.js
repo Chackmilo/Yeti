@@ -2,21 +2,12 @@
  * @file FlyBrainCompetitorAI.js
  * @description Biologically inspired Drosophila melanogaster Spiking Neural Network (SNN)
  * controller for autonomous rival skier ("Fly-Bot").
- * 
- * Supports Dual-Engine Operation:
- * 1. WebSocket Remote Mode: Connects to local Python server (ws://127.0.0.1:8765) running
- *    the full PyTorch / LIF connectome model.
- * 2. Embedded Local SNN Mode: Runs real-time Leaky Integrate-and-Fire (LIF) spiking dynamics
- *    directly inside JavaScript at 60 Hz if the Python bridge is not running.
  */
 
 import { clamp, lerp } from '../config.js';
 import { ACTION } from '../core/InputManager.js';
 
 export class FlyBrainCompetitorAI {
-  /**
-   * @param {Object} options Configuration
-   */
   constructor(options = {}) {
     this.enabled = options.enabled !== undefined ? options.enabled : true;
     this.serverUrl = options.serverUrl || 'ws://127.0.0.1:8765';
@@ -24,14 +15,12 @@ export class FlyBrainCompetitorAI {
     this.ws = null;
     this.reconnectTimer = null;
 
-    // Control Outputs
-    this.steer = 0;       // -1.0 (left) to +1.0 (right)
+    this.steer = 0;
     this.jump = false;
     this.turbo = false;
     this.brake = false;
     this.virtualInput = new Uint8Array(5);
 
-    // Neural Telemetry (Exposed to HUD and Gizmos)
     this.telemetry = {
       connected: false,
       sensorySpikes: 0,
@@ -42,7 +31,6 @@ export class FlyBrainCompetitorAI {
       engine: 'LOCAL_LIF'
     };
 
-    // Perception state
     this.lastPerception = {
       left_hazard: 0,
       right_hazard: 0,
@@ -51,10 +39,7 @@ export class FlyBrainCompetitorAI {
       goal_bias: 0
     };
 
-    // Local LIF Spiking Model State (Refractory, potentials, EPSC)
     this.initLocalSNN();
-
-    // Initialize WebSocket client
     this.connectWebSocket();
   }
 
@@ -64,7 +49,6 @@ export class FlyBrainCompetitorAI {
     this.vReset = -75.0;
     this.tauM = 16.0;
 
-    // 16 sensory, 32 central, 8 motor
     this.vSensory = new Float32Array(16).fill(this.vRest);
     this.vCentral = new Float32Array(32).fill(this.vRest);
     this.vMotor = new Float32Array(8).fill(this.vRest);
@@ -75,6 +59,7 @@ export class FlyBrainCompetitorAI {
 
     this.synCentral = new Float32Array(32);
     this.synMotor = new Float32Array(8);
+    this.iSens = new Float32Array(16); // Pre-allocated buffer for 60Hz zero-allocation
   }
 
   connectWebSocket() {
@@ -134,17 +119,9 @@ export class FlyBrainCompetitorAI {
     }
   }
 
-  /**
-   * Gathers sensory stimuli from the mountain and updates neural processing.
-   * @param {number} dt Delta time
-   * @param {Object} rival The Fly Competitor entity
-   * @param {Object} yeti The Yeti entity
-   * @param {Object} world The WorldGenerator
-   */
   update(dt, rival, yeti, world) {
     if (!this.enabled || !rival) return;
 
-    // 1. Gather Sensory Perception
     const lookaheadD = 34;
     const minD = rival.d - 1;
     const maxD = rival.d + lookaheadD;
@@ -159,7 +136,6 @@ export class FlyBrainCompetitorAI {
         const block = world.blocks[b];
         if (block.end < minD || block.start > maxD) continue;
 
-        // Obstacles (Trees and Rocks)
         for (let i = 0; i < block.items.length; i++) {
           const item = block.items[i];
           if (!item.active || item.d < minD || item.d > maxD) continue;
@@ -179,11 +155,10 @@ export class FlyBrainCompetitorAI {
           }
         }
 
-        // Slalom Flags targeting
         if (block.flags && !nextGate) {
           for (let i = 0; i < block.flags.length; i++) {
             const f = block.flags[i];
-            if (f.active && !f.cleared && f.d >= rival.d && f.d <= maxD) {
+            if (f.active && !f.rivalCleared && f.d >= rival.d && f.d <= maxD) {
               nextGate = f;
               break;
             }
@@ -192,42 +167,38 @@ export class FlyBrainCompetitorAI {
       }
     }
 
-    // Yeti Proximity (Looming predator threat)
+    // Yeti Proximity (Compatible with Yeti.status and mock yeti.active)
     let yetiProximity = 0;
-    if (yeti && yeti.active) {
+    const yetiActive = yeti && (yeti.status === 'chase' || yeti.status === 'warning' || yeti.active === true);
+    if (yetiActive) {
       const distToYeti = Math.hypot(rival.x - yeti.x, rival.d - yeti.d);
       if (distToYeti < 45) {
         yetiProximity = Math.max(0, 1 - distToYeti / 45);
       }
     }
 
-    // Slalom Gate Attractor (Biased navigation)
     let goalBias = 0;
     if (nextGate) {
       const dx = nextGate.x - rival.x;
       goalBias = clamp(dx / 5.0, -1, 1);
     }
 
-    this.lastPerception = {
-      left_hazard: clamp(leftHazard, 0, 1),
-      right_hazard: clamp(rightHazard, 0, 1),
-      center_hazard: clamp(centerHazard, 0, 1),
-      yeti_proximity: clamp(yetiProximity, 0, 1),
-      goal_bias: goalBias
-    };
+    // Mutate in-place (zero allocation)
+    this.lastPerception.left_hazard = clamp(leftHazard, 0, 1);
+    this.lastPerception.right_hazard = clamp(rightHazard, 0, 1);
+    this.lastPerception.center_hazard = clamp(centerHazard, 0, 1);
+    this.lastPerception.yeti_proximity = clamp(yetiProximity, 0, 1);
+    this.lastPerception.goal_bias = goalBias;
 
-    // 2. Transmit to Python or Execute Local SNN
     if (this.connected && this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({
         type: 'perception',
         data: this.lastPerception
       }));
     } else {
-      // Local In-Browser LIF Simulation step
       this.stepLocalSNN(this.lastPerception, dt);
     }
 
-    // 3. Translate Decoded Motor Output to Virtual Inputs
     this.virtualInput.fill(0);
     if (this.steer < -0.15) this.virtualInput[ACTION.LEFT] = 1;
     if (this.steer > 0.15) this.virtualInput[ACTION.RIGHT] = 1;
@@ -235,35 +206,27 @@ export class FlyBrainCompetitorAI {
     if (this.brake) this.virtualInput[ACTION.BRAKE] = 1;
   }
 
-  /**
-   * In-Browser Leaky Integrate-and-Fire simulation of Drosophila sensorimotor loop.
-   */
   stepLocalSNN(p, dtSim) {
     const microTicks = 20;
-    const dt = 1.0; // 1 ms micro-tick
+    const dt = 1.0;
     let sensorySpikes = 0;
     let centralSpikes = 0;
     let motorLeftSpikes = 0;
     let motorRightSpikes = 0;
     let gfSpikes = 0;
 
-    // Injected currents
-    const iSens = new Float32Array(16);
-    // Left sensors (stimulated by right hazard to trigger turn-left avoidance)
+    const iSens = this.iSens;
     for (let i = 0; i < 6; i++) {
       iSens[i] = (p.right_hazard * 110.0) + Math.max(0, -p.goal_bias * 50.0);
     }
-    // Right sensors (stimulated by left hazard to trigger turn-right avoidance)
     for (let i = 6; i < 12; i++) {
       iSens[i] = (p.left_hazard * 110.0) + Math.max(0, p.goal_bias * 50.0);
     }
-    // Looming threat (Giant fiber pathway)
     for (let i = 12; i < 16; i++) {
       iSens[i] = (p.center_hazard * 120.0) + (p.yeti_proximity * 140.0);
     }
 
     for (let step = 0; step < microTicks; step++) {
-      // 1. Sensory Layer LIF
       for (let i = 0; i < 16; i++) {
         if (this.refrSensory[i] > 0) {
           this.refrSensory[i]--;
@@ -275,29 +238,26 @@ export class FlyBrainCompetitorAI {
           this.refrSensory[i] = 2;
           sensorySpikes++;
 
-          // Synaptic transmission to Central Complex
           const tgtStart = i < 6 ? 0 : (i < 12 ? 16 : 0);
           for (let c = tgtStart; c < tgtStart + 16; c++) {
             this.synCentral[c] += 16.0;
           }
 
-          // Direct fast reflex pathway (LPTC -> DNa and Looming -> Giant Fiber)
           if (i < 6) {
-            this.synMotor[0] += 14.0; // Turn Left reflex
+            this.synMotor[0] += 14.0;
             this.synMotor[1] += 14.0;
           } else if (i < 12) {
-            this.synMotor[2] += 14.0; // Turn Right reflex
+            this.synMotor[2] += 14.0;
             this.synMotor[3] += 14.0;
           } else {
-            this.synMotor[6] += 26.0; // Giant Fiber escape jump
+            this.synMotor[6] += 26.0;
             this.synMotor[7] += 26.0;
           }
         }
       }
 
-      // 2. Central Complex LIF (Ring Attractor Heading)
       for (let i = 0; i < 32; i++) {
-        this.synCentral[i] *= 0.88; // Synaptic decay
+        this.synCentral[i] *= 0.88;
         if (this.refrCentral[i] > 0) {
           this.refrCentral[i]--;
           continue;
@@ -307,18 +267,16 @@ export class FlyBrainCompetitorAI {
           this.vCentral[i] = this.vReset;
           this.refrCentral[i] = 2;
           centralSpikes++;
-          // Transmit to motor neurons (left vs right steering bias)
           if (i < 16) {
-            this.synMotor[0] += 15.0; // DNa01 Left
+            this.synMotor[0] += 15.0;
             this.synMotor[1] += 15.0;
           } else {
-            this.synMotor[2] += 15.0; // DNa02 Right
+            this.synMotor[2] += 15.0;
             this.synMotor[3] += 15.0;
           }
         }
       }
 
-      // 3. Motor Descending Neurons LIF
       for (let i = 0; i < 8; i++) {
         this.synMotor[i] *= 0.84;
         if (this.refrMotor[i] > 0) {
@@ -336,7 +294,6 @@ export class FlyBrainCompetitorAI {
       }
     }
 
-    // Motor Decoding
     const rateDiff = motorRightSpikes - motorLeftSpikes;
     const targetSteer = Math.tanh(rateDiff * 0.45);
     this.steer = lerp(this.steer, targetSteer, 0.5);

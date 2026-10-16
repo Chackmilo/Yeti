@@ -966,7 +966,7 @@
 <body>
 
   <!-- CINEMATIC START VIDEO MODAL (CAFÉ EN EL LAGO) -->
-  <div id="intro-modal" class="intro-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+  <div id="intro-modal" class="intro-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="intro-title">
     <div class="intro-modal-content">
       <div class="intro-modal-header">
         <div class="intro-modal-title-group">
@@ -983,9 +983,8 @@
       </div>
 
       <div class="intro-video-wrapper">
-        <video id="intro-video" playsinline controls loop preload="auto" poster="./assets/otter_3d_coffee.jpg">
+        <video id="intro-video" playsinline controls loop preload="none" poster="./assets/otter_3d_coffee.jpg">
           <source src="./assets/intro_lake.mp4" type="video/mp4">
-          <source src="./Otter_pouring_coffee_by_lake_20261011143032.mp4" type="video/mp4">
           Tu navegador no soporta la reproducción de video HTML5.
         </video>
         <div class="intro-video-overlay-ctrls">
@@ -1243,7 +1242,7 @@
         <article class="character-card" data-full="./assets/otter_3d_coffee.jpg" data-caption="Nutria Alpina 3D PBR — Suéter de lana acanalada mostaza, taza de café caliente y pelaje de alta definición. Protagonista de la Edición 3D PRO.">
           <div class="character-card-img-wrap">
             <img src="./assets/otter_3d_coffee.jpg" alt="Nutria 3D con suéter y café" class="character-card-img" loading="lazy">
-            <span class="character-zoom-hint">🔍 Ampliar Arte</span>
+            <button type="button" class="character-zoom-hint">🔍 Ampliar arte</button>
           </div>
           <div class="character-card-body">
             <span class="character-card-tag">Three.js PBR · Edición Pro & 3D</span>
@@ -1258,7 +1257,7 @@
         <article class="character-card" data-full="./assets/otter_2d_pixel.jpg" data-caption="Nutria Retro 2D Pixel-Art — Homenaje nostálgico al esquí arcade de los 90 y SkiFree. Protagonista de Otter Escape 2D.">
           <div class="character-card-img-wrap">
             <img src="./assets/otter_2d_pixel.jpg" alt="Nutria en Pixel Art en la nieve" class="character-card-img" loading="lazy">
-            <span class="character-zoom-hint">🔍 Ampliar Arte</span>
+            <button type="button" class="character-zoom-hint">🔍 Ampliar arte</button>
           </div>
           <div class="character-card-body">
             <span class="character-card-tag">Pixel Art 16-Bit · Canvas 2D</span>
@@ -1273,7 +1272,7 @@
         <article class="character-card" data-full="./assets/otter_cartoon_wanderer.jpg" data-caption="Nutria Exploradora Ilustrada — Concept art alpino con mochila de expedición, termo de café y saludo entusiasta de bienvenida.">
           <div class="character-card-img-wrap">
             <img src="./assets/otter_cartoon_wanderer.jpg" alt="Nutria con mochila y taza de café saludando" class="character-card-img" loading="lazy">
-            <span class="character-zoom-hint">🔍 Ampliar Arte</span>
+            <button type="button" class="character-zoom-hint">🔍 Ampliar arte</button>
           </div>
           <div class="character-card-body">
             <span class="character-card-tag">Concept Art · Ilustración Alpina</span>
