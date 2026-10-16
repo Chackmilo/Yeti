@@ -3,7 +3,7 @@
 [![Three.js](https://img.shields.io/badge/Three.js-r170-black?logo=three.js)](https://threejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite)](https://vitejs.dev/)
 [![Node](https://img.shields.io/badge/Node.js-20%2B%20%7C%2022%2B-339933?logo=node.js)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/Tests-37%2F37%20Passing-brightgreen)](../games/3d-pro/tests)
+[![Tests](https://img.shields.io/badge/Tests-46%2F46%20Passing-brightgreen)](../tests)
 [![AI Engine](https://img.shields.io/badge/AI%20Engine-Behavior%20Trees%20%2B%20MPC%20%2B%20DDA-cyan)](../games/3d-pro/src/ai)
 [![Gamepad](https://img.shields.io/badge/Gamepad-Xbox%20%2F%20PlayStation-blue)](CONTROLS.md)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](../LICENSE)

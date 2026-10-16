@@ -1,14 +1,14 @@
-# ⛷️ Snow Escape 3D PRO — Modular Alpine Engine & AI Suite
+# ⛷️ Otter Escape 3D PRO — Modular Alpine Engine & AI Suite
 
 [![Three.js](https://img.shields.io/badge/Three.js-r170-black?logo=three.js)](https://threejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite)](https://vitejs.dev/)
 [![Node](https://img.shields.io/badge/Node.js-20%2B%20%7C%2024%2B-339933?logo=node.js)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/Tests-33%2F33%20Passing-brightgreen)](tests)
+[![Tests](https://img.shields.io/badge/Tests-42%2F42%20Passing-brightgreen)](tests)
 [![AI Engine](https://img.shields.io/badge/AI%20Engine-Behavior%20Trees%20%2B%20MPC%20%2B%20DDA-cyan)](src/ai)
 [![Gamepad](https://img.shields.io/badge/Gamepad-Xbox%20%2F%20PlayStation-blue)](https://w3c.github.io/gamepad/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Versión modular y de grado de producción del videojuego alpino de esquí procedural infinito. Desarrollada con **Three.js r170**, empaquetada con **Vite 6** mediante code-splitting optimizado, simulación desacoplada a 60 Hz con **Continuous Collision Detection (CCD)**, audio espacial 3D HRTF posicional, mecánicas acrobáticas de slalom y rampas 360°, soporte completo para **mandos de consola** y una **Arquitectura de Inteligencia Artificial (Behavior Trees, Agente Esquiador Autónomo MPC, Motor DDA de Estado de Flujo y Gizmos XAI 3D)**.
+Versión modular y de grado de producción del videojuego alpino de esquí procedural infinito. Desarrollada con **Three.js r170**, empaquetada con **Vite 6** mediante code-splitting optimizado, simulación desacoplada a 60 Hz con **Continuous Collision Detection (CCD)**, audio espacial 3D HRTF posicional, mecánicas acrobáticas de slalom y rampas 360°, soporte completo para **mandos de consola** y una **Arquitectura de Inteligencia Artificial (Behavior Trees, Agente Esquiador Autónomo MPC, Motor DDA de Estado de Flujo, Rival Neuronal Drosophila SNN y Gizmos XAI 3D)**.
 
 ---
 
@@ -28,6 +28,9 @@ Versión modular y de grado de producción del videojuego alpino de esquí proce
 - **Dynamic Difficulty Adjustment ([`DDAEngine.js`](src/ai/DDAEngine.js)):**
   - Implementa el **Canal de Flujo de Mihaly Csikszentmihalyi** con ventana deslizante de 10 segundos.
   - Clasifica la experiencia en `ALIVIO (RELIEF)`, `BALANCE (FLOW)` y `OLEADA (SURGE)`, modulando suavemente la velocidad y agresividad del monstruo.
+- **Rival Neuronal Drosophila SNN ([`FlyBrainCompetitorAI.js`](src/ai/FlyBrainCompetitorAI.js) & [`FlyCompetitor.js`](src/entities/FlyCompetitor.js)):**
+  - Red neuronal de impulsos biológica (*Spiking Neural Network - LIF*) inspirada en el conectoma visual de *Drosophila melanogaster*.
+  - Evasión contralateral de obstáculos, reflejos de salto acrobático y percepción dinámica de amenazas del Yeti a 60 Hz sin asignación de memoria.
 - **Explainable AI y Gizmos 3D ([`AITelemetry.js`](src/ai/AITelemetry.js) & [`AIDebugRenderer.js`](src/ai/AIDebugRenderer.js)):**
   - Rayos de bigotes sensoriales (verde = libre, rojo = obstáculo), retícula cian de intercepción en la nieve y trayectoria planificada del autopiloto visibles en modo Debug (`F2`).
 
@@ -66,7 +69,7 @@ npm install
 # 2. Iniciar servidor de desarrollo con recarga rápida (HMR)
 npm run dev
 
-# 3. Ejecutar suite completa de 33 pruebas automatizadas
+# 3. Ejecutar suite completa de 42 pruebas automatizadas
 npm test
 
 # 4. Compilar bundle de producción optimizado
@@ -117,7 +120,7 @@ El directorio `dist/` contiene la compilación estática lista para producción 
 ## 🏛️ Estructura de Módulos
 
 ```
-snow-escape/
+otter-escape-3d-pro/
 ├── index.html                   # Contenedor HTML semántico y layouts de interfaz
 ├── package.json                 # Metadatos, scripts y dependencias (Three.js + Vite)
 ├── vite.config.js               # Configuración de empaquetado y code-splitting
@@ -126,7 +129,9 @@ snow-escape/
 │   ├── coherence.test.js        # Invariantes de configuración y navegabilidad del corredor
 │   ├── physics.test.js          # Pruebas unitarias de CCD, corredor seguro y memoria
 │   ├── ui.test.js               # Alerta de proximidad, HUD y menú accesible
-│   └── entities.test.js         # Nutria (lente, bufanda) y puntos de slalom
+│   ├── entities.test.js         # Nutria (lente, bufanda) y puntos de slalom
+│   ├── flybrain.test.js         # Pruebas del rival neuronal Drosophila LIF SNN y FlyCompetitor
+│   └── build.test.js            # Verificación de integridad postbuild y enlaces limpios
 └── src/
     ├── config.js                # Constantes de juego, paletas de color y parámetros físicos
     ├── main.js                  # Orquestador del ciclo de vida y eventos de juego
@@ -136,6 +141,8 @@ snow-escape/
     │   ├── YetiAI.js            # Percepción de 5 bigotes, Lead Pursuit y Pounce Leap
     │   ├── SkierAgentAI.js      # Agente esquiador autónomo (Autopilot y Co-Piloto MPC)
     │   ├── DDAEngine.js         # Dynamic Difficulty Adjustment (Canal de Flujo Csikszentmihalyi)
+    │   ├── FlyBrainCompetitorAI.js # Controlador del rival neuronal (Drosophila LIF SNN)
+    │   ├── DrosophilaLIFNetwork.js # Red neuronal biológica de impulsos Spiking LIF
     │   ├── AITelemetry.js       # Observabilidad, latencia y XAI en tiempo real
     │   └── AIDebugRenderer.js   # Gizmos 3D Three.js (rayos sensoriales y retícula cian)
     ├── core/
@@ -145,6 +152,7 @@ snow-escape/
     │   └── StorageManager.js    # Persistencia de récords y fallback tolerante a fallos
     ├── entities/
     │   ├── Player.js            # Lógica del esquiador, saltos parabólicos, slalom y giros 360°
+    │   ├── FlyCompetitor.js     # Entidad 3D rival neuronal con floating origin y swept CCD
     │   ├── Yeti.js              # Entidad cinemática del Yeti con cerebro YetiAI integrado
     │   └── ProceduralModels.js  # Geometrías procedurales y materiales PBR compartidos
     ├── physics/
@@ -166,6 +174,8 @@ snow-escape/
 | [`src/ai/YetiAI.js`](src/ai/YetiAI.js) | Cerebro táctico del Yeti: radar de bigotes, intercepción predictiva y pounce |
 | [`src/ai/SkierAgentAI.js`](src/ai/SkierAgentAI.js) | Agente autónomo con rollouts heurísticos MPC, autopiloto y asistencia de copiloto |
 | [`src/ai/DDAEngine.js`](src/ai/DDAEngine.js) | Motor DDA de ajuste dinámico de dificultad basado en el canal de flujo psicológico |
+| [`src/ai/FlyBrainCompetitorAI.js`](src/ai/FlyBrainCompetitorAI.js) | Agente rival que adapta la red LIF Spiking de Drosophila para navegación 3D |
+| [`src/ai/DrosophilaLIFNetwork.js`](src/ai/DrosophilaLIFNetwork.js) | Red neuronal de impulsos biológica (LIF SNN) zero-allocation a 60 Hz |
 | [`src/ai/AITelemetry.js`](src/ai/AITelemetry.js) | Colector de métricas en tiempo real, latencias de decisión y resúmenes XAI |
 | [`src/ai/AIDebugRenderer.js`](src/ai/AIDebugRenderer.js) | Renderizador Three.js de rayos sensoriales, retícula cian y curvas de predicción |
 | [`src/config.js`](src/config.js) | Constantes, paletas PBR, parámetros físicos, corredor seguro canónico y validación |
@@ -178,6 +188,7 @@ snow-escape/
 | [`src/world/ObstaclePool.js`](src/world/ObstaclePool.js) | InstancedMesh para pinos, rocas, banderas y rampas inclinadas |
 | [`src/world/SnowTracks.js`](src/world/SnowTracks.js) | Buffers estáticos para 720 marcas de esquí y 650 copos de nieve sin GC |
 | [`src/entities/Player.js`](src/entities/Player.js) | Físicas del esquiador, saltos parabólicos, giros 360°, energía y frenado |
+| [`src/entities/FlyCompetitor.js`](src/entities/FlyCompetitor.js) | Rival neuronal con simulación física, Floating Origin Z y Swept CCD |
 | [`src/entities/Yeti.js`](src/entities/Yeti.js) | Cinemática y animación del Yeti con delegación de decisiones en `YetiAI` |
 | [`src/entities/ProceduralModels.js`](src/entities/ProceduralModels.js) | Geometrías de personajes y árboles generadas por código |
 | [`src/physics/CollisionSystem.js`](src/physics/CollisionSystem.js) | Broad phase y Swept CCD cilindro/AABB para evitar tunneling |
@@ -188,7 +199,7 @@ snow-escape/
 
 ## 🧪 Pruebas Unitarias Automatizadas (`npm test`)
 
-La suite automatizada valida **33/33 especificaciones críticas** con el runner nativo de Node.js en cinco suites:
+La suite automatizada valida **42/42 especificaciones críticas** con el runner nativo de Node.js en siete suites:
 
 ### 1. Inteligencia Artificial ([`tests/ai.test.js`](tests/ai.test.js) — 13 tests)
 - ✅ **Behavior Tree Selector:** Evaluación secuencial hasta éxito o estado running.
@@ -232,6 +243,19 @@ La suite automatizada valida **33/33 especificaciones críticas** con el runner 
 - ✅ **Lente de la nutria:** material `#bdefff` aplicado a las gafas.
 - ✅ **Bufanda al viento:** aletea más rápido con turbo y sin saltos de fase.
 - ✅ **Puntos de slalom:** `lastGatePoints` refleja `150 × combo` (Clásico) y `100 × combo` (Moderno).
+
+### 6. Rival Neuronal Drosophila SNN ([`tests/flybrain.test.js`](tests/flybrain.test.js) — 6 tests)
+- ✅ **Inicialización SNN:** Modo local LIF con topología sensorial, interneuronas de escape y motoneuronas.
+- ✅ **Evasión Contralateral Izquierda:** Giro motor hacia la derecha ante amenaza detectada a la izquierda.
+- ✅ **Evasión Contralateral Derecha:** Giro motor hacia la izquierda ante amenaza detectada a la derecha.
+- ✅ **Reflejo de Escape Frontal:** Impulso de aceleración y salto acrobático ante peligro frontal inminente.
+- ✅ **Floating Origin y Swept CCD:** Cálculo de coordenadas Z finitas bajo cambio de origen y detección continua.
+- ✅ **Percepción del Yeti:** Detección de proximidad y activación de reflejos tanto en estado chase como warning.
+
+### 7. Integridad de Empaquetado Postbuild ([`tests/build.test.js`](tests/build.test.js) — 3 tests)
+- ✅ **CSS Único:** Verificación de un solo CSS enlazado sin atributo crossorigin no estándar ni copia inline duplicada.
+- ✅ **Compatibilidad Dual ESM / file://:** Modulepreload condicional para servidor HTTP y fallback IIFE en ejecución local.
+- ✅ **Protección de Salida Vite:** Detección temprana y fallo explícito si cambia la estructura de empaquetado.
 
 ---
 

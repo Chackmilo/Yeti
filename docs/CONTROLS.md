@@ -86,5 +86,8 @@ En modo Clásico, el turbo es infinito, pero viajar a 35 m/s (126 km/h) reduce l
 ### 3. Rampas y Acrobacias Aéreas 360°
 Al embestir una rampa alpina con impulso, la nutria salta en una parábola de 2.8 m de elevación, ejecutando un giro de 360° en el aire y volando por encima de árboles y rocas. La recompensa de **+250 PTS** se otorga **exclusivamente al completar un aterrizaje limpio sobre la nieve**, acompañada de partículas spray, vibración auditiva y aceleración extra.
 
-### 4. Alerta Visual de Proximidad (Edición PRO)
-Cuando el Yeti está a menos de **65 m**, los bordes de la pantalla laten en rojo con una intensidad proporcional a la cercanía. Es el mismo umbral que el latido sonoro, para que jugar sin audio no sea una desventaja. El pulso es lento (menos de 1 Hz), se desactiva con `prefers-reduced-motion` y la capa no bloquea los controles táctiles.
+### 4. Alerta Visual de Proximidad (#yetiAlert — En las 3 Ediciones)
+Cuando el Yeti está a menos de **65 m** del jugador, los bordes de la pantalla laten con una viñeta roja (`#yetiAlert`) cuya opacidad e intensidad son proporcionales a la cercanía del monstruo:
+* **Presente en toda la suite:** Activa en **2D Retro**, **3D Standalone** y **3D PRO**.
+* **Mismo umbral que el audio:** Se activa exactamente a $\le 65\text{ m}$ (coincidiendo con el latido auditivo de tensión), para que jugar sin sonido o con sonido silenciado no represente ninguna desventaja.
+* **Accesible:** Pulso visual lento ($< 1\text{ Hz}$), se desactiva la animación con `prefers-reduced-motion: reduce` y la capa usa `pointer-events: none` para no interferir jamás con los toques táctiles ni el ratón.

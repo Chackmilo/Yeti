@@ -4,53 +4,72 @@ OTTER ESCAPE PRO (YETI CHASE) — CERTIFICADO DE VALIDACIÓN TÉCNICA Y DE CALID
 Fecha de Certificación: 2026-10-11
 Entorno: Node.js 20+ / 22+ / 24+ | Vite 6 | Three.js r170 | Docker 29+ | WebGL 2.0 | Web Audio API
 
-1. SUITE DE PRUEBAS AUTOMATIZADAS (node --test tests/*.test.js)
+1. SUITE DE PRUEBAS AUTOMATIZADAS (npm test)
 --------------------------------------------------------------------------------
-Estado: 33/33 Tests PASSING (0 fallos, 0 omitidos, 0 cancelados)
-Duración de ejecución: ~1.8 segundos
+Estado: 46/46 Tests PASSING (42 en 3D PRO + 4 Guardias de Suite, 0 fallos)
+Duración de ejecución: ~2.1 segundos
 
-[Arquitectura de Inteligencia Artificial - tests/ai.test.js]
-  ✔ BT Selector: ejecuta hasta encontrar éxito o running (3.0ms)
-  ✔ BT Sequence: ejecuta hasta encontrar fallo o running (0.6ms)
-  ✔ BT Inverter: invierte SUCCESS a FAILURE y viceversa (0.6ms)
-  ✔ YetiAI: cálculo de interceptación predictiva con ventaja de velocidad (1.0ms)
-  ✔ YetiAI: anticipación de slalom corta el contra-giro hacia el centro (0.5ms)
-  ✔ YetiAI: radar de bigotes sensoriales detecta obstáculo y genera fuerza de repulsión (7.5ms)
-  ✔ SkierAgentAI: cicla modos entre OFF, AUTOPILOT y CO_PILOT (0.5ms)
-  ✔ SkierAgentAI Autopilot: esquiva obstáculo inminente sin intervención humana (3.2ms)
-  ✔ SkierAgentAI Co-Pilot: interviene con freno/giro en colisión crítica (2.6ms)
+[Arquitectura de Inteligencia Artificial - games/3d-pro/tests/ai.test.js]
+  ✔ BT Selector: ejecuta hasta encontrar éxito o running (2.4ms)
+  ✔ BT Sequence: ejecuta hasta encontrar fallo o running (0.5ms)
+  ✔ BT Inverter: invierte SUCCESS a FAILURE y viceversa (0.5ms)
+  ✔ YetiAI: cálculo de interceptación predictiva con ventaja de velocidad (0.9ms)
+  ✔ YetiAI: anticipación de slalom corta el contra-giro hacia el centro (0.3ms)
+  ✔ YetiAI: radar de bigotes sensoriales detecta obstáculo y genera fuerza de repulsión (6.1ms)
+  ✔ SkierAgentAI: cicla modos entre OFF, AUTOPILOT y CO_PILOT (0.6ms)
+  ✔ SkierAgentAI Autopilot: esquiva obstáculo inminente sin intervención humana (2.5ms)
+  ✔ SkierAgentAI Co-Pilot: interviene con freno/giro en colisión crítica (2.2ms)
   ✔ DDAEngine: estado inicial en BALANCE con modulación unitaria (0.7ms)
-  ✔ DDAEngine: conmuta a RELIEF cuando el jugador se accidenta repetidamente (4.9ms)
-  ✔ DDAEngine: conmuta a SURGE cuando el jugador domina con saltos y combos (1.1ms)
-  ✔ AITelemetry: genera resumen formateado XAI legible sin excepciones (1.1ms)
+  ✔ DDAEngine: conmuta a RELIEF cuando el jugador se accidenta repetidamente (4.0ms)
+  ✔ DDAEngine: conmuta a SURGE cuando el jugador domina con saltos y combos (0.8ms)
+  ✔ AITelemetry: genera resumen formateado XAI legible sin excepciones (0.8ms)
 
-[Coherencia de Configuración e Invariantes - tests/coherence.test.js]
-  ✔ config: invariantes internas coherentes (3.2ms)
+[Rival Neuronal Drosophila SNN & Swept CCD - games/3d-pro/tests/flybrain.test.js]
+  ✔ FlyBrainCompetitorAI: inicialización en modo local SNN y valores por defecto (37.8ms)
+  ✔ FlyBrainCompetitorAI: evasión contralateral ante amenaza a la izquierda (1.4ms)
+  ✔ FlyBrainCompetitorAI: evasión contralateral ante amenaza a la derecha (0.5ms)
+  ✔ FlyBrainCompetitorAI: reflejo de escape y salto acrobático ante peligro frontal (0.4ms)
+  ✔ FlyCompetitor: Floating Origin calcula Z finita, detecta CCD y puntúa slalom (9.5ms)
+  ✔ FlyBrainCompetitorAI: detecta al Yeti cuando yeti.status es chase o warning (0.6ms)
+
+[Coherencia de Configuración e Invariantes - games/3d-pro/tests/coherence.test.js]
+  ✔ config: invariantes internas coherentes (3.1ms)
   ✔ config: safeHalf coincide con el valor certificado (4.2) (0.4ms)
-  ✔ corridor: el eje generado es navegable para 100 semillas / 10 km (15.3ms)
+  ✔ corridor: el eje generado es navegable para 100 semillas / 10 km (13.5ms)
 
-[Físicas, Generación Procedural y Resiliencia - tests/physics.test.js]
-  ✔ CCD contra cilindros: cruce rápido, tangencia, reposo y fallo (2.4ms)
+[Físicas, Generación Procedural y Resiliencia - games/3d-pro/tests/physics.test.js]
+  ✔ CCD contra cilindros: cruce rápido, tangencia, reposo y fallo (2.9ms)
   ✔ CCD contra AABB expandida: cruce, eje paralelo y extremo (0.4ms)
-  ✔ Corredor seguro para 100 semillas y reciclaje hasta 10 km (1581.1ms)
-  ✔ Generación determinista y reutilización de los mismos objetos (3.1ms)
-  ✔ Broad phase detecta un tronco y permite ignorar su ID (0.7ms)
+  ✔ Corredor seguro para 100 semillas y reciclaje hasta 10 km (1674.7ms)
+  ✔ Generación determinista y reutilización de los mismos objetos (3.0ms)
+  ✔ Broad phase detecta un tronco y permite ignorar su ID (0.6ms)
   ✔ Storage funciona sin localStorage y separa récords por modo (0.4ms)
 
-[Interfaz y Accesibilidad - tests/ui.test.js]
-  ✔ Alerta Yeti: apagada fuera de partida o sin persecución activa (1.5ms)
-  ✔ Alerta Yeti: umbral de 65 m compartido con el latido y robusta ante gap inválido (0.4ms)
-  ✔ Alerta Yeti: crece al acercarse y satura en 1 (0.3ms)
-  ✔ HUD: la alerta vive en la capa #yetiAlert y se apaga al volver al menú (31.1ms)
-  ✔ Alerta Yeti: pulso lento (< 3 destellos/s) y sin animación con reduced-motion (1.2ms)
-  ✔ Menú: selectRadio sincroniza la clase selected y aria-checked (1.3ms)
-  ✔ HUD: con el Yeti burlado se oculta la unidad "m" y vuelve con la cuenta atrás (0.6ms)
-  ✔ Resultados: el récord se etiqueta en español (CLÁSICO / MODERNO) (1.3ms)
+[Interfaz y Accesibilidad - games/3d-pro/tests/ui.test.js]
+  ✔ Alerta Yeti: apagada fuera de partida o sin persecución activa (2.6ms)
+  ✔ Alerta Yeti: umbral de 65 m compartido con el latido y robusta ante gap inválido (0.3ms)
+  ✔ Alerta Yeti: crece al acercarse y satura en 1 (0.2ms)
+  ✔ HUD: la alerta vive en la capa #yetiAlert y se apaga al volver al menú (28.3ms)
+  ✔ Alerta Yeti: pulso lento (< 3 destellos/s) y sin animación con reduced-motion (1.1ms)
+  ✔ Menú: selectRadio sincroniza la clase selected y aria-checked (2.0ms)
+  ✔ HUD: con el Yeti burlado se oculta la unidad "m" y vuelve con la cuenta atrás (0.7ms)
+  ✔ Resultados: el récord se etiqueta en español (CLÁSICO / MODERNO) (1.2ms)
 
-[Entidades - tests/entities.test.js]
-  ✔ Nutria: gafas con lente de brillo #bdefff (10.6ms)
-  ✔ Nutria: la bufanda aletea más rápido con turbo y su fase es continua (4.7ms)
-  ✔ Slalom: lastGatePoints refleja los puntos sumados en cada modo (4.5ms)
+[Entidades - games/3d-pro/tests/entities.test.js]
+  ✔ Nutria: gafas con lente de brillo #bdefff (9.3ms)
+  ✔ Nutria: la bufanda aletea más rápido con turbo y su fase es continua (5.1ms)
+  ✔ Slalom: lastGatePoints refleja los puntos sumados en cada modo (4.8ms)
+
+[Cargador Universal Postbuild - games/3d-pro/tests/build.test.js]
+  ✔ Postbuild: un solo CSS enlazado sin crossorigin y sin copia inline (2.0ms)
+  ✔ Postbuild: ESM y modulepreload solo por http; IIFE en file:// (0.5ms)
+  ✔ Postbuild: falla con un mensaje claro si cambia el formato de Vite (0.8ms)
+
+[Guardias de Coherencia de la Suite - tests/suite.test.js]
+  ✔ Suite: las páginas solo enlazan archivos locales relativos que existen (14.2ms)
+  ✔ Suite: nginx solo marca immutable los bundles con hash y no pierde cabeceras (1.3ms)
+  ✔ Suite: la alerta de proximidad usa una capa visible en las tres ediciones (2.0ms)
+  ✔ Suite: cada medio existe una sola vez y los originales quedan fuera del despliegue (0.6ms)
 
 2. BENCHMARK DE COMPILACIÓN DE PRODUCCIÓN (Vite 6 + esbuild IIFE + Postbuild)
 --------------------------------------------------------------------------------

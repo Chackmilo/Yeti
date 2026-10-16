@@ -1,12 +1,12 @@
 ================================================================================
-SNOW ESCAPE 3D PRO — CERTIFICADO DE VALIDACIÓN TÉCNICA Y DE CALIDAD
+OTTER ESCAPE 3D PRO — CERTIFICADO DE VALIDACIÓN TÉCNICA Y DE CALIDAD
 ================================================================================
-Fecha de Certificación: 2026-10-11
+Fecha de Certificación: 2026-10-15
 Entorno: Node.js 20+ / 22+ / 24+ | Vite 6 | Three.js r170 | Docker 29+ | WebGL 2.0 | Web Audio API
 
 1. SUITE DE PRUEBAS AUTOMATIZADAS (node --test tests/*.test.js)
 --------------------------------------------------------------------------------
-Estado: 33/33 Tests PASSING (0 fallos, 0 omitidos, 0 cancelados)
+Estado: 42/42 Tests PASSING (0 fallos, 0 omitidos, 0 cancelados)
 Duración de ejecución: ~1.8 segundos
 
 [Arquitectura de Inteligencia Artificial - tests/ai.test.js]
@@ -52,6 +52,19 @@ Duración de ejecución: ~1.8 segundos
   ✔ Nutria: la bufanda aletea más rápido con turbo y su fase es continua (4.7ms)
   ✔ Slalom: lastGatePoints refleja los puntos sumados en cada modo (4.5ms)
 
+[Rival Neuronal Drosophila SNN - tests/flybrain.test.js]
+  ✔ FlyBrainCompetitorAI: inicialización en modo local SNN y valores por defecto (35.1ms)
+  ✔ FlyBrainCompetitorAI: evasión contralateral ante amenaza a la izquierda (gira a la derecha) (1.7ms)
+  ✔ FlyBrainCompetitorAI: evasión contralateral ante amenaza a la derecha (gira a la izquierda) (0.5ms)
+  ✔ FlyBrainCompetitorAI: reflejo de escape y salto acrobático ante peligro frontal inminente (0.4ms)
+  ✔ FlyCompetitor: Floating Origin calcula posición Z finita, detecta colisiones CCD y puntúa puertas de slalom (8.3ms)
+  ✔ FlyBrainCompetitorAI: detecta al Yeti cuando yeti.status es chase o warning (0.6ms)
+
+[Integridad de Empaquetado Postbuild - tests/build.test.js]
+  ✔ Postbuild: un solo CSS enlazado sin crossorigin y sin copia inline (2.3ms)
+  ✔ Postbuild: ESM y modulepreload solo por http; IIFE en file:// (0.5ms)
+  ✔ Postbuild: falla con un mensaje claro si cambia el formato de Vite (0.7ms)
+
 2. BENCHMARK DE COMPILACIÓN DE PRODUCCIÓN (Vite 6)
 --------------------------------------------------------------------------------
 Comando: npm run build
@@ -76,5 +89,6 @@ Resultado: 26 módulos transformados y empaquetados en ~1.7 segundos
 | **Accesibilidad** | Alerta perimetral a < 65 m | Capa visual sobre canvas, pulso lento (< 1 Hz), respeta reduced-motion. | APROBADO |
 
 ================================================================================
-FIN DEL CERTIFICADO — SISTEMA DE CALIDAD SNOW ESCAPE SUITE
+FIN DEL CERTIFICADO — SISTEMA DE CALIDAD OTTER ESCAPE SUITE
 ================================================================================
+
