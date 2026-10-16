@@ -2669,6 +2669,7 @@
     // =========================================================================
     class CollisionSystem {
       static checkAABB(b1, b2) {
+        if (!b1 || !b2) return false;
         return (
           b1.x < b2.x + b2.w &&
           b1.x + b1.w > b2.x &&
@@ -2920,10 +2921,10 @@
         const yetiBox = this.getHitbox();
         for (let i = 0; i < worldGen.obstacles.length; i++) {
           const obs = worldGen.obstacles[i];
-          if (obs.collided) continue;
+          if (obs.collided || obs.type === ObstacleType.SLALOM_GATE || obs.type === ObstacleType.RAMP) continue;
 
           const obsBox = worldGen.getHitbox(obs);
-          if (CollisionSystem.checkAABB(yetiBox, obsBox)) {
+          if (obsBox && CollisionSystem.checkAABB(yetiBox, obsBox)) {
             obs.collided = true;
             this.state = YetiState.STUMBLED;
             this.stateTimer = CONFIG.YETI_STUMBLE_TIME;
