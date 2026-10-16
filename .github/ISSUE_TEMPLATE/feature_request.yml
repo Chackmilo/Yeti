@@ -1,0 +1,48 @@
+name: 💡 Solicitud de Mejora o Mecánica (Feature Request)
+description: Propón una nueva idea, optimización física, ajuste de IA o mecánica jugable
+title: "[FEAT]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¡Nos encanta recibir ideas de la comunidad y de desarrolladores de juegos! Describe tu propuesta a continuación.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Área o Subsistema
+      description: ¿A qué componente impacta esta propuesta?
+      options:
+        - "Física & Dinámica de Esquí"
+        - "Inteligencia Artificial (Yeti BT / Piloto MPC / DDA)"
+        - "Audio 3D & Efectos de Sonido"
+        - "Modelado 3D & Shaders"
+        - "HUD, Menús & Experiencia de Usuario"
+        - "Rival Neuronal Drosophila SNN"
+        - "Rendimiento & Optimización"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema o Necesidad
+      description: ¿Existe alguna limitación o problema que esta función vendría a resolver?
+      placeholder: Me di cuenta de que al esquiar a alta velocidad...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solución Propuesta
+      description: Describe cómo te gustaría que funcione la mecánica o característica.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas Consideradas
+      description: ¿Has pensado en alguna otra forma de resolverlo o abordarlo?

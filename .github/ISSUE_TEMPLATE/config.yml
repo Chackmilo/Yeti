@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Documentación de Arquitectura Técnica
+    url: https://github.com/Chackmilo/Yeti/blob/main/docs/ARCHITECTURE.md
+    about: Revisa los fundamentos de simulación a 60 Hz, Behavior Trees y CCD antes de abrir una consulta.
+  - name: 🎮 Guía Universal de Controles
+    url: https://github.com/Chackmilo/Yeti/blob/main/docs/CONTROLS.md
+    about: Consulta la tabla de mapeo de controles y físicas para teclado, mando y touch.

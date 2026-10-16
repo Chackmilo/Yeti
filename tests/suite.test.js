@@ -55,6 +55,6 @@ test('Suite: la alerta de proximidad usa una capa visible en las tres ediciones'
 
 test('Suite: cada medio existe una sola vez y los originales quedan fuera del despliegue', () => {
   assert.equal(existsSync(resolve(ROOT, 'games/3d-pro/public')), false, 'games/3d-pro/public duplica assets/');
-  assert.deepEqual(readdirSync(ROOT).filter(f => /\.(?:mp4|webm|jpe?g)$/i.test(f)), [],
-    'originales sueltos en la raíz: muévelos a art/');
+  assert.deepEqual(readdirSync(ROOT).filter(f => /\.(?:mp4|webm|jpe?g|png)$/i.test(f)), [],
+    'medios sueltos en la raíz: muévelos a art/ o docs/screenshots/');
 });

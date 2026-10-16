@@ -810,7 +810,7 @@
           </div>
         </div>
 
-        <button id="btn-replay" class="btn-primary">Volver a Jugar [R]</button>
+        <button id="btn-replay" class="btn-primary">Otra Bajada [R]</button>
         <button id="btn-menu-gameover" class="btn-secondary">Volver al Menú</button>
       </div>
     </div>
@@ -830,7 +830,7 @@
       <div class="debug-row"><span>Distancia Yeti:</span><span id="debug-yeti-dist">-</span></div>
       <div class="debug-btn-row">
         <button id="dbg-btn-yeti" class="debug-btn">Invocar Yeti</button>
-        <button id="dbg-btn-turbo" class="debug-btn">Stamina Full</button>
+        <button id="dbg-btn-turbo" class="debug-btn">Turbo Full</button>
         <button id="dbg-btn-invul" class="debug-btn">Invencible</button>
       </div>
     </div>
@@ -3527,7 +3527,7 @@
         } else {
           this.dom.btnModeModern.classList.add('active');
           this.dom.btnModeClassic.classList.remove('active');
-          this.dom.modeDesc.textContent = 'Modo Moderno: Barra de estamina táctica (6 s). Slalom recarga +25% de energía.';
+          this.dom.modeDesc.textContent = 'Modo Moderno: Barra de energía táctica (6 s). Cada puerta de slalom recarga +25% de turbo.';
         }
         this.updateMenuHighScore();
       }

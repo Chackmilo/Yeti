@@ -17,7 +17,7 @@
 <div id="viewport"></div><div id="yetiAlert" aria-hidden="true"></div>
 <div id="loader"><div><strong>OTTER ESCAPE / 3D</strong><p id="loadingText">Preparando la montaña…</p></div></div>
 <section id="menu" class="overlay"><div class="card">
-<div class="eyebrow">PROCEDURAL ALPINE ADVENTURE · NUTRIA ALPINO</div><h1>OTTER<br><span>ESCAPE 3D.</span></h1>
+<div class="eyebrow">PROCEDURAL ALPINE ADVENTURE · NUTRIA ALPINA</div><h1>OTTER<br><span>ESCAPE 3D.</span></h1>
 <div style="display:flex;align-items:center;gap:12px;margin:12px 0 14px;padding:9px 12px;background:#ffffff0f;border:1px solid #5fe6ff44;border-radius:14px;">
   <img src="../../assets/otter_3d_coffee.jpg" alt="Nutria 3D" style="width:50px;height:50px;border-radius:10px;object-fit:cover;border:2px solid #5fe6ff;flex-shrink:0;">
   <div style="text-align:left;">
@@ -142,7 +142,7 @@ addEventListener('blur',()=>{clearInput();if(state==='playing'||state==='caught'
 function announce(text,seconds=3){$('banner').textContent=text;$('banner').classList.remove('hidden');bannerTime=seconds;}
 function syncSound(){$('audioMenu').textContent='Sonido: '+(audio.enabled?'activado':'desactivado');$('sound').textContent=audio.enabled?'♪':'×♪';$('sound').setAttribute('aria-pressed',String(audio.enabled));}
 function toggleDebug(){debug=!debug;$('debug').classList.toggle('hidden',!debug);hits.visible=debug;if($('debugMenu'))$('debugMenu').textContent='Debug: '+(debug?'sí':'no');}
-function syncMenu(){$('record').textContent='Récord '+(mode==='classic'?'clásico':'moderno')+': '+Math.floor(record(mode)).toLocaleString('es-ES')+' m';$('modeDesc').textContent=mode==='classic'?'Modo Clásico: Turbo ilimitado con inercia a alta velocidad (76% autoridad de giro). Slalom otorga velocidad y combos.':'Modo Moderno: Barra de estamina táctica (6 s). Slalom recarga +25% de energía.';}
+function syncMenu(){$('record').textContent='Récord '+(mode==='classic'?'clásico':'moderno')+': '+Math.floor(record(mode)).toLocaleString('es-ES')+' m';$('modeDesc').textContent=mode==='classic'?'Modo Clásico: Turbo ilimitado con inercia a alta velocidad (76% autoridad de giro). Slalom otorga velocidad y combos.':'Modo Moderno: Barra de energía táctica (6 s). Cada puerta de slalom recarga +25% de turbo.';}
 for(const b of $('modes').querySelectorAll('button'))b.onclick=()=>{mode=b.dataset.mode;$('modes').querySelectorAll('button').forEach(o=>o.classList.toggle('selected',o===b));syncMenu();};for(const b of $('distances').querySelectorAll('button'))b.onclick=()=>{spawnAt=Number(b.dataset.distance);$('distances').querySelectorAll('button').forEach(o=>o.classList.toggle('selected',o===b));};
 $('audioMenu').onclick=$('sound').onclick=()=>audio.toggle();if($('debugMenu'))$('debugMenu').onclick=toggleDebug;$('play').onclick=$('replay').onclick=$('restartPause').onclick=start;$('resume').onclick=()=>togglePause();$('pauseBtn').onclick=togglePause;$('menuPause').onclick=$('menuOver').onclick=toMenu;$('summon').onclick=()=>{if(state==='playing')summonYeti();};$('refill').onclick=()=>player.energy=1;
 function saveRecord(){if(player.d>record(runMode))store.set('snow_escape_hi_'+runMode,Math.floor(player.d));}

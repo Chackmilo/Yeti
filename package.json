@@ -7,11 +7,16 @@
   "workspaces": [
     "games/3d-pro"
   ],
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "dev": "npm --workspace=games/3d-pro run dev",
     "dev:pro": "npm --workspace=games/3d-pro run dev",
     "build": "npm --workspace=games/3d-pro run build",
     "test": "npm --workspace=games/3d-pro run test && node --test tests/*.test.js",
+    "validate": "npm test && npm run build",
     "preview": "npm --workspace=games/3d-pro run preview",
     "docker:build": "docker compose build",
     "docker:up": "docker compose up -d",

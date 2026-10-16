@@ -89,7 +89,7 @@ export class MenuManager {
     if (this.elements.modeDesc) {
       this.elements.modeDesc.textContent = this.mode === 'classic'
         ? 'Modo Clásico: Turbo ilimitado con inercia a alta velocidad (76% autoridad de giro). Slalom otorga velocidad y combos.'
-        : 'Modo Moderno: Barra de estamina táctica (6 s). Slalom recarga +25% de energía.';
+        : 'Modo Moderno: Barra de energía táctica (6 s). Cada puerta de slalom recarga +25% de turbo.';
     }
   }
 

@@ -2,10 +2,12 @@
 
 [![CI Pipeline](https://img.shields.io/badge/CI-GitHub%20Actions-brightgreen?logo=github-actions)](.github/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/Tests-46%2F46%20Passing-brightgreen?logo=node.js)](tests)
+[![Node.js](https://img.shields.io/badge/Node.js-20%20%7C%2022%20LTS-339933?logo=node.js)](https://nodejs.org/)
 [![Three.js](https://img.shields.io/badge/Three.js-r170-black?logo=three.js)](https://threejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite)](https://vitejs.dev/)
 [![Docker](https://img.shields.io/badge/Docker-Alpine%20Nginx-blue?logo=docker)](Dockerfile)
 [![Gamepad](https://img.shields.io/badge/Gamepad-Xbox%20%2F%20PlayStation-blue)](docs/CONTROLS.md)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](CONTRIBUTING.md)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Suite de videojuegos arcade de esquí infinito inspirada en la mística clásica de *SkiFree*, protagonizada por una intrépida **Nutria Esquiadora** equipada con casco dorado, bufanda ondeante al viento, esquís dobles y cola dinámica que se balancea en cada curva, perseguida por el legendario **Yeti de las cumbres**. La suite está modernizada con físicas avanzadas a 60 Hz (objetivo de diseño), audio espacial 3D HRTF y mecánicas acrobáticas. Diseñada con una arquitectura modular de software desacoplada, la suite integra ediciones independientes organizadas en un monorepo profesional y servidas a través de un **Portal Web Unificado**:
@@ -15,6 +17,29 @@ Suite de videojuegos arcade de esquí infinito inspirada en la mística clásica
 3. **🎿 Otter Escape 3D Standalone ([`games/3d-standalone/index.html`](games/3d-standalone/index.html)):** Experiencia 3D completa en un único archivo autosuficiente (~51 KB), Three.js por CDN, audio 3D HRTF, alerta visual `#yetiAlert`, física *Swept Circle* y tarjeta de resultados.
 4. **⚡ Otter Escape PRO & AI Engine ([`games/3d-pro`](games/3d-pro/)):** Suite modular de alto rendimiento con **Arquitectura de IA Avanzada (Behavior Trees + Piloto Automático Autónomo MPC + Motor DDA de Estado de Flujo + Telemetría XAI + Gizmos 3D)**, Vite 6, Three.js r170, Continuous Collision Detection (CCD) a 60 Hz, Gamepad API y suite de 42 tests unitarios automatizados.
 5. **🪰 Drosophila Fly-Brain AI ([`experiments/fly-brain`](experiments/fly-brain/)):** Simulación neurobiológica de la mosca de la fruta (*FlyWire* SNN LIF) que compite en tiempo real como rival en pista (tecla **`B`**). Funciona con servidor WebSocket en Python o con motor local embebido en JavaScript a 60 FPS con arquitectura *zero-allocation*.
+
+---
+
+## 📸 Galería Visual de la Suite
+
+<div align="center">
+
+### 🏔️ Portal Web Hub Unificado
+![Portal Web Hub Alpinos](docs/screenshots/portal_hub.png)
+
+</div>
+
+| ⚡ 3D PRO: Piloto Automático Autónomo MPC | 🔍 3D PRO: Telemetría XAI y Gizmos 3D |
+| :---: | :---: |
+| ![3D Pro Autopilot](docs/screenshots/3d_pro_autopilot_gameplay.png) | ![3D Pro Debug XAI](docs/screenshots/3d_pro_debug_xai.png) |
+
+| 🎿 3D Standalone (Three.js CDN, ~51 KB) | 👾 2D Retro Canvas Arcade |
+| :---: | :---: |
+| ![3D Standalone](docs/screenshots/3d_standalone_gameplay.png) | ![2D Retro Gameplay](docs/screenshots/2d_retro_gameplay.png) |
+
+| 📊 Scorecard Grid de Resultados | ⏸️ Modal de Pausa con Estado |
+| :---: | :---: |
+| ![3D Pro Game Over](docs/screenshots/3d_pro_game_over.png) | ![3D Pro Pause Modal](docs/screenshots/3d_pro_pause_modal.png) |
 
 ---
 
@@ -68,6 +93,8 @@ La suite sigue una estructura modular limpia inspirada en monorepos modernos:
 ```
 Yeti/
 ├── .github/
+│   ├── ISSUE_TEMPLATE/              # Plantillas de issues (bugs, features, config)
+│   ├── PULL_REQUEST_TEMPLATE.md     # Checklist de calidad para PRs
 │   └── workflows/
 │       └── ci.yml                   # Pipeline CI/CD: Matriz Node 20/22 (--workspaces=false)
 ├── docs/                            # Documentación técnica y especificaciones de arquitectura
@@ -75,7 +102,7 @@ Yeti/
 │   ├── CONTROLS.md                  # Mapeo universal de controles (Teclado, Gamepad API, Touch)
 │   ├── DEPLOYMENT.md                # Guía de producción en VPS, Docker, Nginx y Serverless
 │   ├── VALIDATION.md                # Certificado de calidad y benchmarks de rendimiento
-│   └── superpowers/                 # Planes de implementación y auditorías técnicas
+│   └── screenshots/                 # 📸 Capturas oficiales y material gráfico de la suite
 ├── games/                           # Ediciones jugables independientes
 │   ├── 2d-retro/
 │   │   └── index.html               # Edición 2D Retro Canvas autosuficiente con #yetiAlert
@@ -107,6 +134,11 @@ Yeti/
 ├── Dockerfile                       # Multi-stage build (Node 22 test+build -> Nginx Alpine ligero)
 ├── docker-compose.yml               # Orquestación de producción (puerto 8088:80)
 ├── nginx.conf                       # Servidor Nginx (cabeceras de seguridad + caché selectivo)
+├── CHANGELOG.md                     # 📜 Historial de versiones SemVer (Keep a Changelog)
+├── CONTRIBUTING.md                  # 🛠️ Guía de contribución y directrices de ingeniería
+├── LICENSE                          # ⚖️ Licencia de código abierto MIT
+├── SECURITY.md                      # 🔒 Política de seguridad y reporte responsable
+├── .editorconfig                    # Reglas universales de formato de código
 ├── .gitattributes                   # Normalización de saltos de línea (CRLF en .bat, LF en scripts)
 └── .gitignore                       # Filtros Git (ignora art/, node_modules/, dist/, repomix)
 ```
@@ -202,3 +234,7 @@ La suite incorpora una simulación neurobiológica de la red neuronal de la mosc
 * 🪰 [**Experimento Drosophila Fly-Brain AI**](experiments/fly-brain/README.md)
 * 🚀 [**Guía de Despliegue en Producción (Docker / Nginx)**](docs/DEPLOYMENT.md)
 * 📋 [**Certificado Técnico y Benchmark de Calidad**](docs/VALIDATION.md)
+* 🛠️ [**Guía de Contribución & Estándares de Código**](CONTRIBUTING.md)
+* 📜 [**Registro de Cambios (Changelog)**](CHANGELOG.md)
+* 🔒 [**Política de Seguridad**](SECURITY.md)
+* ⚖️ [**Licencia MIT**](LICENSE)

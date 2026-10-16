@@ -6,7 +6,7 @@ Esta guía detalla las diferentes opciones para desplegar la suite en producció
 
 ## 🐳 Opción 1: Despliegue con Docker & Docker Compose (Recomendada para VPS)
 
-La suite cuenta con un empaquetado multi-etapa (*multi-stage build*) con **Node.js 22 Alpine** (compilación y suite de 33 tests unitarios certificados) y **Nginx Alpine** (runtime de solo ~26.5 MB).
+La suite cuenta con un empaquetado multi-etapa (*multi-stage build*) con **Node.js 22 Alpine** (compilación y suite de 46 tests automatizados certificados, 42 en 3D PRO + 4 guardias globales) y **Nginx Alpine** (runtime de solo ~26.5 MB).
 
 ### Paso 1: Clonar el repositorio en tu VPS
 ```bash
@@ -52,7 +52,7 @@ Si ya cuentas con Nginx instalado en tu VPS sin usar Docker:
    npm run build
    ```
 
-2. Configura un bloque de servidor en `/etc/nginx/sites-available/snow-escape`:
+2. Configura un bloque de servidor en `/etc/nginx/sites-available/otter-escape`:
    ```nginx
    server {
        listen 80;
@@ -76,7 +76,7 @@ Si ya cuentas con Nginx instalado en tu VPS sin usar Docker:
 
 3. Habilita el sitio y recarga:
    ```bash
-   sudo ln -s /etc/nginx/sites-available/snow-escape /etc/nginx/sites-enabled/
+   sudo ln -s /etc/nginx/sites-available/otter-escape /etc/nginx/sites-enabled/
    sudo nginx -t && sudo systemctl reload nginx
    ```
 
